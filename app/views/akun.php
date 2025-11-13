@@ -1,1 +1,2 @@
-<h1>HEBAT</h1>
+<h1>View akun berhasil dimuat!</h1>
+<p>Halo <?= $data['nama'] ?? 'Guest'; ?></p>
