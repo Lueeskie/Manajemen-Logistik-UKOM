@@ -10,7 +10,7 @@ class User {
     }
 
     public function login($username, $password) {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username AND password = :password");  // Langsung bandingin plain
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username AND password = :password");
         $stmt->bindParam(':username', $username);
         $stmt->bindParam(':password', $password);
         $stmt->execute();
@@ -20,5 +20,22 @@ class User {
             return $user;
         }
         return false;
+    }
+
+    public function register($username, $email, $password, $role = 'user') {
+        $checkStmt = $this->db->prepare("SELECT id FROM users WHERE username = :username OR email = :email");
+        $checkStmt->bindParam(':username', $username);
+        $checkStmt->bindParam(':email', $email);
+        $checkStmt->execute();
+        if ($checkStmt->fetch()) {
+            return false; 
+        }
+
+        $stmt = $this->db->prepare("INSERT INTO users (username, email, password, role) VALUES (:username, :email, :password, :role)");
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $password);
+        $stmt->bindParam(':role', $role);
+        return $stmt->execute();
     }
 }

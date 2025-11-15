@@ -22,6 +22,10 @@ switch ($uri) {
         $auth = new AuthController();
         $auth->login();
         break;
+    case '/register':
+        $auth = new AuthController();
+        $auth->register();
+        break;
     case '/logout':
         $auth = new AuthController();
         $auth->logout();

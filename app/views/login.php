@@ -1,4 +1,14 @@
-<html>
+<?php
+
+$flash_success = ''; 
+if (isset($_SESSION['flash_success'])) {
+    $flash_success = $_SESSION['flash_success'];
+    unset($_SESSION['flash_success']); 
+}
+
+?>
+<!DOCTYPE html>
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -7,9 +17,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 
 <body>
     <nav class="navbar navbar-expand-lg bg-white">
@@ -26,9 +35,9 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item ms-3">
-                        <button class="btn btn-outline-primary btn-daftar">
+                        <a href="<?= BASE_URL ?>register" class="btn btn-outline-primary btn-daftar">
                             <i class="bi bi-person-plus me-2"></i>Daftar Gratis
-                        </button>
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -39,8 +48,6 @@
         <div class="hero-pattern"></div>
         <div class="container hero-wrapper">
             <div class="row align-items-center g-5">
-
-
                 <div class="col-lg-6 text-white">
                     <span class="badge bg-soft-primary text-uppercase">Astral Express</span>
                     <h1 class="display-5 fw-bold mt-3">Selamat Datang di Astral Express</h1>
@@ -51,7 +58,6 @@
                         <li><i class="bi bi-check-circle"></i>Monitoring pergerakan Paket</li>
                     </ul>
                 </div>
-
 
                 <div class="col-lg-5 offset-lg-1">
                     <div class="card login-card border-0 shadow-lg">
@@ -83,7 +89,6 @@
                                     </div>
                                 </div>
 
-
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="rememberMe">
@@ -95,7 +100,6 @@
                                 <button type="submit" class="btn btn-primary w-100 mb-3">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>Masuk Sekarang
                                 </button>
-
                             </form>
                         </div>
                     </div>
@@ -105,6 +109,19 @@
     </section>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        <?php if (!empty($flash_success)) : ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '<?= addslashes($flash_success) ?>',
+                confirmButtonText: 'Oke, Masuk!',
+                confirmButtonColor: '#0d6efd'
+            }).then(() => {
+                document.querySelector('input[name="username"]').focus();
+            });
+        <?php endif; ?>
+    </script>
 </body>
 
 </html>
