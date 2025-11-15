@@ -63,6 +63,9 @@
         background: linear-gradient(120deg, #1f2ed5, #405efc);
         padding: 90px 0 120px;
         overflow: hidden;
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
     }
 
     .hero-pattern {
@@ -76,6 +79,7 @@
     .hero-wrapper {
         position: relative;
         z-index: 1;
+        width: 100%;
     }
 
     .bg-soft-primary {

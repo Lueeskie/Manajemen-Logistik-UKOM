@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg bg-white">
@@ -52,18 +53,6 @@
                             <h3 class="fw-bold mb-2">Buat Akun Baru</h3>
                             <p class="text-muted mb-4">Isi data di bawah untuk membuat akun</p>
                             
-                            <?php if (isset($error)) : ?>
-                                <div class="alert alert-danger small mb-4">
-                                    <?php echo $error; ?>
-                                </div>
-                            <?php endif; ?>
-
-                            <?php if (isset($success)) : ?>
-                                <div class="alert alert-success small mb-4">
-                                    <?php echo $success; ?>
-                                </div>
-                            <?php endif; ?>
-
                             <form method="POST">
                                 <div class="mb-3">
                                     <label class="form-label">Username</label>
@@ -122,7 +111,27 @@
             </div>
         </div>
     </section>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            <?php if (isset($error)) : ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mendaftar',
+                    text: <?= json_encode($error) ?>,
+                    confirmButtonColor: '#dc3545'
+                });
+            <?php endif; ?>
+
+            <?php if (isset($success)) : ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pendaftaran Berhasil',
+                    text: <?= json_encode($success) ?>,
+                    confirmButtonColor: '#0d6efd'
+                });
+            <?php endif; ?>
+        });
+    </script>
 </body>
 </html>
