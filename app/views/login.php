@@ -63,13 +63,18 @@ if (isset($_SESSION['flash_success'])) {
                         <div class="card-body p-4 p-lg-5">
                             <h3 class="fw-bold mb-2">Masuk ke Akun Anda</h3>
                             <p class="text-muted mb-4">Silakan masuk untuk mengakses dashboard</p>
+                            <?php if (isset($error)) : ?>
+                                <div class="alert alert-danger small mb-4">
+                                    <?php echo $error; ?>
+                                </div>
+                            <?php endif; ?>
+
                             <form method="POST">
                                 <div class="mb-3">
-                                    <label class="form-label">Email atau Username</label>
+                                    <label class="form-label">Email</label>
                                     <div class="input-group custom-input">
                                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                        <input type="text" class="form-control" name="username"
-                                            placeholder="nama@Gmail.com" required>
+                                        <input type="email" class="form-control" name="email" placeholder="Masukkan Email Anda" required>
                                     </div>
                                 </div>
 
@@ -133,14 +138,14 @@ if (isset($_SESSION['flash_success'])) {
                     confirmButtonText: 'Oke, Masuk!',
                     confirmButtonColor: '#0d6efd'
                 }).then(() => {
-                    const usernameInput = document.querySelector('input[name=\"username\"]');
-                    if (usernameInput) {
-                        usernameInput.focus();
+                    const emailInput = document.querySelector('input[name="email"]');  <!-- Ubah selector ke "email" -->
+                    if (emailInput) {
+                        emailInput.focus();
                     }
                 });
             <?php endif; ?>
         });
     </script>
 </body>
-</html>
 
+</html>

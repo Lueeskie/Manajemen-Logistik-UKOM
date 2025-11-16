@@ -9,9 +9,9 @@ class User {
         $this->db = Database::getInstance();
     }
 
-    public function login($username, $password) {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username AND password = :password");
-        $stmt->bindParam(':username', $username);
+    public function login($email, $password) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email AND password = :password");
+        $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $password);
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
