@@ -1,4 +1,5 @@
 <?php
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . 'login');
     exit;
@@ -9,6 +10,9 @@ if (isset($_SESSION['flash_success'])) {
     $flash_success = $_SESSION['flash_success'];
     unset($_SESSION['flash_success']);
 }
+
+$stats = $stats ?? ['total' => 0, 'terkirim' => 0, 'proses' => 0, 'tertunda' => 0];
+$recentResi = $recentResi ?? [];
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -41,7 +45,7 @@ if (isset($_SESSION['flash_success'])) {
                             <div class="avatar-circle">
                                 <i class="bi bi-person-fill"></i>
                             </div>
-                            <span class="d-none d-md-inline"><?php echo $_SESSION['username']; ?></span>
+                            <span class="d-none d-md-inline"><?php echo $_SESSION['username'] ?? 'User'; ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
@@ -68,11 +72,7 @@ if (isset($_SESSION['flash_success'])) {
                 </a>
                 <a href="#" class="sidebar-item">
                     <i class="bi bi-boxes"></i>
-                    <span>Stok Barang</span>
-                </a>
-                <a href="#" class="sidebar-item">
-                    <i class="bi bi-graph-up"></i>
-                    <span>Laporan</span>
+                    <span>Inventaris Barang</span>
                 </a>
                 <a href="#" class="sidebar-item">
                     <i class="bi bi-people"></i>
@@ -86,7 +86,7 @@ if (isset($_SESSION['flash_success'])) {
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h1 class="h3 fw-bold mb-2">Selamat datang, <?php echo $_SESSION['username']; ?>! 👋</h1>
+                                <h1 class="h3 fw-bold mb-2">Selamat datang, <?php echo $_SESSION['username'] ?? 'User'; ?>!</h1>
                                 <p class="text-muted mb-0">Kelola distribusi barang dan pantau stok Anda di sini</p>
                             </div>
                             <div>
@@ -97,7 +97,6 @@ if (isset($_SESSION['flash_success'])) {
                         </div>
                     </div>
                 </div>
-
                 <div class="row mb-4 g-3">
                     <div class="col-md-3">
                         <div class="stat-card">
@@ -106,7 +105,7 @@ if (isset($_SESSION['flash_success'])) {
                             </div>
                             <div class="stat-content">
                                 <p class="stat-label">Total Pengiriman</p>
-                                <h4 class="stat-value">1,234</h4>
+                                <h4 class="stat-value"><?php echo $stats['total']; ?></h4>
                             </div>
                         </div>
                     </div>
@@ -117,7 +116,7 @@ if (isset($_SESSION['flash_success'])) {
                             </div>
                             <div class="stat-content">
                                 <p class="stat-label">Terkirim</p>
-                                <h4 class="stat-value">890</h4>
+                                <h4 class="stat-value"><?php echo $stats['terkirim']; ?></h4>
                             </div>
                         </div>
                     </div>
@@ -128,7 +127,7 @@ if (isset($_SESSION['flash_success'])) {
                             </div>
                             <div class="stat-content">
                                 <p class="stat-label">Dalam Proses</p>
-                                <h4 class="stat-value">234</h4>
+                                <h4 class="stat-value"><?php echo $stats['proses']; ?></h4>
                             </div>
                         </div>
                     </div>
@@ -139,14 +138,14 @@ if (isset($_SESSION['flash_success'])) {
                             </div>
                             <div class="stat-content">
                                 <p class="stat-label">Tertunda</p>
-                                <h4 class="stat-value">110</h4>
+                                <h4 class="stat-value"><?php echo $stats['tertunda']; ?></h4>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-lg-8">
+                    <div class="col-lg-12">
                         <div class="card content-card">
                             <div class="card-header">
                                 <h5 class="mb-0">Pengiriman Terbaru</h5>
@@ -156,70 +155,45 @@ if (isset($_SESSION['flash_success'])) {
                                     <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
-                                                <th>No. Tracking</th>
+                                                <th>Nomor Resi</th>
+                                                <th>Penerima</th>
                                                 <th>Tujuan</th>
-                                                <th>Status</th>
+                                                <th>Status Pengiriman</th>
+                                                <th>Pembayaran</th>
                                                 <th>Tanggal</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><code>PKG-001234</code></td>
-                                                <td>Jakarta</td>
-                                                <td><span class="badge bg-success-light text-success">Terkirim</span></td>
-                                                <td>12 Nov 2025</td>
-                                            </tr>
-                                            <tr>
-                                                <td><code>PKG-001233</code></td>
-                                                <td>Surabaya</td>
-                                                <td><span class="badge bg-warning-light text-warning">Dalam Proses</span></td>
-                                                <td>11 Nov 2025</td>
-                                            </tr>
-                                            <tr>
-                                                <td><code>PKG-001232</code></td>
-                                                <td>Bandung</td>
-                                                <td><span class="badge bg-success-light text-success">Terkirim</span></td>
-                                                <td>10 Nov 2025</td>
-                                            </tr>
+                                            <?php if (!empty($recentResi)) : ?>
+                                                <?php foreach ($recentResi as $row) : ?>
+                                                    <?php
+                                                    $status_color = 'secondary';
+                                                    if ($row['status_pengiriman'] == 'Terkirim') $status_color = 'success';
+                                                    elseif ($row['status_pengiriman'] == 'Dalam Proses') $status_color = 'warning';
+                                                    elseif ($row['status_pengiriman'] == 'Tertunda') $status_color = 'danger';
+
+                                                    $payment_color = 'secondary';
+                                                    if ($row['status_pembayaran'] == 'Terbayar') $payment_color = 'success';
+                                                    elseif ($row['status_pembayaran'] == 'Belum Bayar') $payment_color = 'danger';
+                                                    ?>
+                                                    <tr>
+                                                        <td><code><?php echo $row['nomor_resi']; ?></code></td>
+                                                        <td><?php echo htmlspecialchars($row['nama_penerima']); ?></td>
+                                                        <td><?php echo htmlspecialchars(substr($row['alamat_tujuan'], 0, 30)) . (strlen($row['alamat_tujuan']) > 30 ? '...' : ''); ?></td>
+                                                        <td><span class="badge bg-<?php echo $status_color; ?>-light text-<?php echo $status_color; ?>"><?php echo htmlspecialchars($row['status_pengiriman']); ?></span></td>
+                                                        <td><span class="badge bg-<?php echo $payment_color; ?>-light text-<?php echo $payment_color; ?>"><?php echo htmlspecialchars($row['status_pembayaran']); ?></span></td>
+                                                        <td><?php echo date('d M Y', strtotime($row['tanggal_dibuat'])); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php else : ?>
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted py-4">
+                                                        <i class="bi bi-inbox"></i> Belum ada resi pengiriman
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
                                         </tbody>
                                     </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4">
-                        <div class="card content-card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Ringkasan Performa</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-4">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="small">Tingkat Pengiriman Tepat Waktu</span>
-                                        <span class="small fw-600">92%</span>
-                                    </div>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-success" style="width: 92%"></div>
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="small">Kapasitas Stok</span>
-                                        <span class="small fw-600">78%</span>
-                                    </div>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-primary" style="width: 78%"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="small">Kepuasan Pelanggan</span>
-                                        <span class="small fw-600">95%</span>
-                                    </div>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-info" style="width: 95%"></div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
