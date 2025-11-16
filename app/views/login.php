@@ -4,6 +4,7 @@ $flash_success = '';
 if (isset($_SESSION['flash_success'])) {
     $flash_success = $_SESSION['flash_success'];
     unset($_SESSION['flash_success']); 
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
