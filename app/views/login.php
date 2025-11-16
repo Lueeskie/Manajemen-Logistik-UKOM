@@ -4,8 +4,6 @@ $flash_success = '';
 if (isset($_SESSION['flash_success'])) {
     $flash_success = $_SESSION['flash_success'];
     unset($_SESSION['flash_success']); 
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -94,6 +92,9 @@ if (isset($_SESSION['flash_success'])) {
                                 <button type="submit" class="btn btn-primary w-100 mb-3">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>Masuk Sekarang
                                 </button>
+                                <p class="text-center text-muted small">
+                                    Belum punya akun? <a href="<?= BASE_URL ?>" class="text-primary text-decoration-none fw-600">Daftar di sini</a>
+                                </p>
                             </form>
                         </div>
                     </div>
@@ -113,7 +114,7 @@ if (isset($_SESSION['flash_success'])) {
                     confirmButtonColor: '#dc3545'
                 });
             <?php endif; ?>
-
+  
             <?php if (isset($success)) : ?>
                 Swal.fire({
                     icon: 'success',
@@ -140,5 +141,5 @@ if (isset($_SESSION['flash_success'])) {
         });
     </script>
 </body>
-
 </html>
+
