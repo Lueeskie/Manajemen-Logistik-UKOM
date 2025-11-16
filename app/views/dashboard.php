@@ -4,7 +4,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Ambil flash message sukses (jika ada) untuk dipakai sekali lalu dihapus.
 $flash_success = '';
 if (isset($_SESSION['flash_success'])) {
     $flash_success = $_SESSION['flash_success'];
