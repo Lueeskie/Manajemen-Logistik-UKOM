@@ -94,7 +94,7 @@ if (isset($_SESSION['flash_success'])) {
                                     <i class="bi bi-box-arrow-in-right me-2"></i>Masuk Sekarang
                                 </button>
                                 <p class="text-center text-muted small">
-                                    Belum punya akun? <a href="<?= BASE_URL ?>" class="text-primary text-decoration-none fw-600">Daftar di sini</a>
+                                    Belum punya akun? <a href="<?= BASE_URL ?>register" class="text-primary text-decoration-none fw-600">Daftar di sini</a>
                                 </p>
                             </form>
                         </div>
