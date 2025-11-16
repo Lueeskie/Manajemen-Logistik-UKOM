@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/models/Resi.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -33,9 +34,11 @@ switch ($uri) {
     case '/dashboard':
         session_start();
         if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . BASE_URL . 'login'); 
+            header('Location: ' . BASE_URL . 'login');
             exit;
         }
+        $resiModel = new Resi();
+        $shipments = $resiModel->getAll();
         require __DIR__ . '/../app/views/dashboard.php';
         break;
     default:
