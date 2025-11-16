@@ -1,11 +1,9 @@
 <?php
 
-$flash_success = '';
+$flash_success = ''; 
 if (isset($_SESSION['flash_success'])) {
     $flash_success = $_SESSION['flash_success'];
-    unset($_SESSION['flash_success']);
-}
-
+    unset($_SESSION['flash_success']); 
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -94,7 +92,6 @@ if (isset($_SESSION['flash_success'])) {
                                 <button type="submit" class="btn btn-primary w-100 mb-3">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>Masuk Sekarang
                                 </button>
-
                                 <p class="text-center text-muted small">
                                     Belum punya akun? <a href="<?= BASE_URL ?>" class="text-primary text-decoration-none fw-600">Daftar di sini</a>
                                 </p>
@@ -108,7 +105,7 @@ if (isset($_SESSION['flash_success'])) {
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             <?php if (isset($error)) : ?>
                 Swal.fire({
                     icon: 'error',
@@ -117,8 +114,32 @@ if (isset($_SESSION['flash_success'])) {
                     confirmButtonColor: '#dc3545'
                 });
             <?php endif; ?>
+  
+            <?php if (isset($success)) : ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: <?= json_encode($success) ?>,
+                    confirmButtonColor: '#0d6efd'
+                });
+            <?php endif; ?>
+
+            <?php if (!empty($flash_success)) : ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: <?= json_encode($flash_success) ?>,
+                    confirmButtonText: 'Oke, Masuk!',
+                    confirmButtonColor: '#0d6efd'
+                }).then(() => {
+                    const usernameInput = document.querySelector('input[name=\"username\"]');
+                    if (usernameInput) {
+                        usernameInput.focus();
+                    }
+                });
+            <?php endif; ?>
         });
     </script>
 </body>
-
 </html>
+

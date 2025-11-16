@@ -12,18 +12,12 @@ if (isset($_SESSION['flash_success'])) {
 ?>
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - Manajemen Logistik</title>
-    <style>
-        body {
-            font-family: Arial;
-        }
-    </style>
+    <style> body { font-family: Arial; } </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 <body>
     <h2>Selamat datang di Dashboard, <?php echo $_SESSION['role']; ?>!</h2>
     <p>Ini halaman utama setelah login. Nanti kita tambah fitur seperti daftar pengiriman paket.</p>
@@ -40,5 +34,4 @@ if (isset($_SESSION['flash_success'])) {
         <?php endif; ?>
     </script>
 </body>
-
 </html>

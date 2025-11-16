@@ -21,7 +21,6 @@ class AuthController {
             if ($user) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['role'];
-            
                 $_SESSION['flash_success'] = 'Login berhasil, selamat datang kembali!';
                 header('Location: ' . BASE_URL . 'dashboard');
                 exit;
