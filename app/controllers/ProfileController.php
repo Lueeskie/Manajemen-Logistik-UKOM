@@ -70,12 +70,6 @@ class ProfileController
             exit;
         }
 
-        if (empty($data['telepon']) && empty($data['alamat'])) {
-            $_SESSION['flash_error'] = "Minimal isi satu field selain username.";
-            header('Location: ' . BASE_URL . 'profile?edit=true');
-            exit;
-        }
-
         $hasNewImage = isset($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE;
 
         if ($hasNewImage) {

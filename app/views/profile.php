@@ -119,14 +119,14 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                 </div>
 
                 <?php if (!empty($flash_success)): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;"> <!-- Sembunyikan kalau Swal aktif -->
+                    <div class="alert alert-success alert-dismissible fade show" role="alert"> 
                         <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($flash_success); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
 
                 <?php if (!empty($flash_error)): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;"> <!-- Sembunyikan kalau Swal aktif -->
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-circle me-2"></i><?php echo htmlspecialchars($flash_error); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -286,7 +286,7 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function initProfilePage() {
             const avatarInput = document.getElementById('foto');
             const avatarPreview = document.getElementById('avatarPreview');
             const avatarFallback = document.getElementById('avatarFallback');
@@ -381,7 +381,13 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                         });
                 });
             }
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initProfilePage);
+        } else {
+            initProfilePage();
+        }
     </script>
 </body>
 
