@@ -38,4 +38,34 @@ class User {
         $stmt->bindParam(':role', $role);
         return $stmt->execute();
     }
+    
+    public function getProfile($userId) {
+        $stmt = $this->db->prepare("SELECT id, username, email, telepon, alamat, role FROM users WHERE id = :id");
+        $stmt->bindParam(':id', $userId);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: false;
+    }
+
+    public function updateProfile($userId, $data) {
+        $stmt = $this->db->prepare("UPDATE users SET telepon = :telepon, alamat = :alamat WHERE id = :id");
+        $stmt->bindParam(':id', $userId);
+        $stmt->bindParam(':telepon', $data['telepon']);
+        $stmt->bindParam(':alamat', $data['alamat']);
+        return $stmt->execute();
+    }
+
+    public function changePassword($userId, $currentPassword, $newPassword) {
+        $stmt = $this->db->prepare("SELECT password FROM users WHERE id = :id");
+        $stmt->bindParam(':id', $userId);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user || $currentPassword !== $user['password']) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare("UPDATE users SET password = :new_password WHERE id = :id");
+        $stmt->bindParam(':id', $userId);
+        $stmt->bindParam(':new_password', $newPassword);
+        return $stmt->execute();
+    }
 }
