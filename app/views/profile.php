@@ -171,25 +171,25 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                                     <form method="POST" action="<?= BASE_URL ?>profile/update" class="profile-form">
                                         <div class="mb-4">
                                             <label for="username" class="form-label">Username</label>
-                                            <input type="text" class="form-control form-control-profile" id="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Username tidak dapat diubah">
+                                            <input type="text" class="form-control form-control-profile" id="username" name="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Masukkan username">
                                         </div>
-
+                                
                                         <div class="mb-4">
                                             <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control form-control-profile" id="email" name="email" value="<?php echo htmlspecialchars($user_info['email']); ?>" placeholder="Masukkan email Anda" disabled>
+                                            <input type="email" class="form-control form-control-profile" id="email" value="<?php echo htmlspecialchars($user_info['email']); ?>" placeholder="Email tidak dapat diubah" disabled>
                                             <small class="text-muted">Email tidak dapat diubah</small>
                                         </div>
-
+                                
                                         <div class="mb-4">
                                             <label for="telepon" class="form-label">Telepon</label>
                                             <input type="tel" class="form-control form-control-profile" id="telepon" name="telepon" value="<?php echo htmlspecialchars($user_info['telepon'] ?? ''); ?>" placeholder="Masukkan telepon">
                                         </div>
-
+                                
                                         <div class="mb-4">
                                             <label for="alamat" class="form-label">Alamat</label>
                                             <textarea class="form-control form-control-profile" id="alamat" name="alamat" rows="3" placeholder="Masukkan alamat Anda"><?php echo htmlspecialchars($user_info['alamat'] ?? ''); ?></textarea>
                                         </div>
-
+                                
                                         <div class="d-flex gap-2">
                                             <button type="submit" class="btn btn-primary">
                                                 <i class="bi bi-check-circle me-2"></i>Simpan Perubahan

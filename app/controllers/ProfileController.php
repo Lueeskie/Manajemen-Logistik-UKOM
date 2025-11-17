@@ -47,22 +47,30 @@ class ProfileController {
 
         $userId = $_SESSION['user_id'];
         $data = [
+            'username' => trim($_POST['username'] ?? ''),
             'telepon' => trim($_POST['telepon'] ?? ''),
             'alamat' => trim($_POST['alamat'] ?? '')
         ];
 
+        if (empty($data['username'])) {
+            $_SESSION['flash_error'] = "Username tidak boleh kosong.";
+            header('Location: ' . BASE_URL . 'profile?edit=true');
+            exit;
+        }
+
         if (empty($data['telepon']) && empty($data['alamat'])) {
-            $_SESSION['flash_error'] = "Minimal isi satu field.";
+            $_SESSION['flash_error'] = "Minimal isi satu field selain username.";
             header('Location: ' . BASE_URL . 'profile?edit=true');
             exit;
         }
 
         if ($this->userModel->updateProfile($userId, $data)) {
             $_SESSION['flash_success'] = "Profil berhasil diperbarui!";
+            $_SESSION['username'] = $data['username'];
         } else {
             $_SESSION['flash_error'] = "Gagal memperbarui profil. Coba lagi.";
         }
-
+        
         header('Location: ' . BASE_URL . 'profile');
         exit;
     }
