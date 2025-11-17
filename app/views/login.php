@@ -34,7 +34,7 @@ if (isset($_SESSION['flash_success'])) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item ms-3">
-                        <a href="<?= BASE_URL ?>register" class="btn btn-outline-primary btn-daftar">
+                        <a href="<?= BASE_URL ?>register" class="btn btn-daftar">
                             <i class="bi bi-person-plus me-2"></i>Daftar Gratis
                         </a>
                     </li>
