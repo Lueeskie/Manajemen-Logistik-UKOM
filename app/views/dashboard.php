@@ -16,6 +16,7 @@ $recentResi = $recentResi ?? [];
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,8 +25,10 @@ $recentResi = $recentResi ?? [];
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
         <div class="container-fluid px-4">
@@ -50,7 +53,9 @@ $recentResi = $recentResi ?? [];
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item text-danger" href="<?php echo BASE_URL; ?>logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </li>
@@ -78,6 +83,11 @@ $recentResi = $recentResi ?? [];
                     <i class="bi bi-people"></i>
                     <span>Pengguna</span>
                 </a>
+
+                <a href="#" class="sidebar-item">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <span>Supplier</span>
+                </a>
             </div>
         </aside>
         <main class="main-content">
@@ -90,9 +100,6 @@ $recentResi = $recentResi ?? [];
                                 <p class="text-muted mb-0">Kelola distribusi barang dan pantau stok Anda di sini</p>
                             </div>
                             <div>
-                                <button class="btn btn-primary btn-sm">
-                                    <i class="bi bi-plus-lg me-2"></i>Pengiriman Baru
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -215,4 +222,5 @@ $recentResi = $recentResi ?? [];
         <?php endif; ?>
     </script>
 </body>
+
 </html>
