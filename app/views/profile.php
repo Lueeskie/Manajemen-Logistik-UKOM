@@ -21,6 +21,7 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,6 +34,7 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
         <div class="container-fluid px-4">
@@ -57,7 +59,9 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item active" href="<?= BASE_URL ?>profile"><i class="bi bi-person me-2"></i>Profil</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item text-danger" href="<?= BASE_URL ?>logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </li>
@@ -112,14 +116,14 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                 </div>
 
                 <?php if (!empty($flash_success)): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">  <!-- Sembunyikan kalau Swal aktif -->
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;"> <!-- Sembunyikan kalau Swal aktif -->
                         <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($flash_success); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
 
                 <?php if (!empty($flash_error)): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;">  <!-- Sembunyikan kalau Swal aktif -->
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;"> <!-- Sembunyikan kalau Swal aktif -->
                         <i class="bi bi-exclamation-circle me-2"></i><?php echo htmlspecialchars($flash_error); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -167,13 +171,13 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                                     <form method="POST" action="<?= BASE_URL ?>profile/update" class="profile-form">
                                         <div class="mb-4">
                                             <label for="username" class="form-label">Username</label>
-                                            <input type="text" class="form-control form-control-profile" id="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Username tidak dapat diubah" disabled>
-                                            <small class="text-muted">Username tidak dapat diubah</small>
+                                            <input type="text" class="form-control form-control-profile" id="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Username tidak dapat diubah">
                                         </div>
 
                                         <div class="mb-4">
                                             <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control form-control-profile" id="email" name="email" value="<?php echo htmlspecialchars($user_info['email']); ?>" placeholder="Masukkan email Anda">
+                                            <input type="email" class="form-control form-control-profile" id="email" name="email" value="<?php echo htmlspecialchars($user_info['email']); ?>" placeholder="Masukkan email Anda" disabled>
+                                            <small class="text-muted">Email tidak dapat diubah</small>
                                         </div>
 
                                         <div class="mb-4">
@@ -259,72 +263,73 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () { 
-        <?php if (!empty($flash_success)): ?>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: <?= json_encode($flash_success) ?>,
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#3554f5'
-            }).then(() => {
-                location.reload();
-            });
-        <?php endif; ?>
-
-        <?php if (!empty($flash_error)): ?>
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: <?= json_encode($flash_error) ?>,
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#dc3545'
-            });
-        <?php endif; ?>
-
-        const changePasswordForm = document.querySelector('form[action*="change-password"]');
-        
-        if (changePasswordForm) {
-            changePasswordForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                
-                const formData = new FormData(this);
-                const actionUrl = this.getAttribute('action');
-                
-                fetch(actionUrl, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
-                        modal.hide();
-                        changePasswordForm.reset();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            text: data.message,
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Terjadi kesalahan komunikasi dengan server',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#dc3545'
-                    });
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if (!empty($flash_success)): ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: <?= json_encode($flash_success) ?>,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3554f5'
+                }).then(() => {
+                    location.reload();
                 });
-            });
-        }
-    });
-</script>
+            <?php endif; ?>
+
+            <?php if (!empty($flash_error)): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: <?= json_encode($flash_error) ?>,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545'
+                });
+            <?php endif; ?>
+
+            const changePasswordForm = document.querySelector('form[action*="change-password"]');
+
+            if (changePasswordForm) {
+                changePasswordForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const actionUrl = this.getAttribute('action');
+
+                    fetch(actionUrl, {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                                modal.hide();
+                                changePasswordForm.reset();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: data.message,
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan komunikasi dengan server',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        });
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>
