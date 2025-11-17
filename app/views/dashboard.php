@@ -32,11 +32,8 @@ $recentResi = $recentResi ?? [];
 <body>
     <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
         <div class="container-fluid px-4">
-            <a class="navbar-brand" href="#">
-                <div class="brand-icon">
-                    <i class="bi bi-boxes"></i>
-                </div>
-                AstralExpress
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+            <img src="<?= BASE_URL ?>assets/logo-astral-express.png" alt="Astral Express" class="brand-logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -79,7 +76,7 @@ $recentResi = $recentResi ?? [];
                     <i class="bi bi-boxes"></i>
                     <span>Inventaris Barang</span>
                 </a>
-                    <a href="#" class="sidebar-item">
+                <a href="#" class="sidebar-item">
                     <i class="fa-solid fa-warehouse"></i>
                     <span>Supplier</span>
                 </a>

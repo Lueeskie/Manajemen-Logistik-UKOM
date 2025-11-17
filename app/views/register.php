@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>Register - Manajemen Logistik</title>
@@ -9,14 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg bg-white">
         <div class="container">
-            <a class="navbar-brand" href="<?= BASE_URL ?>login">
-                <div class="brand-icon">
-                    <i class="bi bi-boxes"></i>
-                </div>
-                AstralExpress
+            <a class="navbar-brand" href="#">
+                <img src="<?= BASE_URL ?>assets/logo-astral-express.png" alt="Astral Express" class="brand-logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -52,7 +51,7 @@
                         <div class="card-body p-4 p-lg-5">
                             <h3 class="fw-bold mb-2">Buat Akun Baru</h3>
                             <p class="text-muted mb-4">Isi data di bawah untuk membuat akun</p>
-                            
+
                             <form method="POST">
                                 <div class="mb-3">
                                     <label class="form-label">Username</label>
@@ -62,7 +61,7 @@
                                             placeholder="Pilih username" required>
                                     </div>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label">Email</label>
                                     <div class="input-group custom-input">
@@ -113,7 +112,7 @@
     </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             <?php if (isset($error)) : ?>
                 Swal.fire({
                     icon: 'error',
@@ -134,4 +133,5 @@
         });
     </script>
 </body>
+
 </html>

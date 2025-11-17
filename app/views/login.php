@@ -23,11 +23,9 @@ if (isset($_SESSION['flash_success'])) {
     <nav class="navbar navbar-expand-lg bg-white">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <div class="brand-icon">
-                    <i class="bi bi-boxes"></i>
-                </div>
-                AstralExpress
+            <img src="<?= BASE_URL ?>assets/logo-astral-express.png" alt="Astral Express" class="brand-logo">
             </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

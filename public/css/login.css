@@ -25,37 +25,50 @@ body {
     background: #ffffff !important;
 }
 
+
 .navbar-brand {
     font-weight: 700;
-    font-size: 1.35rem;
-    color: var(--primary) !important;
+    font-size: 20rem;
+    color: var(--text-dark) !important;
     display: flex;
     align-items: center;
     gap: 12px;
     letter-spacing: -0.5px;
+    transition: transform 0.2s ease;
 }
 
-.brand-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #fff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
+.brand-text{
+    position: absolute;
+    font-size: 1.35rem;
+    left: 7rem;
 }
+
+.brand-logo {
+    position: absolute;
+    top: -10px;
+    left: 2.7rem;
+    width: 85px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(37, 53, 104, 0.25));
+    transition: transform 0.25s ease, filter 0.25s ease;
+    border-radius:200px;
+}
+
+
 
 .btn-daftar {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border-radius: 999px;
-    padding: 0.65rem 1.75rem;
-    border: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(37, 53, 104, 0.25);
+   color: #ffffff !important;
+    border: 2px solid var(--primary) !important;
+    border-radius: 12px;
+    padding: 0.65rem 1.5rem !important;
+    font-weight: 600 !important;
+    background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+    transition: all 0.3s ease;
+    display: inline-flex !important;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(37, 53, 104, 0.3);
+    
 }
 
 .btn-daftar:hover {
