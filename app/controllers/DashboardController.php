@@ -1,13 +1,16 @@
 <?php
 
 require_once __DIR__ . '/../models/Resi.php';
+require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../../config/config.php';
 
 class DashboardController {
     private $resiModel;
+    private $userModel;
     
     public function __construct() {
         $this->resiModel = new Resi();
+        $this->userModel = new User();
     }
 
     public function index() {
@@ -20,6 +23,18 @@ class DashboardController {
         $userId = $_SESSION['user_id'];
         $stats = $this->resiModel->getStats($userId);
         $recentResi = $this->resiModel->getRecentResi($userId);
+
+        // Ambil data user untuk foto profil menggunakan method getProfile
+        $user_info = $this->userModel->getProfile($userId);
+        if (!$user_info) {
+            $user_info = [
+                'username' => $_SESSION['username'] ?? 'User',
+                'email' => '',
+                'telepon' => '',
+                'alamat' => '',
+                'foto' => ''
+            ];
+        }
 
         require __DIR__ . '/../views/dashboard.php';
     }

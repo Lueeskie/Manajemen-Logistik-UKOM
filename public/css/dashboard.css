@@ -66,12 +66,28 @@ body::before {
 
 
 .brand-logo {
-    position: absolute;
-    width: 80px;
-    height: 80px;
+    width: 46px;
+    height: 46px;
     object-fit: contain;
     filter: drop-shadow(0 4px 10px rgba(37, 53, 104, 0.25));
     transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.brand-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 6px 15px rgba(37, 53, 104, 0.35));
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 1.35rem;
+    color: #253568;
+    letter-spacing: -0.5px;
+    transition: color 0.25s ease;
+}
+
+.navbar-brand:hover .brand-text {
+    color: #1a2547;
 }
 
 /* Hover animasi elegan */
@@ -627,6 +643,15 @@ body::before {
     .card-body {
         padding: 1rem;
     }
+
+     .brand-logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .brand-text {
+        font-size: 1.1rem;
+    }
 }
 
 ::-webkit-scrollbar {
@@ -721,4 +746,23 @@ body::before {
 .stat-card:hover .stat-icon::after {
     transform: translate(-50%, -50%) scale(1.5);
     opacity: 1;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    overflow: hidden;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }

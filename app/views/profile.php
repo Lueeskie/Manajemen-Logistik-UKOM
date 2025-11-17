@@ -4,7 +4,8 @@ $user_info = $user_info ?? [
     'username' => $_SESSION['username'] ?? 'User',
     'email' => '',
     'telepon' => '',
-    'alamat' => ''
+    'alamat' => '',
+    'foto' => ''
 ];
 
 $flash_success = $_SESSION['flash_success'] ?? '';
@@ -21,6 +22,7 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,14 +35,13 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
         <div class="container-fluid px-4">
-            <a class="navbar-brand" href="<?= BASE_URL ?>dashboard">
-                <div class="brand-icon">
-                    <i class="bi bi-boxes"></i>
-                </div>
-                AstralExpress
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <img src="<?= BASE_URL ?>assets/logo2.png" alt="Astral Express" class="brand-logo">
+                <span class="brand-text">AstralExpress</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -50,12 +51,18 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                             <div class="avatar-circle">
-                                <i class="bi bi-person-fill"></i>
+                                <?php if (!empty($user_info['foto'])): ?>
+                                    <img src="<?= BASE_URL ?>uploads/profile/<?= htmlspecialchars($user_info['foto']) ?>" 
+                                        alt="<?= htmlspecialchars($_SESSION['username'] ?? 'User') ?>" 
+                                        class="avatar-img">
+                                <?php else: ?>
+                                    <i class="bi bi-person-fill"></i>
+                                <?php endif; ?>
                             </div>
                             <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item active" href="<?= BASE_URL ?>profile"><i class="bi bi-person me-2"></i>Profil</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>profile"><i class="bi bi-person me-2"></i>Profil</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="<?= BASE_URL ?>logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
@@ -97,7 +104,7 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h1 class="h3 fw-bold mb-2"><i class="bi bi-person-circle me-2"></i>Profil Pengguna</h1>
+                                <h1 class="h3 fw-bold mb-2">Profil Pengguna</h1>
                                 <p class="text-muted mb-0">Kelola informasi profil Anda</p>
                             </div>
                             <div>
@@ -112,14 +119,14 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                 </div>
 
                 <?php if (!empty($flash_success)): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">  <!-- Sembunyikan kalau Swal aktif -->
+                    <div class="alert alert-success alert-dismissible fade show" role="alert"> 
                         <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($flash_success); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
 
                 <?php if (!empty($flash_error)): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;">  <!-- Sembunyikan kalau Swal aktif -->
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-circle me-2"></i><?php echo htmlspecialchars($flash_error); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -130,8 +137,17 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                         <div class="profile-card">
                             <div class="avatar-container">
                                 <div class="avatar-large">
-                                    <i class="bi bi-person-fill"></i>
+                                    <?php $hasFoto = !empty($user_info['foto']); ?>
+                                    <img src="<?php echo $hasFoto ? BASE_URL . 'uploads/profile/' . htmlspecialchars($user_info['foto']) : ''; ?>" alt="Foto Profil" id="avatarPreview" class="<?php echo $hasFoto ? '' : 'd-none'; ?>">
+                                    <i class="bi bi-person-fill <?php echo $hasFoto ? 'd-none' : ''; ?>" id="avatarFallback"></i>
                                 </div>
+                                <?php if ($isEditMode): ?>
+                                    <div class="avatar-upload">
+                                        <label for="foto" class="avatar-upload-btn" title="Pilih foto baru">
+                                            <i class="bi bi-camera-fill"></i>
+                                        </label>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <h3 class="mt-3 mb-1"><?php echo htmlspecialchars($user_info['username']); ?></h3>
                             <p class="text-muted mb-0"><?php echo htmlspecialchars($user_info['email']); ?></p>
@@ -164,28 +180,38 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                                         </div>
                                     </div>
                                 <?php else: ?>
-                                    <form method="POST" action="<?= BASE_URL ?>profile/update" class="profile-form">
+                                    <form method="POST" action="<?= BASE_URL ?>profile/update" class="profile-form" enctype="multipart/form-data">
+                                        <input type="file" class="d-none" id="foto" name="foto" accept="image/*">
+
+                                        <div class="mb-4">
+                                            <label class="form-label d-block">Foto Profil</label>
+                                            <p class="text-muted small mb-1">Klik ikon kamera pada foto untuk mengganti gambar.</p>
+                                            <span class="text-muted small" id="avatar-file-name">
+                                                <?php echo !empty($user_info['foto']) ? htmlspecialchars($user_info['foto']) : 'Belum ada file dipilih'; ?>
+                                            </span>
+                                        </div>
+
                                         <div class="mb-4">
                                             <label for="username" class="form-label">Username</label>
-                                            <input type="text" class="form-control form-control-profile" id="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Username tidak dapat diubah" disabled>
-                                            <small class="text-muted">Username tidak dapat diubah</small>
+                                            <input type="text" class="form-control form-control-profile" id="username" name="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Masukkan username">
                                         </div>
-
+                                
                                         <div class="mb-4">
                                             <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control form-control-profile" id="email" name="email" value="<?php echo htmlspecialchars($user_info['email']); ?>" placeholder="Masukkan email Anda">
+                                            <input type="email" class="form-control form-control-profile" id="email" value="<?php echo htmlspecialchars($user_info['email']); ?>" placeholder="Email tidak dapat diubah" disabled>
+                                            <small class="text-muted">Email tidak dapat diubah</small>
                                         </div>
-
+                                
                                         <div class="mb-4">
                                             <label for="telepon" class="form-label">Telepon</label>
                                             <input type="tel" class="form-control form-control-profile" id="telepon" name="telepon" value="<?php echo htmlspecialchars($user_info['telepon'] ?? ''); ?>" placeholder="Masukkan telepon">
                                         </div>
-
+                                
                                         <div class="mb-4">
                                             <label for="alamat" class="form-label">Alamat</label>
                                             <textarea class="form-control form-control-profile" id="alamat" name="alamat" rows="3" placeholder="Masukkan alamat Anda"><?php echo htmlspecialchars($user_info['alamat'] ?? ''); ?></textarea>
                                         </div>
-
+                                
                                         <div class="d-flex gap-2">
                                             <button type="submit" class="btn btn-primary">
                                                 <i class="bi bi-check-circle me-2"></i>Simpan Perubahan
@@ -259,72 +285,110 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () { 
-        <?php if (!empty($flash_success)): ?>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: <?= json_encode($flash_success) ?>,
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#3554f5'
-            }).then(() => {
-                location.reload();
-            });
-        <?php endif; ?>
+    <script>
+        function initProfilePage() {
+            const avatarInput = document.getElementById('foto');
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarFallback = document.getElementById('avatarFallback');
+            const avatarFileName = document.getElementById('avatar-file-name');
 
-        <?php if (!empty($flash_error)): ?>
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: <?= json_encode($flash_error) ?>,
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#dc3545'
-            });
-        <?php endif; ?>
-
-        const changePasswordForm = document.querySelector('form[action*="change-password"]');
-        
-        if (changePasswordForm) {
-            changePasswordForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                
-                const formData = new FormData(this);
-                const actionUrl = this.getAttribute('action');
-                
-                fetch(actionUrl, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
-                        modal.hide();
-                        changePasswordForm.reset();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            text: data.message,
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#dc3545'
-                        });
+            if (avatarInput) {
+                avatarInput.addEventListener('change', function() {
+                    const file = this.files && this.files[0] ? this.files[0] : null;
+                    if (!file) {
+                        return;
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Terjadi kesalahan komunikasi dengan server',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#dc3545'
-                    });
+
+                    if (avatarFileName) {
+                        avatarFileName.textContent = file.name;
+                    }
+
+                    if (avatarPreview) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            avatarPreview.src = e.target.result;
+                            avatarPreview.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+
+                    if (avatarFallback) {
+                        avatarFallback.classList.add('d-none');
+                    }
                 });
-            });
+            }
+
+            <?php if (!empty($flash_success)): ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: <?= json_encode($flash_success) ?>,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3554f5'
+                }).then(() => {
+                    location.reload();
+                });
+            <?php endif; ?>
+
+            <?php if (!empty($flash_error)): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: <?= json_encode($flash_error) ?>,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545'
+                });
+            <?php endif; ?>
+
+            const changePasswordForm = document.querySelector('form[action*="change-password"]');
+
+            if (changePasswordForm) {
+                changePasswordForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const actionUrl = this.getAttribute('action');
+
+                    fetch(actionUrl, {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                                modal.hide();
+                                changePasswordForm.reset();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: data.message,
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan komunikasi dengan server',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        });
+                });
+            }
         }
-    });
-</script>
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initProfilePage);
+        } else {
+            initProfilePage();
+        }
+    </script>
 </body>
+
 </html>
