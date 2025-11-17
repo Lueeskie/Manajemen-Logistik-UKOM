@@ -11,21 +11,21 @@ class AuthController {
     }
 
     public function login() {
-        session_start();
+        session_start(); 
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = $_POST['username'] ?? '';
+            $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
-            $user = $this->userModel->login($username, $password);
+            $user = $this->userModel->login($email, $password);
             if ($user) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['role'];
-                $_SESSION['flash_success'] = 'Login berhasil, selamat datang kembali!';
+                $_SESSION['username'] = $user['username'];
                 header('Location: ' . BASE_URL . 'dashboard');
                 exit;
             } else {
-                $error = "Username atau password salah!";
+                $error = "Email atau password salah!";
                 require __DIR__ . '/../views/login.php';
             }
         } else {
