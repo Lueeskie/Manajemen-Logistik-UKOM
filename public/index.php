@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/database.php'; 
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
+require_once __DIR__ . '/../app/controllers/ProfileController.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -35,7 +37,20 @@ switch ($uri) {
         $dashboard = new DashboardController();
         $dashboard->index();
         break;
+    case '/profile':
+        $profile = new ProfileController();
+        $profile->index();
+        break;
+    case '/profile/update':
+        $profile = new ProfileController();
+        $profile->update();
+        break;
+    case '/profile/change-password':
+        $profile = new ProfileController();
+        $profile->changePassword();
+        break;
     default:
         http_response_code(404);
         echo "Page not found";
 }
+?>

@@ -1,0 +1,330 @@
+<?php
+
+$user_info = $user_info ?? [
+    'username' => $_SESSION['username'] ?? 'User',
+    'email' => '',
+    'telepon' => '',
+    'alamat' => ''
+];
+
+$flash_success = $_SESSION['flash_success'] ?? '';
+$flash_error = $_SESSION['flash_error'] ?? '';
+
+if (isset($_SESSION['flash_success'])) {
+    unset($_SESSION['flash_success']);
+}
+if (isset($_SESSION['flash_error'])) {
+    unset($_SESSION['flash_error']);
+}
+
+$isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Manajemen Logistik</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>css/profile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="<?= BASE_URL ?>dashboard">
+                <div class="brand-icon">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                AstralExpress
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="avatar-circle">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User'); ?></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item active" href="<?= BASE_URL ?>profile"><i class="bi bi-person me-2"></i>Profil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="<?= BASE_URL ?>logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <a href="<?= BASE_URL ?>dashboard" class="sidebar-item">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Pengiriman</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="bi bi-boxes"></i>
+                    <span>Inventaris Barang</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <span>Supplier</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="bi bi-people"></i>
+                    <span>Pengguna</span>
+                </a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="container-fluid px-4 py-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1 class="h3 fw-bold mb-2"><i class="bi bi-person-circle me-2"></i>Profil Pengguna</h1>
+                                <p class="text-muted mb-0">Kelola informasi profil Anda</p>
+                            </div>
+                            <div>
+                                <?php if (!$isEditMode): ?>
+                                    <a href="<?= BASE_URL ?>profile?edit=true" class="btn btn-primary">
+                                        <i class="bi bi-pencil me-2"></i>Edit Profil
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if (!empty($flash_success)): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">  <!-- Sembunyikan kalau Swal aktif -->
+                        <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($flash_success); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($flash_error)): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;">  <!-- Sembunyikan kalau Swal aktif -->
+                        <i class="bi bi-exclamation-circle me-2"></i><?php echo htmlspecialchars($flash_error); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="profile-card">
+                            <div class="avatar-container">
+                                <div class="avatar-large">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                            </div>
+                            <h3 class="mt-3 mb-1"><?php echo htmlspecialchars($user_info['username']); ?></h3>
+                            <p class="text-muted mb-0"><?php echo htmlspecialchars($user_info['email']); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Informasi Pribadi</h5>
+                            </div>
+                            <div class="card-body">
+                                <?php if (!$isEditMode): ?>
+                                    <div class="profile-info">
+                                        <div class="info-item">
+                                            <label class="info-label">Username</label>
+                                            <p class="info-value"><?php echo htmlspecialchars($user_info['username']); ?></p>
+                                        </div>
+                                        <div class="info-item">
+                                            <label class="info-label">Email</label>
+                                            <p class="info-value"><?php echo htmlspecialchars($user_info['email']); ?></p>
+                                        </div>
+                                        <div class="info-item">
+                                            <label class="info-label">Telepon</label>
+                                            <p class="info-value"><?php echo !empty($user_info['telepon']) ? htmlspecialchars($user_info['telepon']) : '-'; ?></p>
+                                        </div>
+                                        <div class="info-item">
+                                            <label class="info-label">Alamat</label>
+                                            <p class="info-value"><?php echo !empty($user_info['alamat']) ? htmlspecialchars($user_info['alamat']) : '-'; ?></p>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <form method="POST" action="<?= BASE_URL ?>profile/update" class="profile-form">
+                                        <div class="mb-4">
+                                            <label for="username" class="form-label">Username</label>
+                                            <input type="text" class="form-control form-control-profile" id="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Username tidak dapat diubah" disabled>
+                                            <small class="text-muted">Username tidak dapat diubah</small>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control form-control-profile" id="email" name="email" value="<?php echo htmlspecialchars($user_info['email']); ?>" placeholder="Masukkan email Anda">
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="telepon" class="form-label">Telepon</label>
+                                            <input type="tel" class="form-control form-control-profile" id="telepon" name="telepon" value="<?php echo htmlspecialchars($user_info['telepon'] ?? ''); ?>" placeholder="Masukkan telepon">
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="alamat" class="form-label">Alamat</label>
+                                            <textarea class="form-control form-control-profile" id="alamat" name="alamat" rows="3" placeholder="Masukkan alamat Anda"><?php echo htmlspecialchars($user_info['alamat'] ?? ''); ?></textarea>
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-check-circle me-2"></i>Simpan Perubahan
+                                            </button>
+                                            <a href="<?= BASE_URL ?>profile" class="btn btn-outline-secondary">
+                                                <i class="bi bi-x-circle me-2"></i>Batal
+                                            </a>
+                                        </div>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if (!$isEditMode): ?>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="content-card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Keamanan Akun</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="security-item">
+                                        <div class="security-info">
+                                            <h6 class="mb-1">Ubah Password</h6>
+                                            <p class="text-muted mb-0">Perbarui password Anda untuk menjaga keamanan akun</p>
+                                        </div>
+                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                            <i class="bi bi-key me-2"></i>Ubah Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-custom">
+                <div class="modal-header border-bottom-light">
+                    <h5 class="modal-title"><i class="bi bi-key me-2"></i>Ubah Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="<?= BASE_URL ?>profile/change-password">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Password Saat Ini</label>
+                            <input type="password" class="form-control form-control-profile" id="currentPassword" name="current_password" placeholder="Masukkan password saat ini" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Password Baru</label>
+                            <input type="password" class="form-control form-control-profile" id="newPassword" name="new_password" placeholder="Masukkan password baru" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Konfirmasi Password</label>
+                            <input type="password" class="form-control form-control-profile" id="confirmPassword" name="confirm_password" placeholder="Konfirmasi password baru" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () { 
+        <?php if (!empty($flash_success)): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: <?= json_encode($flash_success) ?>,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3554f5'
+            }).then(() => {
+                location.reload();
+            });
+        <?php endif; ?>
+
+        <?php if (!empty($flash_error)): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: <?= json_encode($flash_error) ?>,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#dc3545'
+            });
+        <?php endif; ?>
+
+        const changePasswordForm = document.querySelector('form[action*="change-password"]');
+        
+        if (changePasswordForm) {
+            changePasswordForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const actionUrl = this.getAttribute('action');
+                
+                fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                        modal.hide();
+                        changePasswordForm.reset();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: data.message,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan komunikasi dengan server',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc3545'
+                    });
+                });
+            });
+        }
+    });
+</script>
+</body>
+</html>
