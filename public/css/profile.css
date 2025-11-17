@@ -1,4 +1,3 @@
-/* ===== PROFILE CARD STYLING ===== */
 .profile-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid rgba(37, 53, 104, 0.12);
@@ -26,7 +25,6 @@
     transform: translateY(-4px);
 }
 
-/* ===== AVATAR STYLING ===== */
 .avatar-container {
     position: relative;
     display: inline-block;
@@ -90,7 +88,6 @@
     box-shadow: 0 6px 16px rgba(37, 53, 104, 0.5);
 }
 
-/* ===== PROFILE BADGE ===== */
 .profile-badge {
     margin: 1rem 0 0 0;
 }
@@ -103,7 +100,6 @@
     box-shadow: 0 4px 12px rgba(37, 53, 104, 0.3);
 }
 
-/* ===== PROFILE INFO DISPLAY ===== */
 .profile-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -142,7 +138,6 @@
     line-height: 1.6;
 }
 
-/* ===== PROFILE FORM STYLING ===== */
 .profile-form {
     animation: fadeInUp 0.5s ease;
 }
@@ -195,7 +190,6 @@ textarea.form-control-profile {
     min-height: 100px;
 }
 
-/* ===== SECURITY SECTION ===== */
 .security-item {
     display: flex;
     justify-content: space-between;
@@ -219,7 +213,6 @@ textarea.form-control-profile {
     margin: 0.5rem 0 0 0;
 }
 
-/* ===== MODAL STYLING ===== */
 .modal-custom {
     border: 1px solid rgba(37, 53, 104, 0.12);
     border-radius: 18px;
@@ -243,7 +236,23 @@ textarea.form-control-profile {
     font-weight: 700;
 }
 
-/* ===== BUTTON VARIATIONS ===== */
+.modal-footer .btn-secondary {
+    border: 1.5px solid rgba(37, 53, 104, 0.2);
+    color: #253568;
+    background: transparent;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0.7rem 1.4rem;
+    transition: all 0.3s ease;
+}
+
+.modal-footer .btn-secondary:hover {
+    background: rgba(37, 53, 104, 0.1);
+    border-color: #253568;
+    color: #253568;
+    transform: translateY(-2px);
+}
+
 .btn-outline-secondary {
     border: 1.5px solid rgba(37, 53, 104, 0.2);
     color: #253568;
@@ -276,7 +285,6 @@ textarea.form-control-profile {
     transform: translateY(-2px);
 }
 
-/* ===== ALERT STYLING ===== */
 .alert {
     border: 1px solid transparent;
     border-radius: 14px;
@@ -306,7 +314,6 @@ textarea.form-control-profile {
     opacity: 1;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 992px) {
     .profile-info {
         grid-template-columns: 1fr;
