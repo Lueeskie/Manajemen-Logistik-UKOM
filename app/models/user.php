@@ -39,7 +39,7 @@ class User {
     }
     
     public function getProfile($userId) {
-        $stmt = $this->db->prepare("SELECT id, username, email, telepon, alamat, role FROM users WHERE id = :id");
+        $stmt = $this->db->prepare("SELECT id, username, email, telepon, alamat, role, foto FROM users WHERE id = :id");
         $stmt->bindParam(':id', $userId);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: false;
@@ -47,12 +47,27 @@ class User {
 
     public function updateProfile($userId, $data) {
         try {
-            $query = "UPDATE users SET username = :username, telepon = :telepon, alamat = :alamat WHERE id = :id";
+            $fields = [
+                'username = :username',
+                'telepon = :telepon',
+                'alamat = :alamat'
+            ];
+
+            if (array_key_exists('foto', $data)) {
+                $fields[] = 'foto = :foto';
+            }
+
+            $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = :id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':username', $data['username']);
             $stmt->bindParam(':telepon', $data['telepon']);
             $stmt->bindParam(':alamat', $data['alamat']);
             $stmt->bindParam(':id', $userId);
+
+            if (array_key_exists('foto', $data)) {
+                $stmt->bindParam(':foto', $data['foto']);
+            }
+
             return $stmt->execute();
         } catch (PDOException $e) {
             return false;

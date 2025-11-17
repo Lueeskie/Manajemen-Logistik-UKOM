@@ -4,7 +4,8 @@ $user_info = $user_info ?? [
     'username' => $_SESSION['username'] ?? 'User',
     'email' => '',
     'telepon' => '',
-    'alamat' => ''
+    'alamat' => '',
+    'foto' => ''
 ];
 
 $flash_success = $_SESSION['flash_success'] ?? '';
@@ -134,8 +135,17 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                         <div class="profile-card">
                             <div class="avatar-container">
                                 <div class="avatar-large">
-                                    <i class="bi bi-person-fill"></i>
+                                    <?php $hasFoto = !empty($user_info['foto']); ?>
+                                    <img src="<?php echo $hasFoto ? BASE_URL . 'uploads/profile/' . htmlspecialchars($user_info['foto']) : ''; ?>" alt="Foto Profil" id="avatarPreview" class="<?php echo $hasFoto ? '' : 'd-none'; ?>">
+                                    <i class="bi bi-person-fill <?php echo $hasFoto ? 'd-none' : ''; ?>" id="avatarFallback"></i>
                                 </div>
+                                <?php if ($isEditMode): ?>
+                                    <div class="avatar-upload">
+                                        <label for="foto" class="avatar-upload-btn" title="Pilih foto baru">
+                                            <i class="bi bi-camera-fill"></i>
+                                        </label>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <h3 class="mt-3 mb-1"><?php echo htmlspecialchars($user_info['username']); ?></h3>
                             <p class="text-muted mb-0"><?php echo htmlspecialchars($user_info['email']); ?></p>
@@ -168,7 +178,17 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                                         </div>
                                     </div>
                                 <?php else: ?>
-                                    <form method="POST" action="<?= BASE_URL ?>profile/update" class="profile-form">
+                                    <form method="POST" action="<?= BASE_URL ?>profile/update" class="profile-form" enctype="multipart/form-data">
+                                        <input type="file" class="d-none" id="foto" name="foto" accept="image/*">
+
+                                        <div class="mb-4">
+                                            <label class="form-label d-block">Foto Profil</label>
+                                            <p class="text-muted small mb-1">Klik ikon kamera pada foto untuk mengganti gambar.</p>
+                                            <span class="text-muted small" id="avatar-file-name">
+                                                <?php echo !empty($user_info['foto']) ? htmlspecialchars($user_info['foto']) : 'Belum ada file dipilih'; ?>
+                                            </span>
+                                        </div>
+
                                         <div class="mb-4">
                                             <label for="username" class="form-label">Username</label>
                                             <input type="text" class="form-control form-control-profile" id="username" name="username" value="<?php echo htmlspecialchars($user_info['username']); ?>" placeholder="Masukkan username">
@@ -265,6 +285,37 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const avatarInput = document.getElementById('foto');
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarFallback = document.getElementById('avatarFallback');
+            const avatarFileName = document.getElementById('avatar-file-name');
+
+            if (avatarInput) {
+                avatarInput.addEventListener('change', function() {
+                    const file = this.files && this.files[0] ? this.files[0] : null;
+                    if (!file) {
+                        return;
+                    }
+
+                    if (avatarFileName) {
+                        avatarFileName.textContent = file.name;
+                    }
+
+                    if (avatarPreview) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            avatarPreview.src = e.target.result;
+                            avatarPreview.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+
+                    if (avatarFallback) {
+                        avatarFallback.classList.add('d-none');
+                    }
+                });
+            }
+
             <?php if (!empty($flash_success)): ?>
                 Swal.fire({
                     icon: 'success',
