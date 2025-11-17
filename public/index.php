@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/controllers/DashboardController.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -31,12 +32,8 @@ switch ($uri) {
         $auth->logout();
         break;
     case '/dashboard':
-        session_start();
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: ' . BASE_URL . 'login'); 
-            exit;
-        }
-        require __DIR__ . '/../app/views/dashboard.php';
+        $dashboard = new DashboardController();
+        $dashboard->index();
         break;
     default:
         http_response_code(404);
