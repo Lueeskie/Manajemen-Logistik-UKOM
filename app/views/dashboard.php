@@ -51,7 +51,7 @@ $recentResi = $recentResi ?? [];
                             <span class="d-none d-md-inline"><?php echo $_SESSION['username'] ?? 'User'; ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>profile"><i class="bi bi-person me-2"></i>Profil</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
                             <li>
                                 <hr class="dropdown-divider">
