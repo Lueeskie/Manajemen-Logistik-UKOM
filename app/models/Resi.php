@@ -2,14 +2,17 @@
 
 require_once __DIR__ . '/../../config/database.php';
 
-class Resi {
+class Resi
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Database::getInstance();
     }
 
-    public function getStats($userId) {
+    public function getStats($userId)
+    {
         $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM resi WHERE user_id = :user_id");
         $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
@@ -38,12 +41,28 @@ class Resi {
         ];
     }
 
-    public function getRecentResi($userId, $limit = 10) {
+    public function getRecentResi($userId, $limit = 10)
+    {
         $stmt = $this->db->prepare("SELECT id, nomor_resi, nama_penerima, alamat_tujuan, status_pengiriman, status_pembayaran, tanggal_dibuat 
                                     FROM resi WHERE user_id = :user_id 
                                     ORDER BY tanggal_dibuat DESC LIMIT :limit");
         $stmt->bindParam(':user_id', $userId);
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getDetailedResi($userId)
+    {
+        $query = "SELECT id, nomor_resi, nama_pengirim, telpon_pengirim, kota_pengirim, alamat_asal,
+                         nama_penerima, telpon_penerima, kota_penerima, alamat_tujuan,
+                         jumlah_paket, berat_total, total_jarak, total_ongkir,
+                         status_pengiriman, status_pembayaran, tanggal_dibuat
+                  FROM resi
+                  WHERE user_id = :user_id
+                  ORDER BY tanggal_dibuat DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

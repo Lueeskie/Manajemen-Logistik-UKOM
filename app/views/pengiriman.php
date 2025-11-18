@@ -19,6 +19,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
+        <link rel="stylesheet" href="<?= BASE_URL ?>css/sticky-table.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
@@ -90,14 +91,6 @@
 
             <main class="main-content">
 
-
-
-
-
-
-
-
-
                 <div class="container-fluid px-4 py-4">
                     <div class="row mb-4">
                         <div class="col-12">
@@ -105,8 +98,6 @@
                                 <div>
                                     <h1 class="h3 fw-bold mb-2">Selamat datang, <?php echo $_SESSION['username'] ?? 'User'; ?>!</h1>
                                     <p class="text-muted mb-0">silahkan lihat detail informasi pengiriman anda di sini</p>
-                                </div>
-                                <div>
                                 </div>
                             </div>
                         </div>
@@ -158,16 +149,110 @@
                         </div>
                     </div>
 
+
+                    <div class="d-flex justify-content-end mb-4">
+                        <button class="btn btn-primary btn-sm shadow-sm">
+                            <i class="bi bi-plus-lg me-2"></i>Pengiriman Baru
+                        </button>
+                    </div>
+
                     <div class="content-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="mb-1">Halaman Pengiriman</h5>
-                                <p class="text-muted mb-0">Konten pengiriman akan ditambahkan di tahap berikutnya.</p>
+                                <h5 class="mb-1">Daftar Pengiriman</h5>
                             </div>
                         </div>
-                        <div class="card-body text-center py-5">
-                            <i class="bi bi-truck fs-1 text-primary mb-3"></i>
-                            <p class="text-muted mb-0">Belum ada data pengiriman untuk ditampilkan.</p>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle table-sticky-first" style="min-width: 1200px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Nomor Resi</th>
+                                            <th>Nama Pengirim</th>
+                                            <th>Telp Pengirim</th>
+                                            <th>Kota Asal</th>
+                                            <th style="min-width: 300px;">Alamat Asal</th>
+                                            <th>Nama Penerima</th>
+                                            <th>Telp Penerima</th>
+                                            <th>Kota Tujuan</th>
+                                            <th style="min-width: 300px;">Alamat Tujuan</th>
+                                            <th>Paket</th>
+                                            <th>Berat (Kg)</th>
+                                            <th>Jarak (Km)</th>
+                                            <th style="min-width: 170px;">Ongkir</th>
+                                            <th>Status Pengiriman</th>
+                                            <th>Status Pembayaran</th>
+                                            <th style="min-width: 170px;">Tanggal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($detailResi)) : ?>
+                                            <?php foreach ($detailResi as $row) : ?>
+                                                <?php
+                                                $statusKey = strtolower($row['status_pengiriman'] ?? '');
+                                                $statusColor = 'secondary';
+                                                if ($statusKey === 'terkirim') {
+                                                    $statusColor = 'success';
+                                                } elseif ($statusKey === 'dalam proses') {
+                                                    $statusColor = 'warning';
+                                                } elseif ($statusKey === 'tertunda') {
+                                                    $statusColor = 'danger';
+                                                }
+
+                                                $paymentKey = strtolower($row['status_pembayaran'] ?? '');
+                                                $paymentColor = $paymentKey === 'terbayar' ? 'success' : 'danger';
+                                                $alamatAsal = $row['alamat_asal'] ?? '';
+                                                $alamatAsalShort = strlen($alamatAsal) > 50 ? substr($alamatAsal, 0, 50) . '...' : $alamatAsal;
+
+                                                $alamatTujuan = $row['alamat_tujuan'] ?? '';
+                                                $alamatTujuanShort = strlen($alamatTujuan) > 50 ? substr($alamatTujuan, 0, 50) . '...' : $alamatTujuan;
+                                                ?>
+                                                <tr>
+                                                    <td><code><?php echo htmlspecialchars($row['nomor_resi']); ?></code></td>
+                                                    <td><?php echo htmlspecialchars($row['nama_pengirim']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['telpon_pengirim']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['kota_pengirim']); ?></td>
+                                                    <td><?php echo htmlspecialchars($alamatAsalShort); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['nama_penerima']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['telpon_penerima']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['kota_penerima']); ?></td>
+                                                    <td><?php echo htmlspecialchars($alamatTujuanShort); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['jumlah_paket']); ?></td>
+                                                    <td><?php echo !is_null($row['berat_total']) ? number_format($row['berat_total'], 2) : '-'; ?></td>
+                                                    <td><?php echo !is_null($row['total_jarak']) ? number_format($row['total_jarak'], 2) : '-'; ?></td>
+                                                    <td>
+                                                        <?php if (!is_null($row['total_ongkir'])) : ?>
+                                                            <span class="currency-badge">
+                                                                <i class="bi bi-wallet2"></i>
+                                                                <?php echo 'Rp ' . number_format($row['total_ongkir'], 0, ',', '.'); ?>
+                                                            </span>
+                                                        <?php else : ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<?php echo $statusColor; ?>-light text-<?php echo $statusColor; ?>">
+                                                            <?php echo !empty($row['status_pengiriman']) ? ucwords($row['status_pengiriman']) : '-'; ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<?php echo $paymentColor; ?>-light text-<?php echo $paymentColor; ?>">
+                                                            <?php echo !empty($row['status_pembayaran']) ? ucwords($row['status_pembayaran']) : '-'; ?>
+                                                        </span>
+                                                    </td>
+                                                    <td><?php echo !empty($row['tanggal_dibuat']) ? date('d M Y', strtotime($row['tanggal_dibuat'])) : '-'; ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else : ?>
+                                            <tr>
+                                                <td colspan="16" class="text-center text-muted py-4">
+                                                    <i class="bi bi-inbox me-1"></i> Belum ada data pengiriman.
+                                                </td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -26,7 +26,7 @@ class PengirimanController
 
         $userId = $_SESSION['user_id'];
         $stats = $this->resiModel->getStats($userId);
-        $recentResi = $this->resiModel->getRecentResi($userId);
+        $detailResi = $this->resiModel->getDetailedResi($userId);
         $user_info = $this->userModel->getProfile($userId);
         if (!$user_info) {
             $user_info = [
