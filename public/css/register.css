@@ -16,31 +16,46 @@ body {
 }
 
 .navbar {
-    padding: 1.25rem 0;
+    padding: 1rem 0;
+    box-shadow: 0 10px 30px rgba(37, 53, 104, 0.12);
     background: #ffffff !important;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 15px rgba(37, 53, 104, 0.1);
-    position: relative;
-    z-index: 10;
-    border-bottom: 1px solid rgba(37, 53, 104, 0.1);
 }
 
-.brand-text{
-    position: absolute;
-    font-size: 1.35rem;
-    left: 7rem;
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 20rem;
+    color: var(--text-dark) !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.5px;
+    transition: transform 0.2s ease;
 }
 
 .brand-logo {
-    position: absolute;
-    top: -10px;
-    left: 2.7rem;
-    width: 85px;
-    height: auto;
+    width: 46px;
+    height: 46px;
     object-fit: contain;
     filter: drop-shadow(0 4px 10px rgba(37, 53, 104, 0.25));
     transition: transform 0.25s ease, filter 0.25s ease;
-    border-radius:200px;
+}
+
+.brand-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 6px 15px rgba(37, 53, 104, 0.35));
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 1.35rem;
+    color: #253568;
+    letter-spacing: -0.5px;
+    transition: color 0.25s ease;
+}
+
+.navbar-brand:hover .brand-text {
+    color: #1a2547;
 }
 
 .btn-login {

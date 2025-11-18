@@ -22,8 +22,9 @@ if (isset($_SESSION['flash_success'])) {
 <body>
     <nav class="navbar navbar-expand-lg bg-white">
         <div class="container">
-            <a class="navbar-brand" href="#">
-            <img src="<?= BASE_URL ?>assets/logo-astral-express.png" alt="Astral Express" class="brand-logo">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <img src="<?= BASE_URL ?>assets/logo2.png" alt="Astral Express" class="brand-logo">
+                <span class="brand-text">AstralExpress</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -52,7 +53,8 @@ if (isset($_SESSION['flash_success'])) {
                         stok,
                         dan mengoptimalkan rantai pasok perusahaan Anda.</p>
                     <ul class="hero-list">
-                        <li><i class="bi bi-check-circle"></i>Monitoring pergerakan Paket</li>
+                        <li><i class="bi bi-check-circle"></i>Akses dashboard lengkap</li>
+                        <li><i class="bi bi-check-circle"></i>Monitoring pergerakan paket</li>
                     </ul>
                 </div>
 
