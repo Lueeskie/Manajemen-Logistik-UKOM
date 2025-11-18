@@ -71,11 +71,11 @@ $recentResi = $recentResi ?? [];
     <div class="dashboard-wrapper">
         <aside class="sidebar">
             <div class="sidebar-menu">
-                <a href="#" class="sidebar-item active">
+                <a href="<?= BASE_URL ?>dashboard" class="sidebar-item active" data-nav="dashboard">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="sidebar-item">
+                <a href="<?= BASE_URL ?>pengiriman" class="sidebar-item" data-nav="pengiriman">
                     <i class="bi bi-box-seam"></i>
                     <span>Pengiriman</span>
                 </a>
@@ -154,7 +154,7 @@ $recentResi = $recentResi ?? [];
                     </div>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-3" id="pengiriman-section">
                     <div class="col-lg-12">
                         <div class="card content-card">
                             <div class="card-header">
@@ -209,12 +209,50 @@ $recentResi = $recentResi ?? [];
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarItems = document.querySelectorAll('.sidebar-menu .sidebar-item');
+            const pengirimanSection = document.getElementById('pengiriman-section');
+
+            function setActive(navName) {
+                sidebarItems.forEach(item => {
+                    const itemNav = item.getAttribute('data-nav');
+                    if (itemNav) {
+                        item.classList.toggle('active', itemNav === navName);
+                    }
+                });
+            }
+
+            sidebarItems.forEach(item => {
+                const target = item.getAttribute('href');
+                if (target && target.startsWith('#')) {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const destination = document.querySelector(target);
+                        if (destination) {
+                            destination.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                            history.replaceState(null, '', target);
+                            setActive(this.getAttribute('data-nav'));
+                        }
+                    });
+                }
+            });
+
+            if (window.location.hash === '#pengiriman-section' && pengirimanSection) {
+                pengirimanSection.scrollIntoView({
+                    behavior: 'auto',
+                    block: 'start'
+                });
+                setActive('pengiriman');
+            } else {
+                setActive('dashboard');
+            }
+        });
+
         <?php if (!empty($flash_success)) : ?>
             Swal.fire({
                 icon: 'success',

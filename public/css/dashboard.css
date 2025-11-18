@@ -572,6 +572,180 @@ body::before {
     color: var(--text-muted) !important;
 }
 
+.shipment-card .card-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+}
+
+.shipment-card .card-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.shipment-toolbar {
+    width: 100%;
+}
+
+.shipment-search {
+    min-width: 280px;
+    flex: 1;
+}
+
+.shipment-search .input-group-text {
+    border-color: var(--border-color);
+    border-right: none;
+    border-radius: 999px 0 0 999px;
+    background: #fff;
+}
+
+.shipment-search .form-control {
+    border-color: var(--border-color);
+    border-left: none;
+    border-radius: 0 999px 999px 0;
+    background: var(--bg-light);
+    box-shadow: none;
+    padding: 0.75rem 1rem;
+}
+
+.shipment-filters {
+    flex: 1;
+}
+
+.filter-pill {
+    padding: 0.35rem 0.95rem;
+    border-radius: 999px;
+    background: rgba(37, 53, 104, 0.08);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-pill.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(37, 53, 104, 0.25);
+}
+
+.filter-pill:not(.active):hover {
+    background: rgba(37, 53, 104, 0.12);
+}
+
+.shipment-table thead th {
+    background: transparent;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+}
+
+.shipment-table tbody td {
+    padding: 1.1rem 0.75rem;
+    border-bottom: 1px solid rgba(37, 53, 104, 0.08);
+}
+
+.shipment-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.shipment-status {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.badge-soft-primary {
+    color: var(--primary);
+    background: rgba(37, 53, 104, 0.12);
+    border-color: rgba(37, 53, 104, 0.25);
+}
+
+.badge-soft-success {
+    color: #15803d;
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.badge-soft-warning {
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.badge-soft-danger {
+    color: #b91c1c;
+    background: rgba(220, 38, 38, 0.15);
+    border-color: rgba(220, 38, 38, 0.25);
+}
+
+.badge-soft-info {
+    color: #0f6ee7;
+    background: rgba(15, 110, 231, 0.15);
+    border-color: rgba(15, 110, 231, 0.25);
+}
+
+.shipment-progress {
+    height: 6px !important;
+    border-radius: 999px;
+    background: rgba(37, 53, 104, 0.08);
+}
+
+.shipment-progress .progress-bar {
+    border-radius: 999px;
+    box-shadow: none;
+}
+
+.shipment-action .btn {
+    border-radius: 999px;
+    font-weight: 600;
+    padding: 0.45rem 0.9rem;
+}
+
+.shipment-action .btn-light {
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+
+.shipment-action .btn-outline-secondary {
+    border-color: var(--border-color);
+}
+
+.shipment-action .btn-outline-secondary:hover {
+    background: rgba(37, 53, 104, 0.08);
+}
+
+.shipment-action .btn-outline-primary {
+    border-color: rgba(37, 53, 104, 0.4);
+}
+
+.shipment-action .btn-outline-primary:hover {
+    background: rgba(37, 53, 104, 0.08);
+}
+
+@media (max-width: 992px) {
+    .shipment-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .shipment-filters {
+        width: 100%;
+    }
+
+    .shipment-table {
+        font-size: 0.9rem;
+    }
+
+    .shipment-action {
+        flex-wrap: wrap;
+    }
+}
+
 @media (max-width: 992px) {
     .sidebar {
         position: fixed;

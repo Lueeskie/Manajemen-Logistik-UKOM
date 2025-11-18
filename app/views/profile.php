@@ -80,7 +80,7 @@ $isEditMode = isset($_GET['edit']) && $_GET['edit'] == 'true';
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="sidebar-item">
+                <a href="<?= BASE_URL ?>pengiriman" class="sidebar-item">
                     <i class="bi bi-box-seam"></i>
                     <span>Pengiriman</span>
                 </a>

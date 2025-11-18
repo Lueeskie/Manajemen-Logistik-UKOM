@@ -4,6 +4,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
+require_once __DIR__ . '/../app/controllers/PengirimanController.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -48,6 +49,10 @@ switch ($uri) {
     case '/profile/change-password':
         $profile = new ProfileController();
         $profile->changePassword();
+        break;
+    case '/pengiriman':
+        $pengiriman = new PengirimanController();
+        $pengiriman->index();
         break;
     default:
         http_response_code(404);
