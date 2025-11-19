@@ -333,24 +333,28 @@ body::before {
     transform: scale(1.1) rotate(5deg);
 }
 
-.bg-primary-light {
-    background: linear-gradient(135deg, rgba(37, 53, 104, 0.2), rgba(74, 111, 165, 0.15));
-    box-shadow: 0 8px 20px rgba(37, 53, 104, 0.25);
+.bg-primary-soft {
+    background: linear-gradient(135deg, rgba(37, 53, 104, 0.08), rgba(74, 111, 165, 0.06)) !important;
+    color: #253568 !important;
+    border-color: rgba(37, 53, 104, 0.15);
 }
 
-.bg-success-light {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.15));
-    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.25);
+.bg-success-soft {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.06)) !important;
+    color: #15803d !important;
+    border-color: rgba(34, 197, 94, 0.2);
 }
 
-.bg-warning-light {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.15));
-    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
+.bg-warning-soft {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.06)) !important;
+    color: #92400e !important;
+    border-color: rgba(245, 158, 11, 0.2);
 }
 
-.bg-danger-light {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(220, 38, 38, 0.15));
-    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.25);
+.bg-danger-soft {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(220, 38, 38, 0.06)) !important;
+    color: #991b1b !important;
+    border-color: rgba(220, 38, 38, 0.2);
 }
 
 .stat-content {

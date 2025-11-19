@@ -83,7 +83,7 @@ $recentResi = $recentResi ?? [];
                     <i class="bi bi-boxes"></i>
                     <span>Inventaris Barang</span>
                 </a>
-                <a href="#" class="sidebar-item">
+                <a href="<?= BASE_URL ?>supplier" class="sidebar-item">
                     <i class="fa-solid fa-warehouse"></i>
                     <span>Supplier</span>
                 </a>

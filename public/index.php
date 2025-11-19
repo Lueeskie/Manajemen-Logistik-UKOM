@@ -4,6 +4,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
+require_once __DIR__ . '/../app/controllers/SupplierController.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -48,6 +49,18 @@ switch ($uri) {
     case '/profile/change-password':
         $profile = new ProfileController();
         $profile->changePassword();
+        break;
+    case '/supplier':
+        $supplier = new SupplierController();
+        $supplier->dashboard();
+        break;
+    case '/supplier/tambah':
+        $supplier = new SupplierController();
+        $supplier->tambahForm();
+        break;
+    case '/supplier/proses-tambah':
+        $supplier = new SupplierController();
+        $supplier->tambahRequest();
         break;
     default:
         http_response_code(404);
