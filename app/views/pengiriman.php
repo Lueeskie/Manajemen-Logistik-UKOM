@@ -22,9 +22,54 @@
         <link rel="stylesheet" href="<?= BASE_URL ?>css/sticky-table.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>
+            .btn-action {
+                border: none;
+                transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.05s ease;
+            }
+            .btn-action:hover {
+                box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.08);
+            }
+            .btn-action:active {
+                transform: translateY(1px);
+            }
+            .btn-action:focus {
+                outline: none;
+                box-shadow: 0 0 0 0.15rem rgba(53, 84, 245, 0.25);
+            }
+            .btn-action-primary {
+                background-color: #3554f5;
+                color: #fff;
+            }
+            .btn-action-primary:hover {
+                background-color: #2d46c5;
+                color: #fff;
+            }
+            .btn-action-warning {
+                background-color: #f59f00;
+                color: #1f1f1f;
+            }
+            .btn-action-warning:hover {
+                background-color: #d98900;
+                color: #1f1f1f;
+            }
+            .btn-action-danger {
+                background-color: #e74c3c;
+                color: #fff;
+            }
+            .btn-action-danger:hover {
+                background-color: #c44133;
+                color: #fff;
+            }
+        </style>
     </head>
 
     <body>
+        <?php
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        $flashError = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+        ?>
         <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
             <div class="container-fluid px-4">
                 <a class="navbar-brand d-flex align-items-center gap-2" href="#">
@@ -94,7 +139,7 @@
                 <div class="container-fluid px-4 py-4">
                     <div class="row mb-4">
                         <div class="col-12">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                                 <div>
                                     <h1 class="h3 fw-bold mb-2">Selamat datang, <?php echo $_SESSION['username'] ?? 'User'; ?>!</h1>
                                     <p class="text-muted mb-0">silahkan lihat detail informasi pengiriman anda di sini</p>
@@ -151,9 +196,11 @@
 
 
                     <div class="d-flex justify-content-end mb-4">
-                        <button class="btn btn-primary btn-sm shadow-sm">
-                            <i class="bi bi-plus-lg me-2"></i>Pengiriman Baru
-                        </button>
+                        <a href="<?= BASE_URL ?>pengiriman/tambah">
+                            <button class="btn btn-primary btn-sm shadow-sm">
+                                <i class="bi bi-plus-lg me-2"></i>Pengiriman Baru
+                            </button>
+                        </a>
                     </div>
 
                     <div class="content-card">
@@ -164,17 +211,19 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle table-sticky-first" style="min-width: 1200px;">
+                                <table class="table table-hover align-middle table-sticky-first" style="min-width: 1500px;">
                                     <thead>
                                         <tr>
                                             <th>Nomor Resi</th>
-                                            <th>Nama Pengirim</th>
+                                            <th style="min-width: 120px;">Nama Pengirim</th>
                                             <th>Telp Pengirim</th>
                                             <th>Kota Asal</th>
+                                            <th>origin city code</th>
                                             <th style="min-width: 300px;">Alamat Asal</th>
-                                            <th>Nama Penerima</th>
+                                            <th style="min-width: 400px;">Nama Penerima</th>
                                             <th>Telp Penerima</th>
                                             <th>Kota Tujuan</th>
+                                            <th>destination city code</th>
                                             <th style="min-width: 300px;">Alamat Tujuan</th>
                                             <th>Paket</th>
                                             <th>Berat (Kg)</th>
@@ -183,6 +232,7 @@
                                             <th>Status Pengiriman</th>
                                             <th>Status Pembayaran</th>
                                             <th style="min-width: 170px;">Tanggal</th>
+                                            <th style="min-width: 300px;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -212,10 +262,12 @@
                                                     <td><?php echo htmlspecialchars($row['nama_pengirim']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['telpon_pengirim']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['kota_pengirim']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['origin_city_code']); ?></td>
                                                     <td><?php echo htmlspecialchars($alamatAsalShort); ?></td>
                                                     <td><?php echo htmlspecialchars($row['nama_penerima']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['telpon_penerima']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['kota_penerima']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['destination_city_code']); ?></td>
                                                     <td><?php echo htmlspecialchars($alamatTujuanShort); ?></td>
                                                     <td><?php echo htmlspecialchars($row['jumlah_paket']); ?></td>
                                                     <td><?php echo !is_null($row['berat_total']) ? number_format($row['berat_total'], 2) : '-'; ?></td>
@@ -241,11 +293,27 @@
                                                         </span>
                                                     </td>
                                                     <td><?php echo !empty($row['tanggal_dibuat']) ? date('d M Y', strtotime($row['tanggal_dibuat'])) : '-'; ?></td>
+                                                    <td>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <a href="<?= BASE_URL ?>pengiriman/detail/<?php echo $row['id']; ?>" class="btn btn-action btn-action-primary d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Detail">
+                                                                <i class="bi bi-eye"></i>
+                                                            </a>
+                                                            <a href="<?= BASE_URL ?>pengiriman/edit/<?php echo $row['id']; ?>" class="btn btn-action btn-action-warning d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Edit">
+                                                                <i class="bi bi-pencil-square"></i>
+                                                            </a>
+                                                            <form action="<?= BASE_URL ?>pengiriman/delete" method="POST" class="m-0 form-delete-resi">
+                                                                <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                                                <button type="submit" class="btn btn-action btn-action-danger d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Hapus">
+                                                                    <i class="bi bi-trash3"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else : ?>
                                             <tr>
-                                                <td colspan="16" class="text-center text-muted py-4">
+                                                <td colspan="19" class="text-center text-muted py-4">
                                                     <i class="bi bi-inbox me-1"></i> Belum ada data pengiriman.
                                                 </td>
                                             </tr>
@@ -260,6 +328,50 @@
         </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+        <?php if (!empty($flashSuccess)) : ?>
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: '<?= addslashes($flashSuccess) ?>',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+            </script>
+        <?php endif; ?>
+        <?php if (!empty($flashError)) : ?>
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: '<?= addslashes($flashError) ?>'
+                });
+            </script>
+        <?php endif; ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const deleteForms = document.querySelectorAll('.form-delete-resi');
+                deleteForms.forEach(form => {
+                    form.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Hapus resi ini?',
+                            text: 'Tindakan ini tidak dapat dibatalkan.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#e74c3c',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Ya, hapus',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
     </body>
 
     </html>

@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../config/database.php'; 
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
@@ -54,8 +54,23 @@ switch ($uri) {
         $pengiriman = new PengirimanController();
         $pengiriman->index();
         break;
+
+    case '/pengiriman/tambah':
+        $pengiriman = new PengirimanController();
+        $pengiriman->create();
+        break;
+
+    case '/pengiriman/store':
+        $pengiriman = new PengirimanController();
+        $pengiriman->store();
+        break;
+
+    case '/pengiriman/delete':
+        $pengiriman = new PengirimanController();
+        $pengiriman->delete();
+        break;
+
     default:
         http_response_code(404);
         echo "Page not found";
 }
-?>
