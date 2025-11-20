@@ -4,6 +4,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
+require_once __DIR__ . '/../app/controllers/InventarisController.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -48,6 +49,22 @@ switch ($uri) {
     case '/profile/change-password':
         $profile = new ProfileController();
         $profile->changePassword();
+        break;
+    case '/inventaris_barang':
+        $inventaris = new InventarisController();
+        $action = $_GET['action'] ?? 'index';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $post_action = $_POST['action'] ?? $action;
+            if ($post_action === 'add') {
+                $inventaris->add();
+            } elseif ($post_action === 'edit') {
+                $inventaris->edit();
+            }
+        } elseif ($action === 'delete' && isset($_GET['id'])) {
+            $inventaris->delete();
+        } else {
+            $inventaris->index();
+        }
         break;
     default:
         http_response_code(404);
