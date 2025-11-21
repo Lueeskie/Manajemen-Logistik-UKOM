@@ -16,6 +16,92 @@ class PengirimanController
         $this->userModel = new User();
     }
 
+    // Step 0: Fungsi tunggal untuk hitung jarak + ongkir via OpenRouteService
+    private function hitungJarakOngkir(string $asal, string $tujuan, string $apiKey, float $tarifPerKm = 200.0): ?array
+    {
+        $asal = trim($asal);
+        $tujuan = trim($tujuan);
+        if ($asal === '' || $tujuan === '' || $apiKey === '') {
+            return null;
+        }
+
+        // Step 1: Geocode kota asal/tujuan untuk dapatkan lat,lon
+        $geocode = function (string $city) use ($apiKey) {
+            $url = 'https://api.openrouteservice.org/geocode/search?api_key=' . urlencode($apiKey) .
+                '&text=' . urlencode($city);
+            $ctx = stream_context_create(['http' => ['timeout' => 6]]);
+            $json = @file_get_contents($url, false, $ctx);
+            if ($json === false) {
+                return null;
+            }
+            $data = json_decode($json, true);
+            $coords = $data['features'][0]['geometry']['coordinates'] ?? null;
+            if (!$coords || count($coords) < 2) {
+                return null;
+            }
+            return ['lon' => (float) $coords[0], 'lat' => (float) $coords[1]];
+        };
+
+        $koorAsal = $geocode($asal);
+        $koorTujuan = $geocode($tujuan);
+        if (!$koorAsal || !$koorTujuan) {
+            return null;
+        }
+
+        // Step 2: Hitung rute driving-car untuk dapatkan jarak meter
+        $payload = [
+            'coordinates' => [
+                [$koorAsal['lon'], $koorAsal['lat']],
+                [$koorTujuan['lon'], $koorTujuan['lat']],
+            ]
+        ];
+        $ch = curl_init('https://api.openrouteservice.org/v2/directions/driving-car');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: ' . $apiKey
+            ],
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 12
+        ]);
+        $resp = curl_exec($ch);
+        curl_close($ch);
+        if ($resp === false) {
+            return null;
+        }
+
+        $data = json_decode($resp, true);
+        $distMeters = $data['routes'][0]['summary']['distance'] ?? null;
+        if (!is_numeric($distMeters)) {
+            return null;
+        }
+
+        // Step 3: Konversi ke km dan kalikan tarif
+        // Bulatkan jarak ke bilangan bulat (tanpa desimal) lalu kalikan tarif
+        $jarakKmRaw = ((float) $distMeters) / 1000;
+        $jarakKm = round($jarakKmRaw, 0); // contoh: 175.53 -> 176
+        $ongkir = round($jarakKm * $tarifPerKm); // rupiah dibulatkan ke integer
+
+        return [
+            'jarak_km' => $jarakKm,
+            'ongkir' => $ongkir
+        ];
+    }
+
+    private function generateResiCode($originCode, $destCode)
+    {
+        $origin = strtoupper(trim($originCode ?? ''));
+        $dest = strtoupper(trim($destCode ?? ''));
+        if (empty($origin) || empty($dest)) {
+            return '';
+        }
+        $letters = substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3);
+        return $origin . $letters . $dest;
+    }
+
     public function index()
     {
         session_start();
@@ -25,8 +111,14 @@ class PengirimanController
         }
 
         $userId = $_SESSION['user_id'];
-        $stats = $this->resiModel->getStats($userId);
-        $detailResi = $this->resiModel->getDetailedResi($userId);
+        $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+        if ($isAdmin) {
+            $stats = $this->resiModel->getStatsAll();
+            $detailResi = $this->resiModel->getDetailedResiAdmin();
+        } else {
+            $stats = $this->resiModel->getStats($userId);
+            $detailResi = $this->resiModel->getDetailedResi($userId);
+        }
         $user_info = $this->userModel->getProfile($userId);
         if (!$user_info) {
             $user_info = [
@@ -81,16 +173,27 @@ class PengirimanController
             'nama_pengirim' => trim($_POST['nama_pengirim'] ?? ''),
             'telpon_pengirim' => trim($_POST['telpon_pengirim'] ?? ''),
             'kota_pengirim' => trim($_POST['kota_pengirim'] ?? ''),
+            'origin_city_code' => trim($_POST['origin_city_code'] ?? ''),
             'alamat_asal' => trim($_POST['alamat_asal'] ?? ''),
             'nama_penerima' => trim($_POST['nama_penerima'] ?? ''),
             'telpon_penerima' => trim($_POST['telpon_penerima'] ?? ''),
             'kota_penerima' => trim($_POST['kota_penerima'] ?? ''),
+            'destination_city_code' => trim($_POST['destination_city_code'] ?? ''),
             'alamat_tujuan' => trim($_POST['alamat_tujuan'] ?? ''),
             'jumlah_paket' => isset($_POST['jumlah_paket']) ? (int) $_POST['jumlah_paket'] : 0,
             'berat_total' => $_POST['berat_total'] !== '' ? (float) $_POST['berat_total'] : null,
             'total_jarak' => $_POST['total_jarak'] !== '' ? (float) $_POST['total_jarak'] : null,
             'total_ongkir' => $_POST['total_ongkir'] !== '' ? (float) $_POST['total_ongkir'] : null,
         ];
+
+        if (empty($data['nomor_resi'])) {
+            $generated = $this->generateResiCode($data['origin_city_code'], $data['destination_city_code']);
+            if (!empty($generated)) {
+                $data['nomor_resi'] = $generated;
+            }
+        }
+
+
         $paymentMethod = $_POST['payment_method'] ?? 'cod';
         $statusPembayaran = null;
         if ($paymentMethod === 'qris' && ($_POST['status_pembayaran'] ?? '') === 'Terbayar') {
@@ -98,7 +201,7 @@ class PengirimanController
         }
         $data['status_pembayaran'] = $statusPembayaran;
 
-        $required = ['nomor_resi', 'nama_pengirim', 'telpon_pengirim', 'kota_pengirim', 'alamat_asal', 'nama_penerima', 'telpon_penerima', 'kota_penerima', 'alamat_tujuan'];
+        $required = ['nomor_resi', 'nama_pengirim', 'telpon_pengirim', 'kota_pengirim', 'origin_city_code', 'alamat_asal', 'nama_penerima', 'telpon_penerima', 'kota_penerima', 'destination_city_code', 'alamat_tujuan'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
                 $_SESSION['flash_error'] = 'Lengkapi semua data wajib.';
@@ -113,6 +216,16 @@ class PengirimanController
             exit;
         }
 
+        // Step 1: Hitung otomatis jarak + ongkir berdasarkan kota asal/tujuan
+        $hasilHitung = $this->hitungJarakOngkir($data['kota_pengirim'], $data['kota_penerima'], ORS_API_KEY);
+        if ($hasilHitung === null) {
+            $_SESSION['flash_error'] = 'Gagal menghitung jarak/ongkir. Cek nama kota atau API key.';
+            header('Location: ' . BASE_URL . 'pengiriman/tambah');
+            exit;
+        }
+        $data['total_jarak'] = $hasilHitung['jarak_km'];
+        $data['total_ongkir'] = $hasilHitung['ongkir'];
+
         $this->resiModel->create($data);
 
         if (strtolower($data['status_pembayaran']) === 'terbayar') {
@@ -121,6 +234,84 @@ class PengirimanController
             $_SESSION['flash_success'] = 'Resi berhasil ditambahkan. Pembayaran COD.';
         }
         header('Location: ' . BASE_URL . 'pengiriman');
+    }
+
+    // Step 2: Endpoint AJAX untuk hitung jarak/ongkir saat user isi kota di form
+    public function hitungJarakAjax()
+    {
+        session_start();
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $raw = file_get_contents('php://input');
+        $payload = json_decode($raw, true);
+
+        $asal = trim($payload['asal'] ?? ($_POST['asal'] ?? ''));
+        $tujuan = trim($payload['tujuan'] ?? ($_POST['tujuan'] ?? ''));
+
+        if ($asal === '' || $tujuan === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Kota asal dan tujuan wajib diisi.']);
+            exit;
+        }
+
+        $hasil = $this->hitungJarakOngkir($asal, $tujuan, ORS_API_KEY);
+        if ($hasil === null) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Gagal menghitung jarak/ongkir. Cek nama kota atau API key.']);
+            exit;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'jarak_km' => $hasil['jarak_km'],
+            'ongkir' => $hasil['ongkir'],
+            'jarak_text' => round($hasil['jarak_km'], 2) . ' km'
+        ]);
+        exit;
+    }
+
+    public function detail()
+    {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . 'login');
+            exit;
+        }
+
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Resi tidak ditemukan.';
+            header('Location: ' . BASE_URL . 'pengiriman');
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+        $resi = $isAdmin ? $this->resiModel->getByIdAdmin($id) : $this->resiModel->getById($id, $userId);
+        if (!$resi) {
+            $_SESSION['flash_error'] = 'Resi tidak ditemukan atau bukan milik Anda.';
+            header('Location: ' . BASE_URL . 'pengiriman');
+            exit;
+        }
+
+        $user_info = $this->userModel->getProfile($userId);
+        if (!$user_info) {
+            $user_info = [
+                'username' => $_SESSION['username'] ?? 'User',
+                'email' => '',
+                'telepon' => '',
+                'alamat' => '',
+                'foto' => ''
+            ];
+        }
+
+        require __DIR__ . '/../views/detail_resi.php';
     }
 
     public function delete()
@@ -143,6 +334,114 @@ class PengirimanController
             $_SESSION['flash_success'] = 'Resi berhasil dihapus.';
         } else {
             $_SESSION['flash_error'] = 'Gagal hapus resi atau tidak ditemukan.';
+        }
+        header('Location: ' . BASE_URL . 'pengiriman');
+    }
+
+    public function edit()
+    {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . 'login');
+            exit;
+        }
+
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Resi tidak ditemukan.';
+            header('Location: ' . BASE_URL . 'pengiriman');
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+        $resi = $isAdmin ? $this->resiModel->getByIdAdmin($id) : $this->resiModel->getById($id, $userId);
+        if (!$resi) {
+            $_SESSION['flash_error'] = 'Resi tidak ditemukan atau bukan milik Anda.';
+            header('Location: ' . BASE_URL . 'pengiriman');
+            exit;
+        }
+
+        $user_info = $this->userModel->getProfile($userId);
+        if (!$user_info) {
+            $user_info = [
+                'username' => $_SESSION['username'] ?? 'User',
+                'email' => '',
+                'telepon' => '',
+                'alamat' => '',
+                'foto' => ''
+            ];
+        }
+
+        require __DIR__ . '/../views/edit_resi.php';
+    }
+
+    public function update()
+    {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . 'login');
+            exit;
+        }
+
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Data tidak valid.';
+            header('Location: ' . BASE_URL . 'pengiriman');
+            exit;
+        }
+
+        $data = [
+            'nomor_resi' => trim($_POST['nomor_resi'] ?? ''),
+            'tanggal_dibuat' => $_POST['tanggal_dibuat'] ?? date('Y-m-d'),
+            'nama_pengirim' => trim($_POST['nama_pengirim'] ?? ''),
+            'telpon_pengirim' => trim($_POST['telpon_pengirim'] ?? ''),
+            'kota_pengirim' => trim($_POST['kota_pengirim'] ?? ''),
+            'origin_city_code' => trim($_POST['origin_city_code'] ?? ''),
+            'alamat_asal' => trim($_POST['alamat_asal'] ?? ''),
+            'nama_penerima' => trim($_POST['nama_penerima'] ?? ''),
+            'telpon_penerima' => trim($_POST['telpon_penerima'] ?? ''),
+            'kota_penerima' => trim($_POST['kota_penerima'] ?? ''),
+            'destination_city_code' => trim($_POST['destination_city_code'] ?? ''),
+            'alamat_tujuan' => trim($_POST['alamat_tujuan'] ?? ''),
+            'jumlah_paket' => isset($_POST['jumlah_paket']) ? (int) $_POST['jumlah_paket'] : 0,
+            'berat_total' => $_POST['berat_total'] !== '' ? (float) $_POST['berat_total'] : null,
+            'total_jarak' => $_POST['total_jarak'] !== '' ? (float) $_POST['total_jarak'] : null,
+            'total_ongkir' => $_POST['total_ongkir'] !== '' ? (float) $_POST['total_ongkir'] : null,
+            'status_pengiriman' => $_POST['status_pengiriman'] ?? '',
+            'status_pembayaran' => $_POST['status_pembayaran'] ?? 'Belum Bayar',
+        ];
+        if (empty($data['status_pembayaran'])) {
+            $data['status_pembayaran'] = 'Belum Bayar';
+        }
+
+        if (empty($data['nomor_resi'])) {
+            $generated = $this->generateResiCode($data['origin_city_code'], $data['destination_city_code']);
+            if (!empty($generated)) {
+                $data['nomor_resi'] = $generated;
+            }
+        }
+
+        $required = ['nomor_resi', 'nama_pengirim', 'telpon_pengirim', 'kota_pengirim', 'alamat_asal', 'nama_penerima', 'telpon_penerima', 'kota_penerima', 'alamat_tujuan'];
+        foreach ($required as $field) {
+            if (empty($data[$field])) {
+                $_SESSION['flash_error'] = 'Lengkapi semua data wajib.';
+                header('Location: ' . BASE_URL . 'pengiriman/edit?id=' . $id);
+                exit;
+            }
+        }
+
+        if ($data['jumlah_paket'] < 1) {
+            $_SESSION['flash_error'] = 'Jumlah paket minimal 1.';
+            header('Location: ' . BASE_URL . 'pengiriman/edit?id=' . $id);
+            exit;
+        }
+
+        $updated = $this->resiModel->updateById($id, $_SESSION['user_id'], $data);
+        if ($updated) {
+            $_SESSION['flash_success'] = 'Resi berhasil diperbarui.';
+        } else {
+            $_SESSION['flash_error'] = 'Gagal memperbarui resi.';
         }
         header('Location: ' . BASE_URL . 'pengiriman');
     }

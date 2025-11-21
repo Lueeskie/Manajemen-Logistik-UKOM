@@ -65,6 +65,26 @@ switch ($uri) {
         $pengiriman->store();
         break;
 
+    case '/pengiriman/hitung-jarak':
+        $pengiriman = new PengirimanController();
+        $pengiriman->hitungJarakAjax();
+        break;
+
+    case '/pengiriman/edit':
+        $pengiriman = new PengirimanController();
+        $pengiriman->edit();
+        break;
+
+    case '/pengiriman/update':
+        $pengiriman = new PengirimanController();
+        $pengiriman->update();
+        break;
+
+    case '/pengiriman/detail':
+        $pengiriman = new PengirimanController();
+        $pengiriman->detail();
+        break;
+
     case '/pengiriman/delete':
         $pengiriman = new PengirimanController();
         $pengiriman->delete();

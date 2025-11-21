@@ -7,6 +7,8 @@
         header('Location: ' . BASE_URL . 'login');
         exit;
     }
+
+    $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
     ?>
     <!DOCTYPE html>
     <html lang="id">
@@ -27,36 +29,45 @@
                 border: none;
                 transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.05s ease;
             }
+
             .btn-action:hover {
                 box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.08);
             }
+
             .btn-action:active {
                 transform: translateY(1px);
             }
+
             .btn-action:focus {
                 outline: none;
                 box-shadow: 0 0 0 0.15rem rgba(53, 84, 245, 0.25);
             }
+
             .btn-action-primary {
                 background-color: #3554f5;
                 color: #fff;
             }
+
             .btn-action-primary:hover {
                 background-color: #2d46c5;
                 color: #fff;
             }
+
             .btn-action-warning {
                 background-color: #f59f00;
                 color: #1f1f1f;
             }
+
             .btn-action-warning:hover {
                 background-color: #d98900;
                 color: #1f1f1f;
             }
+
             .btn-action-danger {
                 background-color: #e74c3c;
                 color: #fff;
             }
+
             .btn-action-danger:hover {
                 background-color: #c44133;
                 color: #fff;
@@ -119,18 +130,20 @@
                         <i class="bi bi-box-seam"></i>
                         <span>Pengiriman</span>
                     </a>
-                    <a href="#" class="sidebar-item disabled">
-                        <i class="bi bi-boxes"></i>
-                        <span>Inventaris Barang</span>
-                    </a>
-                    <a href="#" class="sidebar-item disabled">
-                        <i class="fa-solid fa-warehouse"></i>
-                        <span>Supplier</span>
-                    </a>
-                    <a href="#" class="sidebar-item disabled">
-                        <i class="bi bi-people"></i>
-                        <span>Pengguna</span>
-                    </a>
+                    <?php if ($isAdmin): ?>
+                        <a href="#" class="sidebar-item">
+                            <i class="bi bi-boxes"></i>
+                            <span>Inventaris Barang</span>
+                        </a>
+                        <a href="#" class="sidebar-item">
+                            <i class="fa-solid fa-warehouse"></i>
+                            <span>Supplier</span>
+                        </a>
+                        <a href="#" class="sidebar-item">
+                            <i class="bi bi-people"></i>
+                            <span>Pengguna</span>
+                        </a>
+                    <?php endif; ?>
                 </div>
             </aside>
 
@@ -232,7 +245,7 @@
                                             <th>Status Pengiriman</th>
                                             <th>Status Pembayaran</th>
                                             <th style="min-width: 170px;">Tanggal</th>
-                                            <th style="min-width: 300px;">Aksi</th>
+                                            <th style="min-width: 220px;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -295,18 +308,20 @@
                                                     <td><?php echo !empty($row['tanggal_dibuat']) ? date('d M Y', strtotime($row['tanggal_dibuat'])) : '-'; ?></td>
                                                     <td>
                                                         <div class="d-flex flex-wrap gap-2">
-                                                            <a href="<?= BASE_URL ?>pengiriman/detail/<?php echo $row['id']; ?>" class="btn btn-action btn-action-primary d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Detail">
+                                                            <a href="<?= BASE_URL ?>pengiriman/detail?id=<?php echo $row['id']; ?>" class="btn btn-action btn-action-primary d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Detail">
                                                                 <i class="bi bi-eye"></i>
                                                             </a>
-                                                            <a href="<?= BASE_URL ?>pengiriman/edit/<?php echo $row['id']; ?>" class="btn btn-action btn-action-warning d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Edit">
-                                                                <i class="bi bi-pencil-square"></i>
-                                                            </a>
-                                                            <form action="<?= BASE_URL ?>pengiriman/delete" method="POST" class="m-0 form-delete-resi">
-                                                                <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                                                                <button type="submit" class="btn btn-action btn-action-danger d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Hapus">
-                                                                    <i class="bi bi-trash3"></i>
-                                                                </button>
-                                                            </form>
+                                                            <?php if ($isAdmin): ?>
+                                                                <a href="<?= BASE_URL ?>pengiriman/edit?id=<?php echo $row['id']; ?>" class="btn btn-action btn-action-warning d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Edit">
+                                                                    <i class="bi bi-pencil-square"></i>
+                                                                </a>
+                                                                <form action="<?= BASE_URL ?>pengiriman/delete" method="POST" class="m-0 form-delete-resi">
+                                                                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                                                    <button type="submit" class="btn btn-action btn-action-danger d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Hapus">
+                                                                        <i class="bi bi-trash3"></i>
+                                                                    </button>
+                                                                </form>
+                                                            <?php endif; ?>
                                                         </div>
                                                     </td>
                                                 </tr>

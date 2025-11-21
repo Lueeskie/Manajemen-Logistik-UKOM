@@ -7,6 +7,8 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . 'login');
     exit;
 }
+
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -23,12 +25,12 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
 </head>
 
-    <body>
-        <?php
-        $flashSuccess = $_SESSION['flash_success'] ?? null;
-        $flashError = $_SESSION['flash_error'] ?? null;
-        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
-        ?>
+<body>
+    <?php
+    $flashSuccess = $_SESSION['flash_success'] ?? null;
+    $flashError = $_SESSION['flash_error'] ?? null;
+    unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+    ?>
     <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-2" href="#">
@@ -78,18 +80,20 @@ if (!isset($_SESSION['user_id'])) {
                     <i class="bi bi-box-seam"></i>
                     <span>Pengiriman</span>
                 </a>
-                <a href="#" class="sidebar-item disabled">
-                    <i class="bi bi-boxes"></i>
-                    <span>Inventaris Barang</span>
-                </a>
-                <a href="#" class="sidebar-item disabled">
-                    <i class="fa-solid fa-warehouse"></i>
-                    <span>Supplier</span>
-                </a>
-                <a href="#" class="sidebar-item disabled">
-                    <i class="bi bi-people"></i>
-                    <span>Pengguna</span>
-                </a>
+                <?php if ($isAdmin): ?>
+                    <a href="#" class="sidebar-item">
+                        <i class="bi bi-boxes"></i>
+                        <span>Inventaris Barang</span>
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-warehouse"></i>
+                        <span>Supplier</span>
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="bi bi-people"></i>
+                        <span>Pengguna</span>
+                    </a>
+                <?php endif; ?>
             </div>
         </aside>
 
@@ -115,8 +119,10 @@ if (!isset($_SESSION['user_id'])) {
                                     <div class="row g-4">
                                         <div class="col-md-6">
                                             <label for="nomorResi" class="form-label">Nomor Resi</label>
-                                            <input type="text" class="form-control" id="nomorResi" name="nomor_resi" placeholder="CTH: AEX1234567890" required>
-                                            <small class="text-muted">Gunakan format unik agar mudah dilacak.</small>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" placeholder="CTH: BDGABCJKT" disabled>
+                                            </div>
+                                            <small class="text-muted">Format: originCode + 3 huruf acak + destinationCode</small>
                                             <div class="invalid-feedback">Nomor resi wajib diisi.</div>
                                         </div>
                                         <div class="col-md-6">
@@ -141,6 +147,10 @@ if (!isset($_SESSION['user_id'])) {
                                             <label for="kotaPengirim" class="form-label">Kota Asal</label>
                                             <input type="text" class="form-control" id="kotaPengirim" name="kota_pengirim" placeholder="Contoh: Bandung" required>
                                         </div>
+                                        <div class="col-md-6">
+                                            <label for="originCityCode" class="form-label">Origin City Code</label>
+                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" placeholder="CTH: BDG" maxlength="10" required>
+                                        </div>
                                         <div class="col-12">
                                             <label for="alamatAsal" class="form-label">Alamat Lengkap</label>
                                             <textarea class="form-control" id="alamatAsal" name="alamat_asal" rows="3" placeholder="Tulis alamat penjemputan lengkap" required></textarea>
@@ -164,6 +174,10 @@ if (!isset($_SESSION['user_id'])) {
                                             <label for="kotaPenerima" class="form-label">Kota Tujuan</label>
                                             <input type="text" class="form-control" id="kotaPenerima" name="kota_penerima" placeholder="Contoh: Surabaya" required>
                                         </div>
+                                        <div class="col-md-6">
+                                            <label for="destinationCityCode" class="form-label">Destination City Code</label>
+                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" placeholder="CTH: SBY" maxlength="10" required>
+                                        </div>
                                         <div class="col-12">
                                             <label for="alamatTujuan" class="form-label">Alamat Tujuan</label>
                                             <textarea class="form-control" id="alamatTujuan" name="alamat_tujuan" rows="3" placeholder="Tulis alamat pengantaran lengkap" required></textarea>
@@ -184,11 +198,12 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-4">
                                             <label for="totalJarak" class="form-label">Jarak (Km)</label>
-                                            <input type="number" step="0.1" class="form-control" id="totalJarak" name="total_jarak" placeholder="0.0">
+                                            <input type="number" step="0.01" class="form-control" id="totalJarak" name="total_jarak" placeholder="0.00" readonly>
+                                            <small class="text-muted">Diisi otomatis setelah kota asal & tujuan dimasukkan.</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="totalOngkir" class="form-label">Estimasi Ongkir (Rp)</label>
-                                            <input type="number" class="form-control" id="totalOngkir" name="total_ongkir" placeholder="0">
+                                            <input type="number" class="form-control" id="totalOngkir" name="total_ongkir" placeholder="0" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -261,78 +276,189 @@ if (!isset($_SESSION['user_id'])) {
                 });
             })();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const dateInput = document.getElementById('tanggalDibuat');
-            if (dateInput) {
-                const today = new Date().toISOString().split('T')[0];
-                dateInput.value = today;
-            }
+            document.addEventListener('DOMContentLoaded', () => {
+                const dateInput = document.getElementById('tanggalDibuat');
+                if (dateInput) {
+                    const today = new Date().toISOString().split('T')[0];
+                    dateInput.value = today;
+                }
 
-            const form = document.getElementById('formTambahResi');
-            const statusInput = document.getElementById('statusPembayaran');
-            const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
-            let qrisConfirmed = false;
+                const form = document.getElementById('formTambahResi');
+                const statusInput = document.getElementById('statusPembayaran');
+                const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+                const submitButtons = document.querySelectorAll('#formTambahResi button[type="submit"], button[type="submit"][form="formTambahResi"]');
+                let qrisConfirmed = false;
+                let isSubmitting = false;
 
-            const getSelectedPayment = () => {
-                const checked = document.querySelector('input[name="payment_method"]:checked');
-                return checked ? checked.value : 'cod';
-            };
+                const getSelectedPayment = () => {
+                    const checked = document.querySelector('input[name="payment_method"]:checked');
+                    return checked ? checked.value : 'cod';
+                };
 
-            const setStatusPembayaran = (method) => {
-                if (!statusInput) return;
-                statusInput.value = method === 'qris' ? 'Terbayar' : '';
-            };
+                const setStatusPembayaran = (method) => {
+                    if (!statusInput) return;
+                    statusInput.value = method === 'qris' ? 'Terbayar' : '';
+                };
 
-            paymentRadios.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    qrisConfirmed = false;
-                    setStatusPembayaran(radio.value);
+                paymentRadios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        qrisConfirmed = false;
+                        setStatusPembayaran(radio.value);
+                    });
                 });
-            });
-            setStatusPembayaran(getSelectedPayment());
+                setStatusPembayaran(getSelectedPayment());
 
-            const showQrisPopup = () => {
-                const qrisImage = '<?= BASE_URL ?>assets/qris.png'; // ganti dengan path QRIS asli Anda
-                return Swal.fire({
-                    title: 'QRIS Pembayaran',
-                    html: `<div class="d-inline-block border rounded p-3 mb-3 bg-light">
+                const originCodeInput = document.getElementById('originCityCode');
+                const destCodeInput = document.getElementById('destinationCityCode');
+                const nomorResiInput = document.getElementById('nomorResi');
+                const btnGenerateResi = document.getElementById('btnGenerateResi');
+
+                const randomLetters = (len = 3) => {
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    let out = '';
+                    for (let i = 0; i < len; i++) {
+                        out += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    }
+                    return out;
+                };
+
+                const generateResi = () => {
+                    if (!nomorResiInput) return;
+                    const ori = (originCodeInput?.value || '').trim().toUpperCase();
+                    const dest = (destCodeInput?.value || '').trim().toUpperCase();
+                    if (!ori || !dest) return;
+                    nomorResiInput.value = `${ori}${randomLetters(3)}${dest}`;
+                };
+
+                if (btnGenerateResi) {
+                    btnGenerateResi.addEventListener('click', () => {
+                        generateResi();
+                    });
+                }
+
+                [originCodeInput, destCodeInput].forEach(input => {
+                    if (input) {
+                        input.addEventListener('change', generateResi);
+                        input.addEventListener('blur', generateResi);
+                    }
+                });
+
+                const showQrisPopup = () => {
+                    const qrisImage = '<?= BASE_URL ?>assets/qris.png'; // ganti dengan path QRIS asli Anda
+                    return Swal.fire({
+                        title: 'QRIS Pembayaran',
+                        html: `<div class="d-inline-block border rounded p-3 mb-3 bg-light">
                                 <img src="${qrisImage}" alt="QRIS" class="img-fluid" style="max-width:220px;max-height:220px;object-fit:contain;">
                                 <div class="small text-muted mt-2">QR statis - silakan scan</div>
                            </div>
                            <p class="mb-0 text-muted small">Setelah bayar, klik "Konfirmasi Pembayaran".</p>`,
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Konfirmasi Pembayaran',
-                    cancelButtonText: 'Batal',
-                    focusConfirm: false,
-                    confirmButtonColor: '#3554f5',
-                    cancelButtonColor: '#6c757d'
-                });
-            };
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: 'Konfirmasi Pembayaran',
+                        cancelButtonText: 'Batal',
+                        focusConfirm: false,
+                        confirmButtonColor: '#3554f5',
+                        cancelButtonColor: '#6c757d'
+                    });
+                };
 
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    if (e.defaultPrevented) return;
-                    const method = getSelectedPayment();
-                    if (method === 'qris' && !qrisConfirmed) {
-                        if (!form.checkValidity()) {
-                            form.classList.add('was-validated');
+                const disableSubmitButtons = () => {
+                    isSubmitting = true;
+                    submitButtons.forEach(btn => {
+                        btn.dataset.prevText = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = 'Menyimpan...';
+                    });
+                };
+
+                const enableSubmitButtons = () => {
+                    isSubmitting = false;
+                    submitButtons.forEach(btn => {
+                        if (btn.dataset.prevText) {
+                            btn.innerHTML = btn.dataset.prevText;
+                        }
+                        btn.disabled = false;
+                    });
+                };
+
+                if (form) {
+                    form.addEventListener('submit', async (e) => {
+                        if (e.defaultPrevented) return;
+                        if (isSubmitting) {
+                            e.preventDefault();
                             return;
                         }
-                        e.preventDefault();
-                        setStatusPembayaran('qris');
-                        const result = await showQrisPopup();
-                        if (result.isConfirmed) {
-                            qrisConfirmed = true;
-                            setStatusPembayaran('qris');
-                            form.submit();
+                        if (!form.checkValidity()) {
+                            form.classList.add('was-validated');
+                            e.preventDefault();
+                            return;
                         }
-                        return;
+                        const method = getSelectedPayment();
+                        if (method === 'qris' && !qrisConfirmed) {
+                            e.preventDefault();
+                            setStatusPembayaran('qris');
+                            const result = await showQrisPopup();
+                            if (result.isConfirmed) {
+                                qrisConfirmed = true;
+                                setStatusPembayaran('qris');
+                                disableSubmitButtons();
+                                form.submit();
+                            } else {
+                                enableSubmitButtons();
+                            }
+                            return;
+                        }
+                        setStatusPembayaran(method);
+                        disableSubmitButtons();
+                    });
+                }
+
+                // Step A: Auto hitung jarak + ongkir saat kota asal & tujuan terisi
+                const asalInput = document.getElementById('kotaPengirim');
+                const tujuanInput = document.getElementById('kotaPenerima');
+                const jarakInput = document.getElementById('totalJarak');
+                const ongkirInput = document.getElementById('totalOngkir');
+                const hitungUrl = '<?= BASE_URL ?>pengiriman/hitung-jarak';
+                let hitungTimer = null;
+
+                const hitungOtomatis = async () => {
+                    const asal = (asalInput?.value || '').trim();
+                    const tujuan = (tujuanInput?.value || '').trim();
+                    if (!asal || !tujuan) return;
+                    if (jarakInput) jarakInput.value = '...';
+                    if (ongkirInput) ongkirInput.value = '';
+
+                    try {
+                        const res = await fetch(hitungUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ asal, tujuan })
+                        });
+                        const data = await res.json();
+                        if (!res.ok || data.success !== true) {
+                            throw new Error(data.message || 'Gagal menghitung jarak');
+                        }
+                        if (jarakInput) jarakInput.value = parseFloat(data.jarak_km).toFixed(2);
+                        if (ongkirInput) ongkirInput.value = Math.round(data.ongkir);
+                    } catch (err) {
+                        console.error(err);
+                        if (jarakInput) jarakInput.value = '';
+                        if (ongkirInput) ongkirInput.value = '';
                     }
-                    setStatusPembayaran(method);
+                };
+
+                const scheduleHitung = () => {
+                    clearTimeout(hitungTimer);
+                    hitungTimer = setTimeout(hitungOtomatis, 400);
+                };
+
+                [asalInput, tujuanInput].forEach(input => {
+                    if (input) {
+                        input.addEventListener('change', scheduleHitung);
+                        input.addEventListener('blur', scheduleHitung);
+                    }
                 });
-            }
-        });
+            });
         </script>
         <?php if (!empty($flashSuccess)) : ?>
             <script>
@@ -354,6 +480,6 @@ if (!isset($_SESSION['user_id'])) {
                 });
             </script>
         <?php endif; ?>
-    </body>
+</body>
 
 </html>
