@@ -9,9 +9,16 @@ class InventarisModel {
         $this->db = Database::getInstance();
     }
 
-    // Fetch all inventaris
+    // Fetch all inventaris (hanya yang belum dikirim)
     public function getAll() {
-        $stmt = $this->db->prepare("SELECT * FROM inventaris_barang ORDER BY created_at DESC");
+        $stmt = $this->db->prepare("SELECT * FROM inventaris_barang WHERE status != 'Sent' ORDER BY created_at DESC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Fetch histori barang yang sudah dikirim
+    public function getHistori() {
+        $stmt = $this->db->prepare("SELECT * FROM inventaris_barang WHERE status = 'Sent' ORDER BY updated_at DESC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -36,7 +43,7 @@ class InventarisModel {
             $stmt->bindParam(':status', $data['status']);
             return $stmt->execute();
         } catch (PDOException $e) {
-            error_log("Create inventaris error: " . $e->getMessage()); // Log untuk debug
+            error_log("Create inventaris error: " . $e->getMessage());
             return false;
         }
     }
@@ -76,6 +83,66 @@ class InventarisModel {
         } catch (PDOException $e) {
             error_log("Delete inventaris error: " . $e->getMessage());
             return false;
+        }
+    }
+
+    // Kirim barang (batch update status ke 'Sent')
+    public function kirimBarang($ids) {
+        try {
+            if (empty($ids) || !is_array($ids)) {
+                return false;
+            }
+
+            // Buat placeholder untuk prepared statement
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            
+            $stmt = $this->db->prepare("UPDATE inventaris_barang SET status = 'Sent', updated_at = NOW() WHERE id_barang IN ($placeholders)");
+            
+            return $stmt->execute($ids);
+        } catch (PDOException $e) {
+            error_log("Kirim barang error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Get multiple items by IDs (untuk validasi sebelum kirim)
+    public function getByIds($ids) {
+        try {
+            if (empty($ids) || !is_array($ids)) {
+                return [];
+            }
+
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $this->db->prepare("SELECT * FROM inventaris_barang WHERE id_barang IN ($placeholders)");
+            $stmt->execute($ids);
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get by IDs error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Search nomor resi dari tabel resi untuk autocomplete
+    public function searchResi($search = '') {
+        try {
+            if (empty($search)) {
+                // Ambil semua nomor resi (limit 50)
+                $stmt = $this->db->prepare("SELECT nomor_resi FROM resi ORDER BY nomor_resi DESC LIMIT 50");
+                $stmt->execute();
+            } else {
+                // Search nomor resi yang mengandung keyword
+                $searchTerm = "%$search%";
+                $stmt = $this->db->prepare("SELECT nomor_resi FROM resi WHERE nomor_resi LIKE :search ORDER BY nomor_resi DESC LIMIT 20");
+                $stmt->bindParam(':search', $searchTerm);
+                $stmt->execute();
+            }
+            
+            $results = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            return $results;
+        } catch (PDOException $e) {
+            error_log("Search resi error: " . $e->getMessage());
+            return [];
         }
     }
 }

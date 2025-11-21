@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/InventarisModel.php';
-require_once __DIR__ . '/../models/User.php'; // Asumsi untuk user_info
+require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../../config/config.php';
 
 class InventarisController {
@@ -10,7 +10,7 @@ class InventarisController {
     
     public function __construct() {
         $this->inventarisModel = new InventarisModel();
-        $this->userModel = new User(); // Untuk ambil user_info
+        $this->userModel = new User();
     }
 
     public function index() {
@@ -35,7 +35,7 @@ class InventarisController {
             ];
         }
 
-        // Untuk edit mode: Jika ada ?action=edit&id=..., pass edit_item
+        // Untuk edit mode
         $edit_item = null;
         if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
             $edit_item = $this->inventarisModel->getById($_GET['id']);
@@ -47,6 +47,50 @@ class InventarisController {
         }
 
         require __DIR__ . '/../views/inventaris.php';
+    }
+
+    // Halaman histori barang
+    public function histori() {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . 'login');
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $histori = $this->inventarisModel->getHistori();
+
+        // Ambil data user untuk foto profil
+        $user_info = $this->userModel->getProfile($userId);
+        if (!$user_info) {
+            $user_info = [
+                'username' => $_SESSION['username'] ?? 'User',
+                'email' => '',
+                'telepon' => '',
+                'alamat' => '',
+                'foto' => ''
+            ];
+        }
+
+        require __DIR__ . '/../views/inventaris_histori.php';
+    }
+
+    // API endpoint untuk autocomplete nomor resi
+    public function getResiList() {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Unauthorized']);
+            exit;
+        }
+
+        header('Content-Type: application/json');
+        
+        $search = $_GET['search'] ?? '';
+        $resiList = $this->inventarisModel->searchResi($search);
+        
+        echo json_encode($resiList);
+        exit;
     }
 
     // Handle add (POST)
@@ -72,7 +116,7 @@ class InventarisController {
             } elseif ($this->inventarisModel->create($data)) {
                 $_SESSION['flash_success'] = 'Barang berhasil ditambahkan!';
             } else {
-                $_SESSION['flash_error'] = 'Gagal menambahkan barang!';
+                $_SESSION['flash_error'] = 'Gagal menambahkan barang! No Resi mungkin sudah digunakan.';
             }
         }
         header('Location: ' . BASE_URL . 'inventaris_barang');
@@ -126,6 +170,41 @@ class InventarisController {
                 $_SESSION['flash_error'] = 'Gagal menghapus barang!';
             }
         }
+        header('Location: ' . BASE_URL . 'inventaris_barang');
+        exit;
+    }
+
+    // Handle kirim barang (batch)
+    public function kirim() {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . 'login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $selectedIds = $_POST['selected_items'] ?? [];
+
+            if (empty($selectedIds)) {
+                $_SESSION['flash_error'] = 'Pilih minimal 1 barang untuk dikirim!';
+            } else {
+                // Validasi bahwa ID yang dipilih ada dan belum dikirim
+                $items = $this->inventarisModel->getByIds($selectedIds);
+                
+                if (empty($items)) {
+                    $_SESSION['flash_error'] = 'Barang yang dipilih tidak valid!';
+                } else {
+                    // Kirim barang
+                    if ($this->inventarisModel->kirimBarang($selectedIds)) {
+                        $count = count($selectedIds);
+                        $_SESSION['flash_success'] = "$count barang berhasil dikirim ke histori!";
+                    } else {
+                        $_SESSION['flash_error'] = 'Gagal mengirim barang!';
+                    }
+                }
+            }
+        }
+
         header('Location: ' . BASE_URL . 'inventaris_barang');
         exit;
     }

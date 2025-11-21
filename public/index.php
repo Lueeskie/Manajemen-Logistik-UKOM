@@ -20,6 +20,42 @@ if (strpos($uri, $basePath) === 0) {
     $uri = '/';
 }
 
+// Handle inventaris_barang routes (sebelum switch untuk catch semua sub-routes)
+if (strpos($uri, '/inventaris_barang') === 0) {
+    $inventaris = new InventarisController();
+    
+    // Route: /inventaris_barang/histori
+    if ($uri === '/inventaris_barang/histori') {
+        $inventaris->histori();
+    }
+    // Route: /inventaris_barang/kirim (POST)
+    elseif ($uri === '/inventaris_barang/kirim') {
+        $inventaris->kirim();
+    }
+    // Route: /inventaris_barang/get-resi (AJAX - autocomplete)
+    elseif ($uri === '/inventaris_barang/get-resi') {
+        $inventaris->getResiList();
+    }
+    // Route: /inventaris_barang (default)
+    else {
+        $action = $_GET['action'] ?? 'index';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $post_action = $_POST['action'] ?? $action;
+            if ($post_action === 'add') {
+                $inventaris->add();
+            } elseif ($post_action === 'edit') {
+                $inventaris->edit();
+            }
+        } elseif ($action === 'delete' && isset($_GET['id'])) {
+            $inventaris->delete();
+        } else {
+            $inventaris->index();
+        }
+    }
+    exit; // Penting: Stop execution setelah handle inventaris routes
+}
+
+// Switch untuk routes lainnya
 switch ($uri) {
     case '/':
     case '/login':
@@ -49,22 +85,6 @@ switch ($uri) {
     case '/profile/change-password':
         $profile = new ProfileController();
         $profile->changePassword();
-        break;
-    case '/inventaris_barang':
-        $inventaris = new InventarisController();
-        $action = $_GET['action'] ?? 'index';
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $post_action = $_POST['action'] ?? $action;
-            if ($post_action === 'add') {
-                $inventaris->add();
-            } elseif ($post_action === 'edit') {
-                $inventaris->edit();
-            }
-        } elseif ($action === 'delete' && isset($_GET['id'])) {
-            $inventaris->delete();
-        } else {
-            $inventaris->index();
-        }
         break;
     default:
         http_response_code(404);
