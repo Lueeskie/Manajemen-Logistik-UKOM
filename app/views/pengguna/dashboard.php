@@ -17,6 +17,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     <title>Kelola Pengguna - Astral Express</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -55,12 +56,18 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                 <div class="col-12">
                     <div class="content-card">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Daftar Pengguna/Staff</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Daftar Pengguna/Staff</h5>
+                                <div class="search-box">
+                                    <input type="text" id="searchInput" class="form-control form-control-search" placeholder="Cari username atau email...">
+                                    <i class="bi bi-search"></i>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
                             <?php if (!empty($users)): ?>
                                 <div class="table-responsive">
-                                    <table class="table table-hover">
+                                    <table class="table table-hover" id="userTable">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
@@ -101,9 +108,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                 <td>
                                                     <div class="dropdown">
                                                         <button class="btn btn-sm btn-action" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <!-- <i class="bi bi-three-dots-vertical"></i> -->
                                                             <i class="bi bi-gear"></i>
-                                                            <!-- <i class="fa-solid fa-gear"></i> -->
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-end">
                                                             <li>
@@ -157,6 +162,22 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                 }
             });
         }
+
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let searchValue = this.value.toLowerCase();
+            let tableRows = document.querySelectorAll('#userTable tbody tr');
+            
+            tableRows.forEach(row => {
+                let username = row.cells[1].textContent.toLowerCase();
+                let email = row.cells[2].textContent.toLowerCase();
+                
+                if (username.includes(searchValue) || email.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
 
         document.addEventListener('DOMContentLoaded', function () { 
             <?php if ($flash_success): ?>
