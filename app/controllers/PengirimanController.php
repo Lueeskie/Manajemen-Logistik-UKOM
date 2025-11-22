@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../models/Kota.php';
 require_once __DIR__ . '/../models/Resi.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../../config/config.php';
@@ -9,98 +10,15 @@ class PengirimanController
 {
     private $resiModel;
     private $userModel;
+    private $kotaModel;
 
     public function __construct()
     {
         $this->resiModel = new Resi();
         $this->userModel = new User();
+        $this->kotaModel = new Kota();
     }
 
-    // Step 0: Fungsi tunggal untuk hitung jarak + ongkir via OpenRouteService
-    private function hitungJarakOngkir(string $asal, string $tujuan, string $apiKey, float $tarifPerKm = 200.0): ?array
-    {
-        $asal = trim($asal);
-        $tujuan = trim($tujuan);
-        if ($asal === '' || $tujuan === '' || $apiKey === '') {
-            return null;
-        }
-
-        // Step 1: Geocode kota asal/tujuan untuk dapatkan lat,lon
-        $geocode = function (string $city) use ($apiKey) {
-            $url = 'https://api.openrouteservice.org/geocode/search?api_key=' . urlencode($apiKey) .
-                '&text=' . urlencode($city);
-            $ctx = stream_context_create(['http' => ['timeout' => 6]]);
-            $json = @file_get_contents($url, false, $ctx);
-            if ($json === false) {
-                return null;
-            }
-            $data = json_decode($json, true);
-            $coords = $data['features'][0]['geometry']['coordinates'] ?? null;
-            if (!$coords || count($coords) < 2) {
-                return null;
-            }
-            return ['lon' => (float) $coords[0], 'lat' => (float) $coords[1]];
-        };
-
-        $koorAsal = $geocode($asal);
-        $koorTujuan = $geocode($tujuan);
-        if (!$koorAsal || !$koorTujuan) {
-            return null;
-        }
-
-        // Step 2: Hitung rute driving-car untuk dapatkan jarak meter
-        $payload = [
-            'coordinates' => [
-                [$koorAsal['lon'], $koorAsal['lat']],
-                [$koorTujuan['lon'], $koorTujuan['lat']],
-            ]
-        ];
-        $ch = curl_init('https://api.openrouteservice.org/v2/directions/driving-car');
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Authorization: ' . $apiKey
-            ],
-            CURLOPT_POSTFIELDS => json_encode($payload),
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => 12
-        ]);
-        $resp = curl_exec($ch);
-        curl_close($ch);
-        if ($resp === false) {
-            return null;
-        }
-
-        $data = json_decode($resp, true);
-        $distMeters = $data['routes'][0]['summary']['distance'] ?? null;
-        if (!is_numeric($distMeters)) {
-            return null;
-        }
-
-        // Step 3: Konversi ke km dan kalikan tarif
-        // Bulatkan jarak ke bilangan bulat (tanpa desimal) lalu kalikan tarif
-        $jarakKmRaw = ((float) $distMeters) / 1000;
-        $jarakKm = round($jarakKmRaw, 0); // contoh: 175.53 -> 176
-        $ongkir = round($jarakKm * $tarifPerKm); // rupiah dibulatkan ke integer
-
-        return [
-            'jarak_km' => $jarakKm,
-            'ongkir' => $ongkir
-        ];
-    }
-
-    private function generateResiCode($originCode, $destCode)
-    {
-        $origin = strtoupper(trim($originCode ?? ''));
-        $dest = strtoupper(trim($destCode ?? ''));
-        if (empty($origin) || empty($dest)) {
-            return '';
-        }
-        $letters = substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3);
-        return $origin . $letters . $dest;
-    }
 
     public function index()
     {
@@ -143,7 +61,7 @@ class PengirimanController
 
         $userId = $_SESSION['user_id'];
         $user_info = $this->userModel->getProfile($userId);
-
+        
         if (!$user_info) {
             $user_info = [
                 'username' => $_SESSION['username'] ?? 'User',
@@ -153,6 +71,8 @@ class PengirimanController
                 'foto' => ''
             ];
         }
+
+        $listKota = $this->kotaModel->all();
 
         require __DIR__ . '/../views/tambah_resi.php';
     }
@@ -216,8 +136,11 @@ class PengirimanController
             exit;
         }
 
-        // Step 1: Hitung otomatis jarak + ongkir berdasarkan kota asal/tujuan
-        $hasilHitung = $this->hitungJarakOngkir($data['kota_pengirim'], $data['kota_penerima'], ORS_API_KEY);
+        // Step 1: Hitung otomatis jarak + ongkir berdasarkan kota asal/tujuan + berat (tarif per km + tarif per kg)
+        $beratKg = isset($_POST['berat_total']) && $_POST['berat_total'] !== '' ? (float) $_POST['berat_total'] : 0.0;
+        $tarifPerKm = 200.0;   // sesuaikan tarif per km
+        $tarifPerKg = 5000.0;  // sesuaikan tarif per kg
+        $hasilHitung = $this->hitungJarakOngkir($data['kota_pengirim'], $data['kota_penerima'], ORS_API_KEY, $tarifPerKm, $tarifPerKg, $beratKg);
         if ($hasilHitung === null) {
             $_SESSION['flash_error'] = 'Gagal menghitung jarak/ongkir. Cek nama kota atau API key.';
             header('Location: ' . BASE_URL . 'pengiriman/tambah');
@@ -260,7 +183,10 @@ class PengirimanController
             exit;
         }
 
-        $hasil = $this->hitungJarakOngkir($asal, $tujuan, ORS_API_KEY);
+        $tarifPerKm = 200.0;
+        $tarifPerKg = 1000.0;
+        $beratKg = isset($payload['berat']) ? (float) $payload['berat'] : 0.0;
+        $hasil = $this->hitungJarakOngkir($asal, $tujuan, ORS_API_KEY, $tarifPerKm, $tarifPerKg, $beratKg);
         if ($hasil === null) {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Gagal menghitung jarak/ongkir. Cek nama kota atau API key.']);
@@ -369,9 +295,12 @@ class PengirimanController
                 'email' => '',
                 'telepon' => '',
                 'alamat' => '',
-                'foto' => ''
-            ];
-        }
+            'foto' => ''
+        ];
+    }
+
+        // Ambil daftar kota untuk dropdown pada form edit
+        $listKota = $this->kotaModel->all();
 
         require __DIR__ . '/../views/edit_resi.php';
     }
@@ -422,7 +351,8 @@ class PengirimanController
             }
         }
 
-        $required = ['nomor_resi', 'nama_pengirim', 'telpon_pengirim', 'kota_pengirim', 'alamat_asal', 'nama_penerima', 'telpon_penerima', 'kota_penerima', 'alamat_tujuan'];
+        // Validasi data wajib termasuk kode kota
+        $required = ['nomor_resi', 'nama_pengirim', 'telpon_pengirim', 'kota_pengirim', 'origin_city_code', 'alamat_asal', 'nama_penerima', 'telpon_penerima', 'kota_penerima', 'destination_city_code', 'alamat_tujuan'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
                 $_SESSION['flash_error'] = 'Lengkapi semua data wajib.';
@@ -437,6 +367,19 @@ class PengirimanController
             exit;
         }
 
+        // Hitung ulang jarak/ongkir saat edit agar data konsisten
+        $beratKg = $data['berat_total'] !== null ? (float) $data['berat_total'] : 0.0;
+        $tarifPerKm = 200.0;
+        $tarifPerKg = 1000.0;
+        $hasilHitung = $this->hitungJarakOngkir($data['kota_pengirim'], $data['kota_penerima'], ORS_API_KEY, $tarifPerKm, $tarifPerKg, $beratKg);
+        if ($hasilHitung === null) {
+            $_SESSION['flash_error'] = 'Gagal menghitung jarak/ongkir saat update. Cek nama kota atau API key.';
+            header('Location: ' . BASE_URL . 'pengiriman/edit?id=' . $id);
+            exit;
+        }
+        $data['total_jarak'] = $hasilHitung['jarak_km'];
+        $data['total_ongkir'] = $hasilHitung['ongkir'];
+
         $updated = $this->resiModel->updateById($id, $_SESSION['user_id'], $data);
         if ($updated) {
             $_SESSION['flash_success'] = 'Resi berhasil diperbarui.';
@@ -445,4 +388,99 @@ class PengirimanController
         }
         header('Location: ' . BASE_URL . 'pengiriman');
     }
+
+
+
+
+
+                                                 // ====== Helper ======
+
+     // Step 0: Fungsi tunggal untuk hitung jarak + ongkir via OpenRouteService (tarif per km + tarif per kg)
+    private function hitungJarakOngkir(string $asal, string $tujuan, string $apiKey, float $tarifPerKm = 200.0, float $tarifPerKg = 1000.0, float $beratKg = 0.0): ?array
+    {
+        $asal = trim($asal);
+        $tujuan = trim($tujuan);
+        if ($asal === '' || $tujuan === '' || $apiKey === '') {
+            return null;
+        }
+
+        // Step 1: Geocode kota asal/tujuan untuk dapatkan lat,lon
+        $geocode = function (string $city) use ($apiKey) {
+            $url = 'https://api.openrouteservice.org/geocode/search?api_key=' . urlencode($apiKey) .
+                '&text=' . urlencode($city);
+            $ctx = stream_context_create(['http' => ['timeout' => 6]]);
+            $json = @file_get_contents($url, false, $ctx);
+            if ($json === false) {
+                return null;
+            }
+            $data = json_decode($json, true);
+            $coords = $data['features'][0]['geometry']['coordinates'] ?? null;
+            if (!$coords || count($coords) < 2) {
+                return null;
+            }
+            return ['lon' => (float) $coords[0], 'lat' => (float) $coords[1]];
+        };
+
+        $koorAsal = $geocode($asal);
+        $koorTujuan = $geocode($tujuan);
+        if (!$koorAsal || !$koorTujuan) {
+            return null;
+        }
+
+        // Step 2: Hitung rute driving-car untuk dapatkan jarak meter
+        $payload = [
+            'coordinates' => [
+                [$koorAsal['lon'], $koorAsal['lat']],
+                [$koorTujuan['lon'], $koorTujuan['lat']],
+            ]
+        ];
+        $ch = curl_init('https://api.openrouteservice.org/v2/directions/driving-car');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: ' . $apiKey
+            ],
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 12
+        ]);
+        $resp = curl_exec($ch);
+        curl_close($ch);
+        if ($resp === false) {
+            return null;
+        }
+
+        $data = json_decode($resp, true);
+        $distMeters = $data['routes'][0]['summary']['distance'] ?? null;
+        if (!is_numeric($distMeters)) {
+            return null;
+        }
+
+        // Step 3: Konversi ke km dan kalikan tarif km + tarif kg
+        // Bulatkan jarak ke bilangan bulat (tanpa desimal)
+        $jarakKmRaw = ((float) $distMeters) / 1000;
+        $jarakKm = round($jarakKmRaw, 0); // contoh: 175.53 -> 176
+        $biayaJarak = $jarakKm * $tarifPerKm;
+        $biayaBerat = max(0, $beratKg) * $tarifPerKg;
+        $ongkir = round($biayaJarak + $biayaBerat); // rupiah dibulatkan ke integer
+
+        return [
+            'jarak_km' => $jarakKm,
+            'ongkir' => $ongkir
+        ];
+    }
+
+    private function generateResiCode($originCode, $destCode)
+    {
+        $origin = strtoupper(trim($originCode ?? ''));
+        $dest = strtoupper(trim($destCode ?? ''));
+        if (empty($origin) || empty($dest)) {
+            return '';
+        }
+        $letters = substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3);
+        return $origin . $letters . $dest;
+    }
+
 }

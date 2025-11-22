@@ -118,7 +118,7 @@ if (!isset($_SESSION['user_id'])) {
                                         <div class="col-md-6">
                                             <label for="nomorResi" class="form-label">Nomor Resi</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" value="<?php echo htmlspecialchars($resi['nomor_resi']); ?>" required>
+                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" value="<?php echo htmlspecialchars($resi['nomor_resi']); ?>" readonly>
                                             </div>
                                             <small class="text-muted">Format: originCode + 3 huruf acak + destinationCode</small>
                                             <small class="text-muted">Pastikan unik dan mudah dilacak.</small>
@@ -126,7 +126,7 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-6">
                                             <label for="tanggalDibuat" class="form-label">Tanggal Dibuat</label>
-                                            <input type="date" class="form-control" id="tanggalDibuat" value="<?php echo htmlspecialchars($resi['tanggal_dibuat']); ?>" disabled>
+                                            <input type="date" class="form-control" id="tanggalDibuat" value="<?php echo htmlspecialchars($resi['tanggal_dibuat']); ?>" readonly>
                                             <input type="hidden" name="tanggal_dibuat" value="<?php echo htmlspecialchars($resi['tanggal_dibuat']); ?>">
                                         </div>
                                     </div>
@@ -145,11 +145,18 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-6">
                                             <label for="kotaPengirim" class="form-label">Kota Asal</label>
-                                            <input type="text" class="form-control" id="kotaPengirim" name="kota_pengirim" value="<?php echo htmlspecialchars($resi['kota_pengirim']); ?>" required>
+                                            <input list="listKotaAsal" class="form-control" id="kotaPengirim" name="kota_pengirim" value="<?php echo htmlspecialchars($resi['kota_pengirim']); ?>" placeholder="Pilih kota" autocomplete="off" required>
+                                            <datalist id="listKotaAsal">
+                                                <?php if (!empty($listKota)): ?>
+                                                    <?php foreach ($listKota as $k): ?>
+                                                        <option value="<?= htmlspecialchars($k['nama']) ?>" data-code="<?= htmlspecialchars($k['id_kota']) ?>"></option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </datalist>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="originCityCode" class="form-label">Origin City Code</label>
-                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" value="<?php echo htmlspecialchars($resi['origin_city_code']); ?>" maxlength="10" required>
+                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" value="<?php echo htmlspecialchars($resi['origin_city_code']); ?>" maxlength="10" required readonly>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatAsal" class="form-label">Alamat Lengkap</label>
@@ -171,11 +178,18 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-6">
                                             <label for="kotaPenerima" class="form-label">Kota Tujuan</label>
-                                            <input type="text" class="form-control" id="kotaPenerima" name="kota_penerima" value="<?php echo htmlspecialchars($resi['kota_penerima']); ?>" required>
+                                            <input list="listKotaTujuan" class="form-control" id="kotaPenerima" name="kota_penerima" value="<?php echo htmlspecialchars($resi['kota_penerima']); ?>" placeholder="Pilih kota" autocomplete="off" required>
+                                            <datalist id="listKotaTujuan">
+                                                <?php if (!empty($listKota)): ?>
+                                                    <?php foreach ($listKota as $k): ?>
+                                                        <option value="<?= htmlspecialchars($k['nama']) ?>" data-code="<?= htmlspecialchars($k['id_kota']) ?>"></option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </datalist>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="destinationCityCode" class="form-label">Destination City Code</label>
-                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" value="<?php echo htmlspecialchars($resi['destination_city_code']); ?>" maxlength="10" required>
+                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" value="<?php echo htmlspecialchars($resi['destination_city_code']); ?>" maxlength="10" required readonly>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatTujuan" class="form-label">Alamat Tujuan</label>
@@ -197,11 +211,11 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-4">
                                             <label for="totalJarak" class="form-label">Jarak (Km)</label>
-                                            <input type="number" step="0.01" class="form-control" id="totalJarak" name="total_jarak" value="<?php echo htmlspecialchars($resi['total_jarak']); ?>">
+                                            <input type="number" step="0.01" class="form-control" id="totalJarak" name="total_jarak" value="<?php echo htmlspecialchars($resi['total_jarak']); ?>" readonly>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="totalOngkir" class="form-label">Ongkir (Rp)</label>
-                                            <input type="number" class="form-control" id="totalOngkir" name="total_ongkir" value="<?php echo htmlspecialchars($resi['total_ongkir']); ?>">
+                                            <input type="number" class="form-control" id="totalOngkir" name="total_ongkir" value="<?php echo htmlspecialchars($resi['total_ongkir']); ?>" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -273,10 +287,41 @@ if (!isset($_SESSION['user_id'])) {
         })();
 
         document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('formEditResi');
+            const submitButtons = document.querySelectorAll('#formEditResi button[type="submit"], button[type="submit"][form="formEditResi"]');
+            let isSubmitting = false;
+
             const originCodeInput = document.getElementById('originCityCode');
             const destCodeInput = document.getElementById('destinationCityCode');
             const nomorResiInput = document.getElementById('nomorResi');
-            const btnGenerateResi = document.getElementById('btnGenerateResi');
+            const kotaAsalInput = document.getElementById('kotaPengirim');
+            const kotaTujuanInput = document.getElementById('kotaPenerima');
+            const jarakInput = document.getElementById('totalJarak');
+            const ongkirInput = document.getElementById('totalOngkir');
+            const beratInput = document.getElementById('beratTotal');
+            const asalInput = document.getElementById('kotaPengirim');
+            const tujuanInput = document.getElementById('kotaPenerima');
+            const hitungUrl = '<?= BASE_URL ?>pengiriman/hitung-jarak';
+            let hitungTimer = null;
+
+            const disableSubmitButtons = () => {
+                isSubmitting = true;
+                submitButtons.forEach(btn => {
+                    btn.dataset.prevText = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = 'Menyimpan...';
+                });
+            };
+
+            const enableSubmitButtons = () => {
+                isSubmitting = false;
+                submitButtons.forEach(btn => {
+                    if (btn.dataset.prevText) {
+                        btn.innerHTML = btn.dataset.prevText;
+                    }
+                    btn.disabled = false;
+                });
+            };
 
             const randomLetters = (len = 3) => {
                 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -295,18 +340,96 @@ if (!isset($_SESSION['user_id'])) {
                 nomorResiInput.value = `${ori}${randomLetters(3)}${dest}`;
             };
 
-            if (btnGenerateResi) {
-                btnGenerateResi.addEventListener('click', () => {
-                    generateResi();
-                });
-            }
-
             [originCodeInput, destCodeInput].forEach(input => {
                 if (input) {
                     input.addEventListener('change', generateResi);
                     input.addEventListener('blur', generateResi);
                 }
             });
+
+            // Ambil kode kota dari datalist dan isi code + trigger resi/jarak
+            const findCodeByName = (inputEl) => {
+                if (!inputEl) return '';
+                const val = (inputEl.value || '').trim();
+                if (!val) return '';
+                const listId = inputEl.getAttribute('list');
+                const listEl = listId ? document.getElementById(listId) : null;
+                if (!listEl) return '';
+                const option = Array.from(listEl.options).find(opt => opt.value.trim().toLowerCase() === val.toLowerCase());
+                return option ? (option.dataset.code || '') : '';
+            };
+
+            const syncKotaCode = () => {
+                const codeAsal = findCodeByName(kotaAsalInput);
+                const codeTujuan = findCodeByName(kotaTujuanInput);
+                if (originCodeInput) originCodeInput.value = codeAsal;
+                if (destCodeInput) destCodeInput.value = codeTujuan;
+                generateResi();
+            };
+
+            [kotaAsalInput, kotaTujuanInput].forEach(input => {
+                if (input) {
+                    input.addEventListener('change', () => { syncKotaCode(); scheduleHitung(); });
+                    input.addEventListener('blur', () => { syncKotaCode(); scheduleHitung(); });
+                }
+            });
+
+            const hitungOtomatis = async () => {
+                const asal = (asalInput?.value || '').trim();
+                const tujuan = (tujuanInput?.value || '').trim();
+                const berat = parseFloat(beratInput?.value || '0') || 0;
+                if (!asal || !tujuan) return;
+                if (jarakInput) jarakInput.value = '...';
+                if (ongkirInput) ongkirInput.value = '';
+                try {
+                    const res = await fetch(hitungUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ asal, tujuan, berat })
+                    });
+                    const data = await res.json();
+                    if (!res.ok || data.success !== true) {
+                        throw new Error(data.message || 'Gagal menghitung jarak');
+                    }
+                    if (jarakInput) jarakInput.value = parseFloat(data.jarak_km).toFixed(2);
+                    if (ongkirInput) ongkirInput.value = Math.round(data.ongkir);
+                } catch (err) {
+                    console.error(err);
+                    if (jarakInput) jarakInput.value = '';
+                    if (ongkirInput) ongkirInput.value = '';
+                }
+            };
+
+            const scheduleHitung = () => {
+                clearTimeout(hitungTimer);
+                hitungTimer = setTimeout(hitungOtomatis, 400);
+            };
+
+            [asalInput, tujuanInput, beratInput].forEach(input => {
+                if (input) {
+                    input.addEventListener('change', scheduleHitung);
+                    input.addEventListener('blur', scheduleHitung);
+                }
+            });
+
+            // Sinkron awal untuk data edit
+            syncKotaCode();
+            scheduleHitung();
+
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    if (isSubmitting) {
+                        e.preventDefault();
+                        return;
+                    }
+                    if (!form.checkValidity()) {
+                        form.classList.add('was-validated');
+                        e.preventDefault();
+                        return;
+                    }
+                    disableSubmitButtons();
+                });
+            }
         });
     </script>
     <?php if (!empty($flashSuccess)) : ?>

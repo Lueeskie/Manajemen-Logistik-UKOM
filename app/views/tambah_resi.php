@@ -120,14 +120,14 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                         <div class="col-md-6">
                                             <label for="nomorResi" class="form-label">Nomor Resi</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" placeholder="CTH: BDGABCJKT" disabled>
+                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" placeholder="CTH: BDGABCJKT" readonly>
                                             </div>
                                             <small class="text-muted">Format: originCode + 3 huruf acak + destinationCode</small>
                                             <div class="invalid-feedback">Nomor resi wajib diisi.</div>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="tanggalDibuat" class="form-label">Tanggal Dibuat</label>
-                                            <input type="date" class="form-control" id="tanggalDibuat" name="tanggal_dibuat" disabled>
+                                            <input type="date" class="form-control" id="tanggalDibuat" name="tanggal_dibuat" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -145,11 +145,19 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                         </div>
                                         <div class="col-md-6">
                                             <label for="kotaPengirim" class="form-label">Kota Asal</label>
-                                            <input type="text" class="form-control" id="kotaPengirim" name="kota_pengirim" placeholder="Contoh: Bandung" required>
+                                            <input list="listKotaAsal" class="form-control" id="kotaPengirim" name="kota_pengirim" placeholder="Pilih kota" autocomplete="off" required>
+                                            <datalist id="listKotaAsal">
+                                                <?php if (!empty($listKota)): ?>
+                                                    <?php foreach ($listKota as $k): ?>
+                                                        <option value="<?= htmlspecialchars($k['nama']) ?>" data-code="<?= htmlspecialchars($k['id_kota']) ?>"></option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </datalist>
+                                            <small class="text-muted">Pilih dari daftar agar tidak typo.</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="originCityCode" class="form-label">Origin City Code</label>
-                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" placeholder="CTH: BDG" maxlength="10" required>
+                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" placeholder="CTH: BDG" maxlength="10" required readonly>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatAsal" class="form-label">Alamat Lengkap</label>
@@ -172,11 +180,19 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                         </div>
                                         <div class="col-md-6">
                                             <label for="kotaPenerima" class="form-label">Kota Tujuan</label>
-                                            <input type="text" class="form-control" id="kotaPenerima" name="kota_penerima" placeholder="Contoh: Surabaya" required>
+                                            <input list="listKotaTujuan" class="form-control" id="kotaPenerima" name="kota_penerima" placeholder="Pilih kota" autocomplete="off" required>
+                                            <datalist id="listKotaTujuan">
+                                                <?php if (!empty($listKota)): ?>
+                                                    <?php foreach ($listKota as $k): ?>
+                                                        <option value="<?= htmlspecialchars($k['nama']) ?>" data-code="<?= htmlspecialchars($k['id_kota']) ?>"></option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </datalist>
+                                            <small class="text-muted">Pilih dari daftar agar tidak typo.</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="destinationCityCode" class="form-label">Destination City Code</label>
-                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" placeholder="CTH: SBY" maxlength="10" required>
+                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" placeholder="CTH: SBY" maxlength="10" required readonly>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatTujuan" class="form-label">Alamat Tujuan</label>
@@ -276,6 +292,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                 });
             })();
 
+            // Fitur: isi tanggal dibuat otomatis ke hari ini
             document.addEventListener('DOMContentLoaded', () => {
                 const dateInput = document.getElementById('tanggalDibuat');
                 if (dateInput) {
@@ -283,6 +300,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     dateInput.value = today;
                 }
 
+                // Fitur: atur status pembayaran & konfirmasi QRIS
                 const form = document.getElementById('formTambahResi');
                 const statusInput = document.getElementById('statusPembayaran');
                 const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
@@ -311,7 +329,8 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                 const originCodeInput = document.getElementById('originCityCode');
                 const destCodeInput = document.getElementById('destinationCityCode');
                 const nomorResiInput = document.getElementById('nomorResi');
-                const btnGenerateResi = document.getElementById('btnGenerateResi');
+                const kotaAsalInput = document.getElementById('kotaPengirim');
+                const kotaTujuanInput = document.getElementById('kotaPenerima');
 
                 const randomLetters = (len = 3) => {
                     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -330,12 +349,6 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     nomorResiInput.value = `${ori}${randomLetters(3)}${dest}`;
                 };
 
-                if (btnGenerateResi) {
-                    btnGenerateResi.addEventListener('click', () => {
-                        generateResi();
-                    });
-                }
-
                 [originCodeInput, destCodeInput].forEach(input => {
                     if (input) {
                         input.addEventListener('change', generateResi);
@@ -343,6 +356,34 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     }
                 });
 
+                // Fitur: ambil kode kota dari datalist dan isi code + trigger resi/jarak
+                const findCodeByName = (inputEl) => {
+                    if (!inputEl) return '';
+                    const val = (inputEl.value || '').trim();
+                    if (!val) return '';
+                    const listId = inputEl.getAttribute('list');
+                    const listEl = listId ? document.getElementById(listId) : null;
+                    if (!listEl) return '';
+                    const option = Array.from(listEl.options).find(opt => opt.value.trim().toLowerCase() === val.toLowerCase());
+                    return option ? (option.dataset.code || '') : '';
+                };
+
+                const syncKotaCode = () => {
+                    const codeAsal = findCodeByName(kotaAsalInput);
+                    const codeTujuan = findCodeByName(kotaTujuanInput);
+                    if (originCodeInput) originCodeInput.value = codeAsal;
+                    if (destCodeInput) destCodeInput.value = codeTujuan;
+                    generateResi();
+                };
+
+                [kotaAsalInput, kotaTujuanInput].forEach(input => {
+                    if (input) {
+                        input.addEventListener('change', () => { syncKotaCode(); scheduleHitung(); });
+                        input.addEventListener('blur', () => { syncKotaCode(); scheduleHitung(); });
+                    }
+                });
+
+                // Fitur: modal QRIS ketika metode pembayaran QRIS dipilih
                 const showQrisPopup = () => {
                     const qrisImage = '<?= BASE_URL ?>assets/qris.png'; // ganti dengan path QRIS asli Anda
                     return Swal.fire({
@@ -413,17 +454,19 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     });
                 }
 
-                // Step A: Auto hitung jarak + ongkir saat kota asal & tujuan terisi
+                // Fitur: auto hitung jarak + ongkir saat kota asal & tujuan terisi
                 const asalInput = document.getElementById('kotaPengirim');
                 const tujuanInput = document.getElementById('kotaPenerima');
                 const jarakInput = document.getElementById('totalJarak');
                 const ongkirInput = document.getElementById('totalOngkir');
+                const beratInput = document.getElementById('beratTotal');
                 const hitungUrl = '<?= BASE_URL ?>pengiriman/hitung-jarak';
                 let hitungTimer = null;
 
                 const hitungOtomatis = async () => {
                     const asal = (asalInput?.value || '').trim();
                     const tujuan = (tujuanInput?.value || '').trim();
+                    const berat = parseFloat(beratInput?.value || '0') || 0;
                     if (!asal || !tujuan) return;
                     if (jarakInput) jarakInput.value = '...';
                     if (ongkirInput) ongkirInput.value = '';
@@ -432,7 +475,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                         const res = await fetch(hitungUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ asal, tujuan })
+                            body: JSON.stringify({ asal, tujuan, berat })
                         });
                         const data = await res.json();
                         if (!res.ok || data.success !== true) {
@@ -452,12 +495,16 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     hitungTimer = setTimeout(hitungOtomatis, 400);
                 };
 
-                [asalInput, tujuanInput].forEach(input => {
+                [asalInput, tujuanInput, beratInput].forEach(input => {
                     if (input) {
                         input.addEventListener('change', scheduleHitung);
                         input.addEventListener('blur', scheduleHitung);
                     }
                 });
+
+                // Sinkron dan hitung di awal (berguna untuk halaman edit/old input)
+                syncKotaCode();
+                scheduleHitung();
             });
         </script>
         <?php if (!empty($flashSuccess)) : ?>

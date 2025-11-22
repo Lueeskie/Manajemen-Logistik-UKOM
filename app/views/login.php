@@ -136,7 +136,7 @@ if (isset($_SESSION['flash_success'])) {
                     confirmButtonText: 'Oke, Masuk!',
                     confirmButtonColor: '#0d6efd'
                 }).then(() => {
-                    const emailInput = document.querySelector('input[name="email"]');  <!-- Ubah selector ke "email" -->
+                    const emailInput = document.querySelector('input[name="email"]');  
                     if (emailInput) {
                         emailInput.focus();
                     }
