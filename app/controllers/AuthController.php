@@ -11,17 +11,21 @@ class AuthController {
     }
 
     public function login() {
-        session_start(); 
+        session_start();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = $_POST['email'] ?? '';
+            $email    = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
             $user = $this->userModel->login($email, $password);
             if ($user) {
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['role'] = $user['role'];
-                $_SESSION['username'] = $user['username'];
+                $_SESSION['user_id']   = $user['id'];
+                $_SESSION['username']  = $user['username'];
+                $_SESSION['email']     = $user['email'];
+                $_SESSION['role']      = $user['role'];
+                $_SESSION['id_role']   = $user['id_role'];
+                $_SESSION['foto_profil'] = $user['foto'];
+
                 header('Location: ' . BASE_URL . 'dashboard');
                 exit;
             } else {

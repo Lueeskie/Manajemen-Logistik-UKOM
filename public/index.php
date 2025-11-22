@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
 require_once __DIR__ . '/../app/controllers/SupplierController.php';
+require_once __DIR__ . '/../app/controllers/UserController.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -62,7 +63,43 @@ switch ($uri) {
         $supplier = new SupplierController();
         $supplier->tambahRequest();
         break;
-    default:
+    case '/pengguna':
+        $userCtrl = new UserController();
+        $userCtrl->index();
+        break;
+    case '/pengguna/tambah':
+        $userCtrl = new UserController();
+        $userCtrl->tambah();
+        break;
+    case '/pengguna/store':
+        $userCtrl = new UserController();
+        $userCtrl->store();
+        break;
+    case (preg_match('#^/pengguna/edit/(\d+)$#', $uri, $matches) ? true : false):
+        $userCtrl = new UserController();
+        $userCtrl->edit($matches[1]);
+        break;
+    case (preg_match('#^/pengguna/update/(\d+)$#', $uri, $matches) ? true : false):
+        $userCtrl = new UserController();
+        $userCtrl->update($matches[1]);
+        break;
+    case (preg_match('#^/pengguna/hapus/(\d+)$#', $uri, $matches) ? true : false):
+        $userCtrl = new UserController();
+        $userCtrl->hapus($matches[1]);
+        break;
+    case (preg_match('#^/supplier/edit/(\d+)$#', $uri, $matches) ? true : false):
+        $supplier = new SupplierController();
+        $supplier->editForm($matches[1]);
+        break;
+    case (preg_match('#^/supplier/update/(\d+)$#', $uri, $matches) ? true : false):
+        $supplier = new SupplierController();
+        $supplier->updateRequest($matches[1]);
+        break;
+    case (preg_match('#^/supplier/hapus/(\d+)$#', $uri, $matches) ? true : false):
+        $supplier = new SupplierController();
+        $supplier->hapus($matches[1]);
+        break;
+        default:
         http_response_code(404);
         echo "Page not found";
 }

@@ -41,4 +41,31 @@ class RequestModel {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getRequestById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM barang_request WHERE id_request = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateRequest($id, $data) {
+        $stmt = $this->db->prepare("
+            UPDATE barang_request 
+            SET nama_barang = ?, jumlah_barang = ?, berat = ?, deskripsi = ?, status = ?
+            WHERE id_request = ?
+        ");
+        return $stmt->execute([
+            $data['nama_barang'],
+            $data['jumlah_barang'],
+            $data['berat'],
+            $data['deskripsi'],
+            $data['status'],
+            $id
+        ]);
+    }
+
+    public function deleteRequest($id) {
+        $stmt = $this->db->prepare("DELETE FROM barang_request WHERE id_request = ?");
+        return $stmt->execute([$id]);
+    }
 }
