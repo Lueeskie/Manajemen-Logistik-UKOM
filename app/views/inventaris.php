@@ -1,3 +1,4 @@
+<!-- inventaris.php -->
 <?php
 // Extract flash messages
 $flash_success = $_SESSION['flash_success'] ?? '';
@@ -8,14 +9,14 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 $edit_item = $edit_item ?? null;
 $edit_mode = !empty($edit_item);
 if ($edit_mode) {
-    $id_resi = $edit_item['id_resi'] ?? '';
+    $nomor_resi = $edit_item['nomor_resi'] ?? '';
     $nama_barang = $edit_item['nama_barang'] ?? '';
     $berat = $edit_item['berat'] ?? 0.00;
     $jumlah = $edit_item['jumlah'] ?? 0;
     $deskripsi = $edit_item['deskripsi'] ?? '';
     $status = $edit_item['status'] ?? 'Stored';
 } else {
-    $id_resi = $nama_barang = $deskripsi = '';
+    $nomor_resi = $nama_barang = $deskripsi = '';
     $berat = 0.00;
     $jumlah = 0;
     $status = 'Stored';
@@ -33,6 +34,9 @@ if ($edit_mode) {
     <link rel="stylesheet" href="<?= BASE_URL ?>css/inventaris.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        
+    </style>
 </head>
 
 <body>
@@ -187,7 +191,7 @@ if ($edit_mode) {
                                                                     value="<?= $row['id_barang'] ?>">
                                                             </td>
                                                             <td><?= htmlspecialchars($row['id_barang']) ?></td>
-                                                            <td><?= htmlspecialchars($row['id_resi']) ?></td>
+                                                            <td><?= htmlspecialchars($row['nomor_resi']) ?></td>
                                                             <td><?= htmlspecialchars($row['nama_barang']) ?></td>
                                                             <td><?= number_format($row['berat'], 2) ?></td>
                                                             <td><?= number_format($row['jumlah']) ?></td>
@@ -239,40 +243,66 @@ if ($edit_mode) {
                     <?php endif; ?>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="id_resi" class="form-label">No Resi</label>
+                            <label for="nomor_resi" class="form-label">No Resi <span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <input type="text" 
+                                    class="form-control" 
+                                    id="nomor_resi" 
+                                    name="nomor_resi"
+                                    value="<?= htmlspecialchars($nomor_resi) ?>" 
+                                    required
+                                    maxlength="50"
+                                    autocomplete="off"
+                                    placeholder="Ketik nomor resi...">
+                                <div id="resiDropdown" class="autocomplete-dropdown">
+                                    <!-- Dropdown items akan muncul di sini -->
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Bisa gunakan nomor resi yang sama untuk beberapa barang
+                            </small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nama_barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
                             <input type="text" 
                                 class="form-control" 
-                                id="id_resi" 
-                                name="id_resi" 
-                                value="<?= htmlspecialchars($id_resi) ?>" 
+                                id="nama_barang" 
+                                name="nama_barang" 
+                                value="<?= htmlspecialchars($nama_barang) ?>" 
                                 required 
-                                maxlength="50"
-                                list="resiList"
-                                autocomplete="off"
-                                placeholder="Ketik untuk mencari nomor resi...">
-                            <datalist id="resiList">
-                                <!-- Options akan diisi via JavaScript -->
-                            </datalist>
-                            <small class="text-muted">Ketik untuk mencari nomor resi yang sudah ada</small>
+                                maxlength="100">
                         </div>
                         <div class="mb-3">
-                            <label for="nama_barang" class="form-label">Nama Barang</label>
-                            <input type="text" class="form-control" id="nama_barang" name="nama_barang" value="<?= htmlspecialchars($nama_barang) ?>" required maxlength="50">
+                            <label for="berat" class="form-label">Berat (kg) <span class="text-danger">*</span></label>
+                            <input type="number" 
+                                step="0.01" 
+                                class="form-control" 
+                                id="berat" 
+                                name="berat" 
+                                value="<?= $berat ?>" 
+                                min="0" 
+                                required>
                         </div>
                         <div class="mb-3">
-                            <label for="berat" class="form-label">Berat (kg)</label>
-                            <input type="number" step="0.01" class="form-control" id="berat" name="berat" value="<?= $berat ?>" min="0" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="jumlah" class="form-label">Jumlah</label>
-                            <input type="number" class="form-control" id="jumlah" name="jumlah" value="<?= $jumlah ?>" min="0" required>
+                            <label for="jumlah" class="form-label">Jumlah <span class="text-danger">*</span></label>
+                            <input type="number" 
+                                class="form-control" 
+                                id="jumlah" 
+                                name="jumlah" 
+                                value="<?= $jumlah ?>" 
+                                min="1" 
+                                required>
                         </div>
                         <div class="mb-3">
                             <label for="deskripsi" class="form-label">Deskripsi</label>
-                            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" maxlength="60"><?= htmlspecialchars($deskripsi) ?></textarea>
+                            <textarea class="form-control" 
+                                id="deskripsi" 
+                                name="deskripsi" 
+                                rows="3" 
+                                maxlength="255"><?= htmlspecialchars($deskripsi) ?></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
+                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
                             <select class="form-select" id="status" name="status" required>
                                 <option value="Stored" <?= ($status === 'Stored') ? 'selected' : '' ?>>Stored</option>
                                 <option value="Delivered" <?= ($status === 'Delivered') ? 'selected' : '' ?>>Delivered</option>
@@ -282,7 +312,9 @@ if ($edit_mode) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>Simpan
+                        </button>
                     </div>
                 </form>
             </div>
@@ -297,49 +329,230 @@ if ($edit_mode) {
                 new bootstrap.Modal(document.getElementById('modalInventaris')).show();
             <?php endif; ?>
 
-            // Autocomplete untuk No Resi
-            const idResiInput = document.getElementById('id_resi');
-            const resiDatalist = document.getElementById('resiList');
+            // Autocomplete untuk No Resi (Allow Duplicates)
+            const nomorResiInput = document.getElementById('nomor_resi');
+            const resiDropdown = document.getElementById('resiDropdown');
             let resiCache = [];
+            let selectedIndex = -1;
+            let isLoading = false;
 
-            // Load initial resi list
+            // Load existing resi list (untuk suggest)
             function loadResiList(search = '') {
-                fetch('<?= BASE_URL ?>inventaris_barang/get-resi?search=' + encodeURIComponent(search))
-                    .then(response => response.json())
-                    .then(data => {
-                        resiCache = data;
-                        updateDatalist(data);
+                if (isLoading) return;
+                
+                isLoading = true;
+                showLoading();
+
+                const url = '<?= BASE_URL ?>inventaris_barang/get-resi?search=' + encodeURIComponent(search);
+                console.log('Fetching from:', url); // Debug
+
+                fetch(url)
+                    .then(response => {
+                        console.log('Response status:', response.status); // Debug
+                        console.log('Response headers:', response.headers.get('content-type')); // Debug
+                        
+                        if (!response.ok) {
+                            throw new Error('HTTP error! status: ' + response.status);
+                        }
+                        
+                        // Cek apakah response adalah JSON
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            throw new Error('Response is not JSON. Content-Type: ' + contentType);
+                        }
+                        
+                        return response.json();
                     })
-                    .catch(error => console.error('Error loading resi:', error));
+                    .then(data => {
+                        console.log('Data received:', data); // Debug
+                        
+                        // Cek jika ada error dari server
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        
+                        // Pastikan data adalah array
+                        if (!Array.isArray(data)) {
+                            throw new Error('Invalid data format');
+                        }
+                        
+                        resiCache = data;
+                        updateDropdown(data, search);
+                        isLoading = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading resi:', error);
+                        console.error('Error details:', error.message); // Debug lebih detail
+                        showError();
+                        isLoading = false;
+                    });
             }
 
-            // Update datalist options
-            function updateDatalist(data) {
-                resiDatalist.innerHTML = '';
-                data.forEach(resi => {
-                    const option = document.createElement('option');
-                    option.value = resi;
-                    resiDatalist.appendChild(option);
+            // Show loading state
+            function showLoading() {
+                resiDropdown.innerHTML = `
+                    <div class="autocomplete-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-2">Mencari nomor resi...</div>
+                    </div>
+                `;
+                resiDropdown.classList.add('show');
+            }
+
+            // Show error state
+            function showError() {
+                resiDropdown.innerHTML = `
+                    <div class="autocomplete-empty">
+                        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                        <div>Gagal memuat data</div>
+                    </div>
+                `;
+            }
+
+            // Update dropdown with results
+            function updateDropdown(data, searchTerm = '') {
+                const currentValue = nomorResiInput.value.trim();
+                
+                if (data.length === 0) {
+                    // Jika tidak ada hasil tapi user sudah ketik, kasih opsi "use this"
+                    if (currentValue) {
+                        resiDropdown.innerHTML = `
+                            <div class="autocomplete-empty">
+                                <i class="bi bi-plus-circle text-primary"></i>
+                                <div>Tidak ada resi ditemukan</div>
+                                <small class="text-muted">Gunakan "<strong>${currentValue}</strong>" sebagai nomor resi baru</small>
+                            </div>
+                        `;
+                    } else {
+                        resiDropdown.innerHTML = `
+                            <div class="autocomplete-empty">
+                                <i class="bi bi-inbox"></i>
+                                <div>Belum ada nomor resi</div>
+                                <small class="text-muted">Ketik untuk membuat nomor resi baru</small>
+                            </div>
+                        `;
+                    }
+                    resiDropdown.classList.add('show');
+                    return;
+                }
+
+                let html = '';
+                data.forEach((resi, index) => {
+                    // Highlight matching text
+                    let displayText = resi;
+                    if (searchTerm) {
+                        const regex = new RegExp(`(${searchTerm})`, 'gi');
+                        displayText = resi.replace(regex, '<strong>$1</strong>');
+                    }
+
+                    html += `
+                        <div class="autocomplete-item" data-index="${index}" data-value="${resi}">
+                            <div class="resi-icon">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+                            <div class="resi-text">${displayText}</div>
+                            <div class="resi-badge">RESI</div>
+                        </div>
+                    `;
+                });
+
+                resiDropdown.innerHTML = html;
+                resiDropdown.classList.add('show');
+                selectedIndex = -1;
+
+                // Add click listeners
+                document.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        selectItem(this.dataset.value);
+                    });
                 });
             }
 
-            // Load resi list on input focus
-            idResiInput.addEventListener('focus', function() {
-                if (resiCache.length === 0) {
+            // Select item from dropdown
+            function selectItem(value) {
+                nomorResiInput.value = value;
+                resiDropdown.classList.remove('show');
+                selectedIndex = -1;
+            }
+
+            // Handle input focus
+            nomorResiInput.addEventListener('focus', function() {
+                const currentValue = this.value.trim();
+                if (currentValue.length === 0 && resiCache.length === 0) {
                     loadResiList();
+                } else if (currentValue.length === 0 && resiCache.length > 0) {
+                    updateDropdown(resiCache);
+                } else if (currentValue.length > 0) {
+                    loadResiList(currentValue);
                 }
             });
 
-            // Search as user types
+            // Handle input typing
             let searchTimeout;
-            idResiInput.addEventListener('input', function() {
+            nomorResiInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    const search = this.value;
-                    if (search.length >= 1) {
-                        loadResiList(search);
+                const search = this.value.trim();
+
+                if (search.length === 0) {
+                    // Show all cached results
+                    if (resiCache.length > 0) {
+                        updateDropdown(resiCache);
+                    } else {
+                        resiDropdown.classList.remove('show');
                     }
-                }, 300); // Debounce 300ms
+                } else {
+                    // Debounce search
+                    searchTimeout = setTimeout(() => {
+                        loadResiList(search);
+                    }, 300);
+                }
+            });
+
+            // Handle keyboard navigation
+            nomorResiInput.addEventListener('keydown', function(e) {
+                const items = document.querySelectorAll('.autocomplete-item');
+                
+                if (items.length === 0) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    updateSelection(items);
+                } else if (e.key === 'Enter') {
+                    if (selectedIndex >= 0) {
+                        e.preventDefault();
+                        selectItem(items[selectedIndex].dataset.value);
+                    }
+                } else if (e.key === 'Escape') {
+                    resiDropdown.classList.remove('show');
+                    selectedIndex = -1;
+                }
+            });
+
+            // Update visual selection
+            function updateSelection(items) {
+                items.forEach((item, index) => {
+                    if (index === selectedIndex) {
+                        item.classList.add('active');
+                        item.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!nomorResiInput.contains(e.target) && !resiDropdown.contains(e.target)) {
+                    resiDropdown.classList.remove('show');
+                    selectedIndex = -1;
+                }
             });
 
             // Checkbox functionality
@@ -439,6 +652,44 @@ if ($edit_mode) {
 
             // Initial count
             updateSelectedCount();
+        });
+
+        // Debug form submit
+        document.getElementById('formInventaris').addEventListener('submit', function(e) {
+            console.log('Form submitted');
+            console.log('Form action:', this.action);
+            console.log('Form method:', this.method);
+            
+            // Log all form data
+            const formData = new FormData(this);
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+            
+            // Validasi manual
+            const nomor_resi = document.getElementById('nomor_resi').value.trim();
+            const nama_barang = document.getElementById('nama_barang').value.trim();
+            const jumlah = parseInt(document.getElementById('jumlah').value);
+            
+            if (!nomor_resi) {
+                e.preventDefault();
+                alert('Nomor resi harus diisi!');
+                return false;
+            }
+            
+            if (!nama_barang) {
+                e.preventDefault();
+                alert('Nama barang harus diisi!');
+                return false;
+            }
+            
+            if (jumlah <= 0) {
+                e.preventDefault();
+                alert('Jumlah harus lebih dari 0!');
+                return false;
+            }
+            
+            console.log('Form validation passed, submitting...');
         });
     </script>
 </body>

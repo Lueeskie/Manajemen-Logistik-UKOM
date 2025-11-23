@@ -1,3 +1,4 @@
+<!-- inventaris_histori.php -->
 <?php
 // Extract flash messages
 $flash_success = $_SESSION['flash_success'] ?? '';
@@ -184,18 +185,18 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                 <?php foreach ($histori as $row): ?>
                                                     <tr>
                                                         <td><?= htmlspecialchars($row['id_barang']) ?></td>
-                                                        <td><?= htmlspecialchars($row['id_resi']) ?></td>
+                                                        <td><?= htmlspecialchars($row['nomor_resi']) ?></td>
                                                         <td><?= htmlspecialchars($row['nama_barang']) ?></td>
                                                         <td><?= number_format($row['berat'], 2) ?></td>
                                                         <td><?= number_format($row['jumlah']) ?></td>
                                                         <td><?= htmlspecialchars(substr($row['deskripsi'], 0, 50)) . (strlen($row['deskripsi']) > 50 ? '...' : '') ?></td>
-                                                        <td><span class="badge bg-success-light text-success">Sent</span></td>
+                                                        <td><span class="badge bg-success-light text-success">Delivered</span></td>
                                                         <td><?= date('d M Y H:i', strtotime($row['updated_at'] ?? $row['created_at'])) ?></td>
                                                         <td>
                                                             <button class="btn btn-sm btn-outline-info" 
                                                                 data-bs-toggle="modal" 
                                                                 data-bs-target="#detailModal"
-                                                                onclick="showDetail(<?= htmlspecialchars(json_encode($row)) ?>)">
+                                                                onclick='showDetail(<?= json_encode($row, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
                                                                 <i class="bi bi-eye"></i>
                                                             </button>
                                                         </td>
@@ -250,7 +251,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                     </tr>
                     <tr>
                         <th>No Resi</th>
-                        <td>${data.id_resi}</td>
+                        <td>${data.nomor_resi}</td>
                     </tr>
                     <tr>
                         <th>Nama Barang</th>
@@ -270,7 +271,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                     </tr>
                     <tr>
                         <th>Status</th>
-                        <td><span class="badge bg-success">Sent</span></td>
+                        <td><span class="badge bg-success">Delivered</span></td>
                     </tr>
                     <tr>
                         <th>Tanggal Dibuat</th>

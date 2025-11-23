@@ -1,3 +1,4 @@
+<!-- index.php -->
 <?php
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php'; 
@@ -24,35 +25,46 @@ if (strpos($uri, $basePath) === 0) {
 if (strpos($uri, '/inventaris_barang') === 0) {
     $inventaris = new InventarisController();
     
+    // Route: /inventaris_barang/get-resi (AJAX - autocomplete) - HARUS PALING ATAS
+    if ($uri === '/inventaris_barang/get-resi') {
+        $inventaris->getResiList();
+        exit; // Penting: Stop execution setelah API call
+    }
     // Route: /inventaris_barang/histori
-    if ($uri === '/inventaris_barang/histori') {
+    elseif ($uri === '/inventaris_barang/histori') {
         $inventaris->histori();
+        exit;
     }
     // Route: /inventaris_barang/kirim (POST)
     elseif ($uri === '/inventaris_barang/kirim') {
         $inventaris->kirim();
+        exit;
     }
-    // Route: /inventaris_barang/get-resi (AJAX - autocomplete)
-    elseif ($uri === '/inventaris_barang/get-resi') {
-        $inventaris->getResiList();
-    }
-    // Route: /inventaris_barang (default)
-    else {
-        $action = $_GET['action'] ?? 'index';
+    // Route: /inventaris_barang (default) - Handle POST untuk add/edit
+    elseif ($uri === '/inventaris_barang') {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $post_action = $_POST['action'] ?? $action;
+            $post_action = $_POST['action'] ?? '';
             if ($post_action === 'add') {
                 $inventaris->add();
+                exit;
             } elseif ($post_action === 'edit') {
                 $inventaris->edit();
+                exit;
             }
-        } elseif ($action === 'delete' && isset($_GET['id'])) {
+        }
+        
+        // GET request dengan action
+        $action = $_GET['action'] ?? 'index';
+        if ($action === 'delete' && isset($_GET['id'])) {
             $inventaris->delete();
+            exit;
         } else {
             $inventaris->index();
+            exit;
         }
     }
-    exit; // Penting: Stop execution setelah handle inventaris routes
+    
+    exit;
 }
 
 // Switch untuk routes lainnya

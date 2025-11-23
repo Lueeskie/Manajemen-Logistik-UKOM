@@ -1,3 +1,4 @@
+<!-- inventarisController.php -->
 <?php
 
 require_once __DIR__ . '/../models/InventarisModel.php';
@@ -77,8 +78,14 @@ class InventarisController {
 
     // API endpoint untuk autocomplete nomor resi
     public function getResiList() {
+        // Bersihkan output buffer sebelumnya
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
         session_start();
         if (!isset($_SESSION['user_id'])) {
+            header('Content-Type: application/json');
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
             exit;
@@ -86,39 +93,85 @@ class InventarisController {
 
         header('Content-Type: application/json');
         
-        $search = $_GET['search'] ?? '';
-        $resiList = $this->inventarisModel->searchResi($search);
+        try {
+            $search = $_GET['search'] ?? '';
+            $resiList = $this->inventarisModel->searchResi($search);
+            
+            echo json_encode($resiList);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
         
-        echo json_encode($resiList);
         exit;
     }
 
     // Handle add (POST)
     public function add() {
+        error_log("=== ADD METHOD CALLED ===");
+        
         session_start();
         if (!isset($_SESSION['user_id'])) {
+            error_log("Add: User not logged in");
             header('Location: ' . BASE_URL . 'login');
             exit;
         }
 
+        error_log("Add: User ID = " . $_SESSION['user_id']);
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            error_log("Add: POST method confirmed");
+            error_log("Add: POST data = " . print_r($_POST, true));
+            
             $data = [
-                'id_resi' => $_POST['id_resi'] ?? '',
-                'nama_barang' => $_POST['nama_barang'] ?? '',
+                'nomor_resi' => trim($_POST['nomor_resi'] ?? ''),
+                'nama_barang' => trim($_POST['nama_barang'] ?? ''),
                 'berat' => (float)($_POST['berat'] ?? 0.0),
                 'jumlah' => (int)($_POST['jumlah'] ?? 0),
-                'deskripsi' => $_POST['deskripsi'] ?? '',
+                'deskripsi' => trim($_POST['deskripsi'] ?? ''),
                 'status' => $_POST['status'] ?? 'Stored'
             ];
 
-            if (empty($data['nama_barang']) || empty($data['id_resi']) || $data['berat'] < 0 || $data['jumlah'] < 0) {
-                $_SESSION['flash_error'] = 'Data tidak valid!';
-            } elseif ($this->inventarisModel->create($data)) {
-                $_SESSION['flash_success'] = 'Barang berhasil ditambahkan!';
+            error_log("Add: Processed data = " . print_r($data, true));
+
+            // Validasi data
+            if (empty($data['nomor_resi'])) {
+                $_SESSION['flash_error'] = 'Nomor resi harus diisi!';
+                error_log("Add: VALIDATION ERROR - Nomor resi kosong");
+            } elseif (empty($data['nama_barang'])) {
+                $_SESSION['flash_error'] = 'Nama barang harus diisi!';
+                error_log("Add: VALIDATION ERROR - Nama barang kosong");
+            } elseif ($data['berat'] < 0) {
+                $_SESSION['flash_error'] = 'Berat tidak boleh negatif!';
+                error_log("Add: VALIDATION ERROR - Berat negatif");
+            } elseif ($data['jumlah'] <= 0) {
+                $_SESSION['flash_error'] = 'Jumlah harus lebih dari 0!';
+                error_log("Add: VALIDATION ERROR - Jumlah tidak valid");
             } else {
-                $_SESSION['flash_error'] = 'Gagal menambahkan barang! No Resi mungkin sudah digunakan.';
+                error_log("Add: Validation passed, calling model->create()");
+                
+                // Simpan ke database
+                try {
+                    $result = $this->inventarisModel->create($data);
+                    error_log("Add: Model->create() returned = " . ($result ? 'TRUE' : 'FALSE'));
+                    
+                    if ($result) {
+                        $_SESSION['flash_success'] = 'Barang "' . htmlspecialchars($data['nama_barang']) . '" berhasil ditambahkan ke resi ' . htmlspecialchars($data['nomor_resi']) . '!';
+                        error_log("Add: SUCCESS - Barang ditambahkan");
+                    } else {
+                        $_SESSION['flash_error'] = 'Gagal menambahkan barang! Silakan coba lagi.';
+                        error_log("Add: FAILED - Database insert failed");
+                    }
+                } catch (Exception $e) {
+                    $_SESSION['flash_error'] = 'Error: ' . $e->getMessage();
+                    error_log("Add: EXCEPTION - " . $e->getMessage());
+                }
             }
+        } else {
+            error_log("Add: NOT POST method, method = " . $_SERVER['REQUEST_METHOD']);
         }
+        
+        error_log("Add: Redirecting to inventaris_barang");
         header('Location: ' . BASE_URL . 'inventaris_barang');
         exit;
     }
@@ -134,7 +187,7 @@ class InventarisController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
             $id = $_POST['id'];
             $data = [
-                'id_resi' => $_POST['id_resi'] ?? '',
+                'nomor_resi' => $_POST['nomor_resi'] ?? '',
                 'nama_barang' => $_POST['nama_barang'] ?? '',
                 'berat' => (float)($_POST['berat'] ?? 0.0),
                 'jumlah' => (int)($_POST['jumlah'] ?? 0),
@@ -142,7 +195,7 @@ class InventarisController {
                 'status' => $_POST['status'] ?? 'Stored'
             ];
 
-            if (empty($data['nama_barang']) || empty($data['id_resi']) || $data['berat'] < 0 || $data['jumlah'] < 0) {
+            if (empty($data['nama_barang']) || empty($data['nomor_resi']) || $data['berat'] < 0 || $data['jumlah'] < 0) {
                 $_SESSION['flash_error'] = 'Data tidak valid!';
             } elseif ($this->inventarisModel->update($id, $data)) {
                 $_SESSION['flash_success'] = 'Barang berhasil diupdate!';
@@ -185,21 +238,30 @@ class InventarisController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $selectedIds = $_POST['selected_items'] ?? [];
 
+            // Debug: Log selected IDs
+            error_log("Selected IDs: " . print_r($selectedIds, true));
+
             if (empty($selectedIds)) {
                 $_SESSION['flash_error'] = 'Pilih minimal 1 barang untuk dikirim!';
             } else {
                 // Validasi bahwa ID yang dipilih ada dan belum dikirim
                 $items = $this->inventarisModel->getByIds($selectedIds);
                 
+                error_log("Found items: " . count($items));
+                
                 if (empty($items)) {
                     $_SESSION['flash_error'] = 'Barang yang dipilih tidak valid!';
                 } else {
                     // Kirim barang
-                    if ($this->inventarisModel->kirimBarang($selectedIds)) {
+                    $result = $this->inventarisModel->kirimBarang($selectedIds);
+                    
+                    error_log("Kirim barang result: " . ($result ? 'SUCCESS' : 'FAILED'));
+                    
+                    if ($result) {
                         $count = count($selectedIds);
                         $_SESSION['flash_success'] = "$count barang berhasil dikirim ke histori!";
                     } else {
-                        $_SESSION['flash_error'] = 'Gagal mengirim barang!';
+                        $_SESSION['flash_error'] = 'Gagal mengirim barang! Silakan cek error log.';
                     }
                 }
             }
