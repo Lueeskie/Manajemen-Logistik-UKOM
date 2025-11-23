@@ -48,7 +48,7 @@ class UserController {
 
             if (empty($username) || empty($email) || empty($password)) {
                 $_SESSION['flash_error'] = "Semua field wajib diisi!";
-                header('Location: ' . BASE_URL . 'pengguna/tambah-pengguna.php');
+                header('Location: ' . BASE_URL . 'pengguna/tambah');
                 exit;
             }
 
@@ -56,7 +56,7 @@ class UserController {
             $check->execute([$email, $username]);
             if ($check->fetch()) {
                 $_SESSION['flash_error'] = "Email atau username sudah digunakan!";
-                header('Location: ' . BASE_URL . 'pengguna/tambah-pengguna.php');
+                header('Location: ' . BASE_URL . 'pengguna/tambah');
                 exit;
             }
 
