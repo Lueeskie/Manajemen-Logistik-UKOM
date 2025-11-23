@@ -57,7 +57,7 @@ switch ($uri) {
 
     case '/pengiriman/tambah':
         $pengiriman = new PengirimanController();
-        $pengiriman->create();
+        $pengiriman->add();
         break;
 
     case '/pengiriman/store':

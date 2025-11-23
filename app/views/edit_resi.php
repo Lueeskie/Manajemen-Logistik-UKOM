@@ -208,7 +208,7 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-4">
                                             <label for="beratTotal" class="form-label">Berat Total (Kg)</label>
-                                            <input type="number" step="0.01" class="form-control" id="beratTotal" name="berat_total" value="<?php echo htmlspecialchars($resi['berat_total']); ?>" <?php echo $disableNonStatus; ?>>
+                                            <input type="number" min="1" step="0.01" class="form-control" id="beratTotal" name="berat_total" value="<?php echo htmlspecialchars($resi['berat_total']); ?>" <?php echo $disableNonStatus; ?> required>
                                         </div>
                                         <div class="col-md-4">
                                             <label for="totalJarak" class="form-label">Jarak (Km)</label>

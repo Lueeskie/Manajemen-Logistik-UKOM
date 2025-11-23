@@ -54,7 +54,7 @@ class PengirimanController
         require __DIR__ . '/../views/pengiriman.php';
     }
 
-    public function create()
+    public function add()
     {
         session_start();
         if (!isset($_SESSION['user_id'])) {
@@ -202,7 +202,7 @@ class PengirimanController
         $hasil = $this->hitungJarakOngkir($asal, $tujuan, ORS_API_KEY, $tarifPerKm, $tarifPerKg, $beratKg);
         if ($hasil === null) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Gagal menghitung jarak/ongkir. Cek nama kota atau API key.']);
+            echo json_encode(['success' => false, 'message' => 'Gagal menghitung jarak/ongkir. Coba cek kembali nama kota.']);
             exit;
         }
 
@@ -354,15 +354,10 @@ class PengirimanController
 
         if ($isDriver) {
             $resi = $this->resiModel->getByIdAdmin($id);
-            if (!$resi) {
-                $_SESSION['flash_error'] = 'Resi tidak ditemukan.';
-                header('Location: ' . BASE_URL . 'pengiriman');
-                exit;
-            }
 
             $statusBaru = trim($_POST['status_pengiriman'] ?? '');
             if ($statusBaru === '') {
-                $statusBaru = $resi['status_pengiriman']; // fallback supaya tidak banyak flash error
+                $statusBaru = $resi['status_pengiriman']; 
             }
 
             if ($statusBaru === $resi['status_pengiriman']) {

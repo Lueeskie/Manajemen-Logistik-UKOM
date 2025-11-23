@@ -139,7 +139,7 @@ class Resi
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function create(array $data)
+    public function add(array $data)
     {
         $withStatus = !empty($data['status_pembayaran']);
 

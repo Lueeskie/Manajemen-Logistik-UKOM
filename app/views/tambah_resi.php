@@ -210,7 +210,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                         </div>
                                         <div class="col-md-4">
                                             <label for="beratTotal" class="form-label">Berat Total (Kg)</label>
-                                            <input type="number" step="0.01" class="form-control" id="beratTotal" name="berat_total" placeholder="0.00">
+                                            <input type="number" min="1" step="0.01" class="form-control" id="beratTotal" name="berat_total" placeholder="1.00" required>
                                         </div>
                                         <div class="col-md-4">
                                             <label for="totalJarak" class="form-label">Jarak (Km)</label>
@@ -278,20 +278,6 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            (() => {
-                'use strict';
-                const forms = document.querySelectorAll('.needs-validation');
-                Array.from(forms).forEach(form => {
-                    form.addEventListener('submit', event => {
-                        if (!form.checkValidity()) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            })();
-
             // Fitur: isi tanggal dibuat otomatis ke hari ini
             document.addEventListener('DOMContentLoaded', () => {
                 const dateInput = document.getElementById('tanggalDibuat');
@@ -391,7 +377,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
                 // Fitur: modal QRIS ketika metode pembayaran QRIS dipilih
                 const showQrisPopup = () => {
-                    const qrisImage = '<?= BASE_URL ?>assets/qris.png'; // ganti dengan path QRIS asli Anda
+                    const qrisImage = '<?= BASE_URL ?>assets/qris.png'; 
                     return Swal.fire({
                         title: 'QRIS Pembayaran',
                         html: `<div class="d-inline-block border rounded p-3 mb-3 bg-light">
@@ -435,11 +421,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                             e.preventDefault();
                             return;
                         }
-                        if (!form.checkValidity()) {
-                            form.classList.add('was-validated');
-                            e.preventDefault();
-                            return;
-                        }
+                        form.classList.add('was-validated'); 
                         const method = getSelectedPayment();
                         if (method === 'qris' && !qrisConfirmed) {
                             e.preventDefault();
