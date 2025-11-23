@@ -20,6 +20,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
     <style>
         .dl-compact dt,
@@ -123,7 +124,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                 <dl class="row mb-0 dl-compact">
                                     <dt class="col-sm-4 text-muted small">Nama</dt>
                                     <dd class="col-sm-8"><?php echo htmlspecialchars($resi['nama_pengirim']); ?></dd>
-                                    <dt class="col-sm-3 text-muted small">Telepon</dt>
+                                    <dt class="col-sm-4 text-muted small">Telepon</dt>
                                     <dd class="col-sm-8"><?php echo htmlspecialchars($resi['telpon_pengirim']); ?></dd>
                                     <dt class="col-sm-4 text-muted small">Kota</dt>
                                     <dd class="col-sm-8"><?php echo htmlspecialchars($resi['kota_pengirim']); ?> (<?php echo htmlspecialchars($resi['origin_city_code']); ?>)</dd>

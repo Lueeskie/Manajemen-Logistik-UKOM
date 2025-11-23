@@ -18,6 +18,7 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/form_tambah_resi.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
@@ -26,6 +27,9 @@ if (!isset($_SESSION['user_id'])) {
 
 <body>
     <?php
+    $role = $_SESSION['role'] ?? '';
+    $isDriver = $role === 'driver';
+    $disableNonStatus = $isDriver ? 'disabled' : '';
     $flashSuccess = $_SESSION['flash_success'] ?? null;
     $flashError = $_SESSION['flash_error'] ?? null;
     unset($_SESSION['flash_success'], $_SESSION['flash_error']);
@@ -118,15 +122,12 @@ if (!isset($_SESSION['user_id'])) {
                                         <div class="col-md-6">
                                             <label for="nomorResi" class="form-label">Nomor Resi</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" value="<?php echo htmlspecialchars($resi['nomor_resi']); ?>" readonly>
+                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" value="<?php echo htmlspecialchars($resi['nomor_resi']); ?>" readonly <?php echo $disableNonStatus; ?>>
                                             </div>
-                                            <small class="text-muted">Format: originCode + 3 huruf acak + destinationCode</small>
-                                            <small class="text-muted">Pastikan unik dan mudah dilacak.</small>
-                                            <div class="invalid-feedback">Nomor resi wajib diisi.</div>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="tanggalDibuat" class="form-label">Tanggal Dibuat</label>
-                                            <input type="date" class="form-control" id="tanggalDibuat" value="<?php echo htmlspecialchars($resi['tanggal_dibuat']); ?>" readonly>
+                                            <input type="date" class="form-control" id="tanggalDibuat" value="<?php echo htmlspecialchars($resi['tanggal_dibuat']); ?>" readonly <?php echo $disableNonStatus; ?>>
                                             <input type="hidden" name="tanggal_dibuat" value="<?php echo htmlspecialchars($resi['tanggal_dibuat']); ?>">
                                         </div>
                                     </div>
@@ -137,30 +138,30 @@ if (!isset($_SESSION['user_id'])) {
                                     <div class="row g-4">
                                         <div class="col-md-6">
                                             <label for="namaPengirim" class="form-label">Nama Pengirim</label>
-                                            <input type="text" class="form-control" id="namaPengirim" name="nama_pengirim" value="<?php echo htmlspecialchars($resi['nama_pengirim']); ?>" required>
+                                            <input type="text" class="form-control" id="namaPengirim" name="nama_pengirim" value="<?php echo htmlspecialchars($resi['nama_pengirim']); ?>" <?php echo $disableNonStatus; ?> required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="telponPengirim" class="form-label">No. Telepon</label>
-                                            <input type="tel" class="form-control" id="telponPengirim" name="telpon_pengirim" value="<?php echo htmlspecialchars($resi['telpon_pengirim']); ?>" required>
+                                            <input type="tel" class="form-control" id="telponPengirim" name="telpon_pengirim" value="<?php echo htmlspecialchars($resi['telpon_pengirim']); ?>" <?php echo $disableNonStatus; ?> required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="kotaPengirim" class="form-label">Kota Asal</label>
-                                            <input list="listKotaAsal" class="form-control" id="kotaPengirim" name="kota_pengirim" value="<?php echo htmlspecialchars($resi['kota_pengirim']); ?>" placeholder="Pilih kota" autocomplete="off" required>
+                                            <input list="listKotaAsal" class="form-control" id="kotaPengirim" name="kota_pengirim" value="<?php echo htmlspecialchars($resi['kota_pengirim']); ?>" placeholder="Pilih kota" autocomplete="off" <?php echo $disableNonStatus; ?> required>
                                             <datalist id="listKotaAsal">
                                                 <?php if (!empty($listKota)): ?>
-                                                    <?php foreach ($listKota as $k): ?>
-                                                        <option value="<?= htmlspecialchars($k['nama']) ?>" data-code="<?= htmlspecialchars($k['id_kota']) ?>"></option>
+                                                    <?php foreach ($listKota as $kota): ?>
+                                                        <option value="<?= htmlspecialchars($kota['nama']) ?>" data-code="<?= htmlspecialchars($kota['id_kota']) ?>"></option>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
                                             </datalist>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="originCityCode" class="form-label">Origin City Code</label>
-                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" value="<?php echo htmlspecialchars($resi['origin_city_code']); ?>" maxlength="10" required readonly>
+                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" value="<?php echo htmlspecialchars($resi['origin_city_code']); ?>" maxlength="10" required readonly <?php echo $disableNonStatus; ?>>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatAsal" class="form-label">Alamat Lengkap</label>
-                                            <textarea class="form-control" id="alamatAsal" name="alamat_asal" rows="3" required><?php echo htmlspecialchars($resi['alamat_asal']); ?></textarea>
+                                            <textarea class="form-control" id="alamatAsal" name="alamat_asal" rows="3" <?php echo $disableNonStatus; ?> required><?php echo htmlspecialchars($resi['alamat_asal']); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -170,15 +171,15 @@ if (!isset($_SESSION['user_id'])) {
                                     <div class="row g-4">
                                         <div class="col-md-6">
                                             <label for="namaPenerima" class="form-label">Nama Penerima</label>
-                                            <input type="text" class="form-control" id="namaPenerima" name="nama_penerima" value="<?php echo htmlspecialchars($resi['nama_penerima']); ?>" required>
+                                            <input type="text" class="form-control" id="namaPenerima" name="nama_penerima" value="<?php echo htmlspecialchars($resi['nama_penerima']); ?>" <?php echo $disableNonStatus; ?> required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="telponPenerima" class="form-label">No. Telepon</label>
-                                            <input type="text" class="form-control" id="telponPenerima" name="telpon_penerima" value="<?php echo htmlspecialchars($resi['telpon_penerima']); ?>" required>
+                                            <input type="text" class="form-control" id="telponPenerima" name="telpon_penerima" value="<?php echo htmlspecialchars($resi['telpon_penerima']); ?>" <?php echo $disableNonStatus; ?> required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="kotaPenerima" class="form-label">Kota Tujuan</label>
-                                            <input list="listKotaTujuan" class="form-control" id="kotaPenerima" name="kota_penerima" value="<?php echo htmlspecialchars($resi['kota_penerima']); ?>" placeholder="Pilih kota" autocomplete="off" required>
+                                            <input list="listKotaTujuan" class="form-control" id="kotaPenerima" name="kota_penerima" value="<?php echo htmlspecialchars($resi['kota_penerima']); ?>" placeholder="Pilih kota" autocomplete="off" <?php echo $disableNonStatus; ?> required>
                                             <datalist id="listKotaTujuan">
                                                 <?php if (!empty($listKota)): ?>
                                                     <?php foreach ($listKota as $k): ?>
@@ -189,11 +190,11 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-6">
                                             <label for="destinationCityCode" class="form-label">Destination City Code</label>
-                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" value="<?php echo htmlspecialchars($resi['destination_city_code']); ?>" maxlength="10" required readonly>
+                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" value="<?php echo htmlspecialchars($resi['destination_city_code']); ?>" maxlength="10" required readonly <?php echo $disableNonStatus; ?>>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatTujuan" class="form-label">Alamat Tujuan</label>
-                                            <textarea class="form-control" id="alamatTujuan" name="alamat_tujuan" rows="3" required><?php echo htmlspecialchars($resi['alamat_tujuan']); ?></textarea>
+                                            <textarea class="form-control" id="alamatTujuan" name="alamat_tujuan" rows="3" <?php echo $disableNonStatus; ?> required><?php echo htmlspecialchars($resi['alamat_tujuan']); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -203,19 +204,19 @@ if (!isset($_SESSION['user_id'])) {
                                     <div class="row g-4">
                                         <div class="col-md-4">
                                             <label for="jumlahPaket" class="form-label">Jumlah Paket</label>
-                                            <input type="number" min="1" class="form-control" id="jumlahPaket" name="jumlah_paket" value="<?php echo htmlspecialchars($resi['jumlah_paket']); ?>" required>
+                                            <input type="number" min="1" class="form-control" id="jumlahPaket" name="jumlah_paket" value="<?php echo htmlspecialchars($resi['jumlah_paket']); ?>" <?php echo $disableNonStatus; ?> required>
                                         </div>
                                         <div class="col-md-4">
                                             <label for="beratTotal" class="form-label">Berat Total (Kg)</label>
-                                            <input type="number" step="0.01" class="form-control" id="beratTotal" name="berat_total" value="<?php echo htmlspecialchars($resi['berat_total']); ?>">
+                                            <input type="number" step="0.01" class="form-control" id="beratTotal" name="berat_total" value="<?php echo htmlspecialchars($resi['berat_total']); ?>" <?php echo $disableNonStatus; ?>>
                                         </div>
                                         <div class="col-md-4">
                                             <label for="totalJarak" class="form-label">Jarak (Km)</label>
-                                            <input type="number" step="0.01" class="form-control" id="totalJarak" name="total_jarak" value="<?php echo htmlspecialchars($resi['total_jarak']); ?>" readonly>
+                                            <input type="number" step="0.01" class="form-control" id="totalJarak" name="total_jarak" value="<?php echo htmlspecialchars($resi['total_jarak']); ?>" readonly <?php echo $disableNonStatus; ?>>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="totalOngkir" class="form-label">Ongkir (Rp)</label>
-                                            <input type="number" class="form-control" id="totalOngkir" name="total_ongkir" value="<?php echo htmlspecialchars($resi['total_ongkir']); ?>" readonly>
+                                            <input type="number" class="form-control" id="totalOngkir" name="total_ongkir" value="<?php echo htmlspecialchars($resi['total_ongkir']); ?>" readonly <?php echo $disableNonStatus; ?>>
                                         </div>
                                     </div>
                                 </div>
@@ -228,11 +229,8 @@ if (!isset($_SESSION['user_id'])) {
                                             <select class="form-select" name="status_pengiriman">
                                                 <?php
                                                 $statusPengirimanOptions = ['Dalam Proses', 'Terkirim', 'Tertunda'];
-                                                foreach ($statusPengirimanOptions as $index => $opt) :
+                                                foreach ($statusPengirimanOptions as $opt) :
                                                     $selected = strtolower($resi['status_pengiriman'] ?? '') === strtolower($opt) ? 'selected' : '';
-                                                    if (empty($selected) && $index === 0 && empty($resi['status_pengiriman'])) {
-                                                        $selected = 'selected';
-                                                    }
                                                 ?>
                                                     <option value="<?php echo $opt; ?>" <?php echo $selected; ?>><?php echo $opt; ?></option>
                                                 <?php endforeach; ?>
@@ -240,14 +238,11 @@ if (!isset($_SESSION['user_id'])) {
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Status Pembayaran</label>
-                                            <select class="form-select" name="status_pembayaran">
+                                            <select class="form-select" name="status_pembayaran" <?php echo $disableNonStatus; ?>>
                                                 <?php
                                                 $statusPembayaranOptions = ['Belum Bayar', 'Terbayar'];
-                                                foreach ($statusPembayaranOptions as $index => $opt) :
+                                                foreach ($statusPembayaranOptions as $opt) :
                                                     $selected = strtolower($resi['status_pembayaran'] ?? '') === strtolower($opt) ? 'selected' : '';
-                                                    if (empty($selected) && $index === 0 && empty($resi['status_pembayaran'])) {
-                                                        $selected = 'selected';
-                                                    }
                                                 ?>
                                                     <option value="<?php echo $opt; ?>" <?php echo $selected; ?>><?php echo $opt; ?></option>
                                                 <?php endforeach; ?>
@@ -369,8 +364,14 @@ if (!isset($_SESSION['user_id'])) {
 
             [kotaAsalInput, kotaTujuanInput].forEach(input => {
                 if (input) {
-                    input.addEventListener('change', () => { syncKotaCode(); scheduleHitung(); });
-                    input.addEventListener('blur', () => { syncKotaCode(); scheduleHitung(); });
+                    input.addEventListener('change', () => {
+                        syncKotaCode();
+                        scheduleHitung();
+                    });
+                    input.addEventListener('blur', () => {
+                        syncKotaCode();
+                        scheduleHitung();
+                    });
                 }
             });
 
@@ -384,8 +385,14 @@ if (!isset($_SESSION['user_id'])) {
                 try {
                     const res = await fetch(hitungUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ asal, tujuan, berat })
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            asal,
+                            tujuan,
+                            berat
+                        })
                     });
                     const data = await res.json();
                     if (!res.ok || data.success !== true) {

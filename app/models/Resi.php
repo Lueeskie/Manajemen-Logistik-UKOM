@@ -41,6 +41,38 @@ class Resi
         ];
     }
 
+
+
+    public function getStatsAll()
+    {
+        $tot = (int) $this->db->query("SELECT COUNT(*) AS total FROM resi")->fetch(PDO::FETCH_ASSOC)['total'];
+
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS total FROM resi WHERE status_pengiriman = :status");
+
+        $status = 'Terkirim';
+        $stmt->bindParam(':status', $status);
+        $stmt->execute();
+        $terkirim = (int) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        $status = 'Dalam Proses';
+        $stmt->bindParam(':status', $status);
+        $stmt->execute();
+        $proses = (int) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        $status = 'Tertunda';
+        $stmt->bindParam(':status', $status);
+        $stmt->execute();
+        $tertunda = (int) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        return [
+            'total' => $tot,
+            'terkirim' => $terkirim,
+            'proses' => $proses,
+            'tertunda' => $tertunda
+        ];
+    }
+
+
     public function getRecentResi($userId, $limit = 10)
     {
         $stmt = $this->db->prepare("SELECT id, nomor_resi, nama_penerima, alamat_tujuan, status_pengiriman, status_pembayaran, tanggal_dibuat 
@@ -52,20 +84,6 @@ class Resi
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getById($id, $userId)
-    {
-        $query = "SELECT id, nomor_resi, nama_pengirim, telpon_pengirim, kota_pengirim, alamat_asal,
-                         nama_penerima, telpon_penerima, kota_penerima, alamat_tujuan,
-                         jumlah_paket, berat_total, total_jarak, total_ongkir,
-                         status_pengiriman, status_pembayaran, tanggal_dibuat, origin_city_code, destination_city_code
-                  FROM resi
-                  WHERE id = :id AND user_id = :user_id";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
 
     public function getDetailedResi($userId)
     {
@@ -73,8 +91,8 @@ class Resi
                          nama_penerima, telpon_penerima, kota_penerima, alamat_tujuan,
                          jumlah_paket, berat_total, total_jarak, total_ongkir,
                          status_pengiriman, status_pembayaran, tanggal_dibuat,origin_city_code,destination_city_code
-                  FROM resi
-                  WHERE user_id = :user_id
+                 FROM resi
+                 WHERE user_id = :user_id
                   ORDER BY tanggal_dibuat DESC";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':user_id', $userId);
@@ -82,17 +100,35 @@ class Resi
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+
+
     public function getDetailedResiAdmin()
     {
         $query = "SELECT id, user_id, nomor_resi, nama_pengirim, telpon_pengirim, kota_pengirim, alamat_asal,
                          nama_penerima, telpon_penerima, kota_penerima, alamat_tujuan,
                          jumlah_paket, berat_total, total_jarak, total_ongkir,
                          status_pengiriman, status_pembayaran, tanggal_dibuat, origin_city_code, destination_city_code
-                  FROM resi
-                  ORDER BY tanggal_dibuat DESC";
+                 FROM resi
+                 ORDER BY tanggal_dibuat DESC";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getById($id, $userId)
+    {
+        $query = "SELECT id, nomor_resi, nama_pengirim, telpon_pengirim, kota_pengirim, alamat_asal,
+                         nama_penerima, telpon_penerima, kota_penerima, alamat_tujuan,
+                         jumlah_paket, berat_total, total_jarak, total_ongkir,
+                         status_pengiriman, status_pembayaran, tanggal_dibuat, origin_city_code, destination_city_code
+                 FROM resi
+                 WHERE id = :id AND user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getByIdAdmin($id)
@@ -101,15 +137,6 @@ class Resi
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function getStatsAll()
-    {
-        $tot = $this->db->query("SELECT COUNT(*) total FROM resi")->fetch(PDO::FETCH_ASSOC)['total'];
-        $terkirim = $this->db->query("SELECT COUNT(*) total FROM resi WHERE status_pengiriman='Terkirim'")->fetch(PDO::FETCH_ASSOC)['total'];
-        $proses = $this->db->query("SELECT COUNT(*) total FROM resi WHERE status_pengiriman='Dalam Proses'")->fetch(PDO::FETCH_ASSOC)['total'];
-        $tertunda = $this->db->query("SELECT COUNT(*) total FROM resi WHERE status_pengiriman='Tertunda'")->fetch(PDO::FETCH_ASSOC)['total'];
-        return ['total' => $tot, 'terkirim' => $terkirim, 'proses' => $proses, 'tertunda' => $tertunda];
     }
 
     public function create(array $data)
@@ -201,6 +228,7 @@ class Resi
 
         return $stmt->execute();
     }
+
 
     public function deleteById($id, $userId)
     {

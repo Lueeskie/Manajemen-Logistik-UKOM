@@ -8,7 +8,9 @@
         exit;
     }
 
-    $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+    $role = $_SESSION['role'] ?? '';
+    $isAdmin = $role === 'admin';
+    $isDriver = $role === 'driver';
     ?>
     <!DOCTYPE html>
     <html lang="id">
@@ -80,6 +82,7 @@
         $flashSuccess = $_SESSION['flash_success'] ?? null;
         $flashError = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+        $stats = $stats ?? ['total' => 0, 'terkirim' => 0, 'proses' => 0, 'tertunda' => 0];
         ?>
         <nav class="navbar navbar-expand-lg bg-white navbar-dashboard">
             <div class="container-fluid px-4">
@@ -208,13 +211,15 @@
                     </div>
 
 
-                    <div class="d-flex justify-content-end mb-4">
-                        <a href="<?= BASE_URL ?>pengiriman/tambah">
-                            <button class="btn btn-primary btn-sm shadow-sm">
-                                <i class="bi bi-plus-lg me-2"></i>Pengiriman Baru
-                            </button>
-                        </a>
-                    </div>
+                    <?php if (!$isDriver): ?>
+                        <div class="d-flex justify-content-end mb-4">
+                            <a href="<?= BASE_URL ?>pengiriman/tambah">
+                                <button class="btn btn-primary btn-sm shadow-sm">
+                                    <i class="bi bi-plus-lg me-2"></i>Pengiriman Baru
+                                </button>
+                            </a>
+                        </div>
+                    <?php endif; ?>
 
                     <div class="content-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -311,10 +316,12 @@
                                                             <a href="<?= BASE_URL ?>pengiriman/detail?id=<?php echo $row['id']; ?>" class="btn btn-action btn-action-primary d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Detail">
                                                                 <i class="bi bi-eye"></i>
                                                             </a>
-                                                            <?php if ($isAdmin): ?>
+                                                            <?php if ($isAdmin || $isDriver): ?>
                                                                 <a href="<?= BASE_URL ?>pengiriman/edit?id=<?php echo $row['id']; ?>" class="btn btn-action btn-action-warning d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Edit">
                                                                     <i class="bi bi-pencil-square"></i>
                                                                 </a>
+                                                            <?php endif; ?>
+                                                            <?php if ($isAdmin): ?>
                                                                 <form action="<?= BASE_URL ?>pengiriman/delete" method="POST" class="m-0 form-delete-resi">
                                                                     <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                                                     <button type="submit" class="btn btn-action btn-action-danger d-flex align-items-center justify-content-center gap-2 px-3 py-2 shadow-sm" title="Hapus">

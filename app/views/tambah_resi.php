@@ -120,15 +120,15 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                         <div class="col-md-6">
                                             <label for="nomorResi" class="form-label">Nomor Resi</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" placeholder="CTH: BDGABCJKT" readonly>
+                                                <input type="text" class="form-control" id="nomorResi" name="nomor_resi" placeholder="Akan diisi otomatis saat simpan" readonly>
                                             </div>
-                                            <small class="text-muted">Format: originCode + 3 huruf acak + destinationCode</small>
-                                            <div class="invalid-feedback">Nomor resi wajib diisi.</div>
+                                            <small class="text-muted">Nomor resi akan dibuat otomatis berdasarkan kota asal & tujuan.</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="tanggalDibuat" class="form-label">Tanggal Dibuat</label>
                                             <input type="date" class="form-control" id="tanggalDibuat" name="tanggal_dibuat" readonly>
                                         </div>
+
                                     </div>
                                 </div>
 
@@ -378,8 +378,14 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
 
                 [kotaAsalInput, kotaTujuanInput].forEach(input => {
                     if (input) {
-                        input.addEventListener('change', () => { syncKotaCode(); scheduleHitung(); });
-                        input.addEventListener('blur', () => { syncKotaCode(); scheduleHitung(); });
+                        input.addEventListener('change', () => {
+                            syncKotaCode();
+                            scheduleHitung();
+                        });
+                        input.addEventListener('blur', () => {
+                            syncKotaCode();
+                            scheduleHitung();
+                        });
                     }
                 });
 
@@ -474,8 +480,14 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     try {
                         const res = await fetch(hitungUrl, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ asal, tujuan, berat })
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                asal,
+                                tujuan,
+                                berat
+                            })
                         });
                         const data = await res.json();
                         if (!res.ok || data.success !== true) {
