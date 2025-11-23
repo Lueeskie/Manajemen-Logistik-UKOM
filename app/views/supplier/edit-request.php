@@ -8,12 +8,16 @@ $flash_success = $_SESSION['flash_success'] ?? '';
 $flash_error = $_SESSION['flash_error'] ?? '';
 unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 
-// $request adalah data request yang diedit, dikirim dari controller
 $request = $request ?? null;
 if (!$request) {
     header('Location: ' . BASE_URL . 'supplier');
     exit;
 }
+$status = $request['status'] ?? 'Menunggu Konfirmasi';
+$isAdmin = ($_SESSION['role'] ?? '') === 'Admin';
+$canEditData = !in_array($status, ['Dikirim', 'Sampai ke Tujuan']);
+$canChangeStatus = in_array($status, ['Menunggu Konfirmasi', 'Dikonfirmasi', 'Dikirim']);
+$isFinal = $status === 'Sampai ke Tujuan';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -68,54 +72,79 @@ if (!$request) {
                             </div>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="<?= BASE_URL ?>supplier/update/<?= $request['id_request'] ?>">
+                            <form method="POST" action="<?= BASE_URL ?>supplier/update/<?= $request['id_request'] ?>" class="tambah-form">
                                 <div class="mb-4">
                                     <label for="nama_barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
-                                    <input type="text" id="nama_barang" name="nama_barang" class="form-control form-control-supplier" value="<?= htmlspecialchars($request['nama_barang']) ?>" placeholder="Contoh: Laptop ASUS Vivobook 14" required>
-                                    <small class="text-muted">Masukkan nama barang yang akan dikirim</small>
+                                    <input type="text" name="nama_barang" id="nama_barang" class="form-control form-control-supplier" 
+                                           value="<?= htmlspecialchars($request['nama_barang']) ?>" 
+                                           <?= $canEditData ? 'required' : 'disabled' ?>>
                                 </div>
-
-                                <input type="hidden" name="id_request" value="<?= $request['id_request'] ?>">
-                                <input type="hidden" name="id_supplier" value="<?= $_SESSION['user_id'] ?>">
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
                                         <label for="jumlah_barang" class="form-label">Jumlah Barang <span class="text-danger">*</span></label>
-                                        <input type="number" id="jumlah_barang" name="jumlah_barang" class="form-control form-control-supplier" value="<?= $request['jumlah_barang'] ?>" min="1" placeholder="Contoh: 5" required>
-                                        <small class="text-muted">Jumlah unit barang</small>
+                                        <input type="number" name="jumlah_barang" id="jumlah_barang" class="form-control form-control-supplier" 
+                                               value="<?= $request['jumlah_barang'] ?>" min="1"
+                                               <?= $canEditData ? 'required' : 'disabled' ?>>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="berat" class="form-label">Berat Total (kg) <span class="text-danger">*</span></label>
-                                        <input type="number" id="berat" name="berat" class="form-control form-control-supplier" value="<?= $request['berat'] ?>" step="0.01" placeholder="Contoh: 2.5" required>
-                                        <small class="text-muted">Berat total semua barang</small>
+                                        <input type="number" name="berat" id="berat" class="form-control form-control-supplier" step="0.01"
+                                               value="<?= $request['berat'] ?>"
+                                               <?= $canEditData ? 'required' : 'disabled' ?>>
                                     </div>
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="deskripsi" class="form-label">Deskripsi (Opsional)</label>
-                                    <textarea id="deskripsi" name="deskripsi" class="form-control form-control-supplier" rows="4" placeholder="Catatan tambahan, misal: barang mudah pecah, butuh packing kayu, sudah diasuransikan, dll."><?= htmlspecialchars($request['deskripsi'] ?? '') ?></textarea>
-                                    <small class="text-muted">Informasi tambahan yang penting untuk pengiriman</small>
+                                    <label for="deskripsi" class="form-label">Deskripsi</label>
+                                    <textarea name="deskripsi" id="deskripsi" class="form-control form-control-supplier" rows="4"
+                                              <?= $canEditData ? '' : 'disabled' ?>><?= htmlspecialchars($request['deskripsi'] ?? '') ?></textarea>
                                 </div>
 
+                                <?php if ($isAdmin): ?>
                                 <div class="mb-4">
                                     <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                    <select id="status" name="status" class="form-control form-control-supplier" required>
+                                    <select name="status" id="status" class="form-select form-control-supplier" 
+                                            <?= $isFinal ? 'disabled' : '' ?> required>
                                         <option value="">Pilih Status</option>
-                                        <option value="Menunggu Konfirmasi" <?= ($request['status'] ?? '') == 'Menunggu Konfirmasi' ? 'selected' : '' ?>>Menunggu Konfirmasi</option>
-                                        <option value="Dikonfirmasi" <?= ($request['status'] ?? '') == 'Dikonfirmasi' ? 'selected' : '' ?>>Dikonfirmasi</option>
-                                        <option value="Dikirim" <?= ($request['status'] ?? '') == 'Dikirim' ? 'selected' : '' ?>>Dikirim</option>
-                                        <option value="Sampai ke Tujuan" <?= ($request['status'] ?? '') == 'Sampai ke Tujuan' ? 'selected' : '' ?>>Sampai ke Tujuan</option>
-                                    </select>
-                                    <small class="text-muted">Tentukan status request pengiriman</small>
-                                </div>
 
+                                        <?php if ($canEditData): ?>
+                                            <option value="Menunggu Konfirmasi" <?= $status == 'Menunggu Konfirmasi' ? 'selected' : '' ?>>Menunggu Konfirmasi</option>
+                                            <option value="Dikonfirmasi" <?= $status == 'Dikonfirmasi' ? 'selected' : '' ?>>Dikonfirmasi</option>
+                                            <option value="Ditolak" <?= $status == 'Ditolak' ? 'selected' : '' ?>>Ditolak</option>
+                                        <?php endif; ?>
+
+                                        <option value="Dikirim" <?= $status == 'Dikirim' ? 'selected' : '' ?>>Dikirim</option>
+                                        <?php if (!$isFinal): ?>
+                                            <option value="Sampai ke Tujuan" <?= $status == 'Sampai ke Tujuan' ? 'selected' : '' ?>>Sampai ke Tujuan</option>
+                                        <?php endif; ?>
+                                    </select>
+                                        
+                                    <?php if ($isFinal): ?>
+                                        <div class="mt-2">
+                                            <small class="text-danger"><i class="bi bi-lock-fill"></i> Status sudah final. Data tidak dapat diubah lagi.</small>
+                                        </div>
+                                    <?php elseif ($status === 'Dikirim'): ?>
+                                        <div class="mt-2">
+                                            <small class="text-warning"><i class="bi bi-exclamation-triangle"></i> Data barang tidak dapat diubah lagi. Hanya status yang bisa diganti.</small>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
+                                    
                                 <div class="d-flex gap-2">
                                     <a href="<?= BASE_URL ?>supplier" class="btn btn-outline-secondary">
-                                        <i class="bi bi-x-circle me-2"></i>Batal
+                                        Batal
                                     </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-check-circle me-2"></i>Simpan Perubahan
-                                    </button>
+                                    <?php if (!$isFinal): ?>
+                                        <button type="submit" class="btn btn-primary">
+                                            Simpan Perubahan
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="submit" class="btn btn-primary" disabled>
+                                            Tidak Dapat Disimpan
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </form>
                         </div>
@@ -182,6 +211,23 @@ if (!$request) {
                 });
             <?php endif; ?>
         });
+        function confirmFinalStatus() {
+            const select = document.getElementById('status');
+            if (!select) return true;
+
+            const newStatus = select.value;
+            const currentStatus = '<?= $status ?>';
+            
+            if (newStatus === 'Dikirim' && !['Dikirim', 'Sampai ke Tujuan'].includes(currentStatus)) {
+                return confirm("PERINGATAN!\n\nSetelah status menjadi 'Dikirim', Anda TIDAK DAPAT mengubah data barang lagi (nama, jumlah, berat, deskripsi).\n\nApakah Anda yakin?");
+            }
+
+            if (newStatus === 'Sampai ke Tujuan' && currentStatus !== 'Sampai ke Tujuan') {
+                return confirm("PERINGATAN FINAL!\n\nSetelah status menjadi 'Sampai ke Tujuan', SEMUA DATA akan terkunci selamanya.\nTidak ada lagi yang bisa diubah.\n\nApakah Anda benar-benar yakin?");
+            }
+        
+            return true;
+        }
     </script>
 </body>
 </html>

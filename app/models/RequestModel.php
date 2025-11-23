@@ -49,19 +49,37 @@ class RequestModel {
     }
 
     public function updateRequest($id, $data) {
-        $stmt = $this->db->prepare("
-            UPDATE barang_request 
-            SET nama_barang = ?, jumlah_barang = ?, berat = ?, deskripsi = ?, status = ?
-            WHERE id_request = ?
-        ");
-        return $stmt->execute([
-            $data['nama_barang'],
-            $data['jumlah_barang'],
-            $data['berat'],
-            $data['deskripsi'],
-            $data['status'],
-            $id
-        ]);
+        $fields = [];
+        $params = [];
+        
+        if (isset($data['nama_barang'])) {
+            $fields[] = 'nama_barang = ?';
+            $params[] = $data['nama_barang'];
+        }
+        if (isset($data['jumlah_barang'])) {
+            $fields[] = 'jumlah_barang = ?';
+            $params[] = $data['jumlah_barang'];
+        }
+        if (isset($data['berat'])) {
+            $fields[] = 'berat = ?';
+            $params[] = $data['berat'];
+        }
+        if (isset($data['deskripsi'])) {
+            $fields[] = 'deskripsi = ?';
+            $params[] = $data['deskripsi'];
+        }
+        if (isset($data['status'])) {
+            $fields[] = 'status = ?';
+            $params[] = $data['status'];
+        }
+
+        if (empty($fields)) return false;
+
+        $params[] = $id;
+        $query = "UPDATE barang_request SET " . implode(', ', $fields) . " WHERE id_request = ?";
+
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute($params);
     }
 
     public function deleteRequest($id) {

@@ -32,9 +32,11 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                             <p class="text-muted mb-0">Kelola permintaan pengiriman barang dari supplier</p>
                         </div>
                         <div>
-                            <a href="<?= BASE_URL ?>supplier/tambah" class="btn btn-primary">
-                                <i class="bi bi-plus-circle me-2"></i>Tambah Request
-                            </a>
+                            <?php if (($_SESSION['role'] ?? '') === 'Supplier'): ?>
+                                <a href="<?= BASE_URL ?>supplier/tambah" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Tambah Request
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -84,7 +86,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                             <?php foreach ($requests as $r): ?>
                                             <tr>
                                                 <td><code>#<?= str_pad($r['id_request'], 4, '0', STR_PAD_LEFT) ?></code></td>
-                                                <td><?= htmlspecialchars($r['nama_barang']) ?></td>
+                                                <td><?= htmlspecialchars($r['nama_barang'] ?? 'Tidak ada nama barang') ?></td>
                                                 <td><span class="badge bg-primary-soft"><?= $r['jumlah_barang'] ?></span></td>
                                                 <td><span class="badge bg-primary-soft"><?= $r['berat'] ?> kg</span></td>
                                                 <td>
@@ -103,6 +105,9 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                         } elseif ($status == 'Sampai ke Tujuan') {
                                                             $statusClass = 'success';
                                                             $statusIcon = 'box-seam';
+                                                        } elseif ($status == 'Ditolak') {
+                                                            $statusClass = 'danger';
+                                                            $statusIcon = 'x-circle';
                                                         } else {
                                                             $statusClass = 'secondary';
                                                             $statusIcon = '';
@@ -123,15 +128,39 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-end">
                                                             <li>
-                                                                <a class="dropdown-item" href="<?= BASE_URL ?>supplier/edit/<?= $r['id_request'] ?>">
-                                                                    <i class="bi bi-pencil me-2"></i>Edit
-                                                                </a>
+                                                                <?php 
+                                                                $status = $r['status'] ?? 'Menunggu Konfirmasi';
+                                                                $isLocked = ($status === 'Sampai ke Tujuan');
+                                                                ?>
+                                                                <?php if ($isLocked): ?>
+                                                                    <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                        Edit <small class="text-muted">(<?= $status ?>)</small>
+                                                                    </a>
+                                                                <?php else: ?>
+                                                                    <a class="dropdown-item" href="<?= BASE_URL ?>supplier/edit/<?= $r['id_request'] ?>">
+                                                                        Edit
+                                                                    </a>
+                                                                <?php endif; ?>
                                                             </li>
                                                             <li><hr class="dropdown-divider"></li>
                                                             <li>
-                                                                <a class="dropdown-item text-danger" href="#" onclick="hapusRequest(<?= $r['id_request'] ?>); return false;">
-                                                                    <i class="bi bi-trash me-2"></i>Hapus
-                                                                </a>
+                                                                <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
+                                                                    <?php 
+                                                                    $status = $r['status'] ?? 'Menunggu Konfirmasi';
+                                                                    if ($status === 'Dikirim'): ?>
+                                                                        <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                            Hapus <small class="text-muted">(Sudah Dikirim)</small>
+                                                                        </a>
+                                                                    <?php elseif ($status === 'Sampai ke Tujuan'): ?>
+                                                                        <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                            Hapus <small class="text-muted">(Sudah Sampai)</small>
+                                                                        </a>
+                                                                    <?php else: ?>
+                                                                        <a class="dropdown-item text-danger" href="#" onclick="hapusRequest(<?= $r['id_request'] ?>, '<?= $status ?>'); return false;">
+                                                                            Hapus
+                                                                        </a>
+                                                                    <?php endif; ?>
+                                                                <?php endif; ?>
                                                             </li>
                                                         </ul>
                                                     </div>
@@ -157,23 +186,37 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
-        function hapusRequest(requestId) {
+        function hapusRequest(requestId, status = 'Menunggu Konfirmasi') {
+            let title = 'Hapus Request?';
+            let text = 'Apakah Anda yakin ingin menghapus request pengiriman ini?';
+            let allowDelete = true;
+
+            if (status === 'Dikirim') {
+                title = 'Tidak Dapat Menghapus!';
+                text = 'Request barang sudah dalam perjalanan.';
+                allowDelete = false;
+            } else if (status === 'Sampai ke Tujuan') {
+                title = 'Tidak Dapat Menghapus!';
+                text = 'Request barang sudah sampai ke tujuan.';
+                allowDelete = false;
+            }
+
             Swal.fire({
-                title: 'Hapus Request?',
-                text: 'Apakah Anda yakin ingin menghapus request pengiriman ini?',
-                icon: 'warning',
-                showCancelButton: true,
+                title: title,
+                text: text,
+                icon: allowDelete ? 'warning' : 'error',
+                showCancelButton: allowDelete,
                 confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Hapus!',
+                confirmButtonText: allowDelete ? 'Ya, Hapus!' : 'OK',
                 cancelButtonText: 'Batal'
             }).then((result) => {
-                if (result.isConfirmed) {
+                if (result.isConfirmed && allowDelete) {
                     window.location.href = '<?= BASE_URL ?>supplier/hapus/' + requestId;
                 }
             });
         }
-        
+
         document.getElementById('searchInput').addEventListener('keyup', function() {
             let searchValue = this.value.toLowerCase();
             let tableRows = document.querySelectorAll('#requestTable tbody tr');
