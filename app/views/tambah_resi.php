@@ -242,7 +242,7 @@ $isAdmin = $role === 'Admin';
                                                     <label class="form-check-label" for="paymentCod">
                                                         COD (Cash on Delivery)
                                                     </label>
-                                                    <div class="text-muted small">Pembayaran dilakukan saat paket tiba.</div>
+                                                    <div class="text-muted small">Pembayaran dilakukan saat Kurir tiba.</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -444,6 +444,8 @@ $isAdmin = $role === 'Admin';
                 }
 
                 // Fitur: auto hitung jarak + ongkir saat kota asal & tujuan terisi
+
+
                 const asalInput = document.getElementById('kotaPengirim');
                 const tujuanInput = document.getElementById('kotaPenerima');
                 const jarakInput = document.getElementById('totalJarak');
@@ -458,6 +460,7 @@ $isAdmin = $role === 'Admin';
                     const berat = parseFloat(beratInput?.value || '0') || 0;
                     if (!asal || !tujuan) return;
 
+                    //Kirim data ke Endpoint memakai format JSON
                     try {
                         const res = await fetch(hitungUrl, {
                             method: 'POST', 
@@ -470,6 +473,8 @@ $isAdmin = $role === 'Admin';
                                 berat
                             })
                         });
+
+                        //Jika data didapat maka ubah value di form pengiriman dan bulatkan angkanya
                         const data = await res.json();
                         if (!res.ok || data.success !== true) {
                             throw new Error(data.message || 'Gagal menghitung jarak');
@@ -483,6 +488,8 @@ $isAdmin = $role === 'Admin';
                     }
                 };
 
+
+                
                 const scheduleHitung = () => {
                     clearTimeout(hitungTimer);
                     hitungTimer = setTimeout(hitungOtomatis, 400);
@@ -495,7 +502,7 @@ $isAdmin = $role === 'Admin';
                     }
                 });
 
-                // Sinkron dan hitung di awal (berguna untuk halaman edit/old input)
+    
                 syncKotaCode();
                 scheduleHitung();
             });

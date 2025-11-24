@@ -142,7 +142,7 @@ class PengirimanController
             exit;
         }
 
-        // Step 1: Hitung otomatis jarak + ongkir berdasarkan kota asal/tujuan + berat (tarif per km + tarif per kg)
+        // Hitung otomatis jarak + ongkir berdasarkan kota asal/tujuan + berat (tarif per km + tarif per kg)
         $beratKg = 0.0;
         if ($data['berat_total'] !== null) {
             $beratKg = (float) $data['berat_total'];
@@ -158,7 +158,11 @@ class PengirimanController
         $data['total_jarak'] = $hasilHitung['jarak_km'];
         $data['total_ongkir'] = $hasilHitung['ongkir'];
 
-        $this->resiModel->add   ($data);
+        $resiId = $this->resiModel->add($data);
+        // Status awal dicatat di tabel status_pengiriman
+        if ($resiId > 0) {
+            $this->resiModel->insertStatusPengiriman($resiId, (int) $data['user_id'], 'Dalam Proses');
+        }
 
         if (strtolower($data['status_pembayaran']) === 'terbayar') {
             $_SESSION['flash_success'] = 'anda sukses melakukan pembayaran';
@@ -168,7 +172,7 @@ class PengirimanController
         header('Location: ' . BASE_URL . 'pengiriman');
     }
 
-    // Step 2: Endpoint AJAX untuk hitung jarak/ongkir saat user isi kota di form
+    //Endpoint AJAX untuk hitung jarak/ongkir saat user isi kota di form
     public function hitungJarakAjax()
     {
         session_start();
@@ -364,27 +368,8 @@ class PengirimanController
             if ($statusBaru === $resi['status_pengiriman']) {
                 $_SESSION['flash_success'] = 'Status pengiriman tidak berubah.';
             } else {
-                $dataUpdate = [
-                    'nomor_resi' => $resi['nomor_resi'],
-                    'nama_pengirim' => $resi['nama_pengirim'],
-                    'telpon_pengirim' => $resi['telpon_pengirim'],
-                    'kota_pengirim' => $resi['kota_pengirim'],
-                    'alamat_asal' => $resi['alamat_asal'],
-                    'nama_penerima' => $resi['nama_penerima'],
-                    'telpon_penerima' => $resi['telpon_penerima'],
-                    'kota_penerima' => $resi['kota_penerima'],
-                    'origin_city_code' => $resi['origin_city_code'],
-                    'destination_city_code' => $resi['destination_city_code'],
-                    'alamat_tujuan' => $resi['alamat_tujuan'],
-                    'jumlah_paket' => (int) $resi['jumlah_paket'],
-                    'berat_total' => $resi['berat_total'],
-                    'total_jarak' => $resi['total_jarak'],
-                    'total_ongkir' => $resi['total_ongkir'],
-                    'status_pengiriman' => $statusBaru,
-                    'status_pembayaran' => $resi['status_pembayaran'] ?: 'Belum Bayar',
-                ];
-                $updated = $this->resiModel->updateById($id, (int) $resi['user_id'], $dataUpdate);
-                if ($updated) {
+                $inserted = $this->resiModel->insertStatusPengiriman($id, (int) $_SESSION['user_id'], $statusBaru);
+                if ($inserted) {
                     $_SESSION['flash_success'] = 'Status pengiriman diperbarui.';
                 } else {
                     $_SESSION['flash_error'] = 'Gagal memperbarui status.';
@@ -411,9 +396,9 @@ class PengirimanController
             'berat_total' => $this->inputFloatOrNull('berat_total'),
             'total_jarak' => $this->inputFloatOrNull('total_jarak'),
             'total_ongkir' => $this->inputFloatOrNull('total_ongkir'),
-            'status_pengiriman' => $_POST['status_pengiriman'] ?? '',
             'status_pembayaran' => $_POST['status_pembayaran'] ?? 'Belum Bayar',
         ];
+        $statusBaru = trim($_POST['status_pengiriman'] ?? '');
         if (empty($data['status_pembayaran'])) {
             $data['status_pembayaran'] = 'Belum Bayar';
         }
@@ -458,11 +443,21 @@ class PengirimanController
         $data['total_ongkir'] = $hasilHitung['ongkir'];
 
         $updated = $this->resiModel->updateById($id, $_SESSION['user_id'], $data);
-        if ($updated) {
-            $_SESSION['flash_success'] = 'Resi berhasil diperbarui.';
-        } else {
+        if (!$updated) {
             $_SESSION['flash_error'] = 'Gagal memperbarui resi.';
+            header('Location: ' . BASE_URL . 'pengiriman');
+            return;
         }
+
+        // Tambah status baru jika diisi dan berbeda dari yang terbaru
+        if ($statusBaru !== '') {
+            $latest = $this->resiModel->getLatestStatus($id);
+            if ($latest === null || $latest !== $statusBaru) {
+                $this->resiModel->insertStatusPengiriman($id, (int) $_SESSION['user_id'], $statusBaru);
+            }
+        }
+
+        $_SESSION['flash_success'] = 'Resi berhasil diperbarui.';
         header('Location: ' . BASE_URL . 'pengiriman');
     }
 
@@ -505,7 +500,7 @@ class PengirimanController
             return null;
         }
 
-        // Step 1: Geocode kota asal/tujuan untuk dapatkan lat,lon
+        // Lakukan Geocode kota asal dan kode kota
         $geocode = function (string $city) use ($apiKey) {
             $url = 'https://api.openrouteservice.org/geocode/search?api_key=' . urlencode($apiKey) .
                 '&text=' . urlencode($city);
@@ -529,6 +524,8 @@ class PengirimanController
         }
 
         // Step 2: Hitung rute driving-car untuk dapatkan jarak meter
+
+        //Kirim data ke API berbentuk array
         $payload = [
             'coordinates' => [
                 [$koorAsal['lon'], $koorAsal['lat']],
@@ -561,8 +558,8 @@ class PengirimanController
 
         // Step 3: Konversi ke km dan kalikan tarif km + tarif kg
         // Bulatkan jarak ke bilangan bulat (tanpa desimal)
-        $jarakKmRaw = ((float) $distMeters) / 1000;
-        $jarakKm = round($jarakKmRaw, 0); 
+        $jarakM = ((float) $distMeters) / 1000;
+        $jarakKm = round($jarakM, 0); 
         $biayaJarak = $jarakKm * $tarifPerKm;
         $biayaBerat = max(0, $beratKg) * $tarifPerKg;
         $ongkir = round($biayaJarak + $biayaBerat); 
