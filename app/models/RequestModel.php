@@ -8,16 +8,22 @@ class RequestModel {
         $this->db = Database::getInstance();
     }
 
-    public function createRequest($id_supplier, $nama_barang, $jumlah_barang, $berat, $deskripsi = '') {
+    public function createRequest($id_supplier, $nama_barang, $jumlah_barang, $berat, 
+                                 $deskripsi = '', $alamat_asal = '', $alamat_tujuan = '', $foto_paket = null) {
         $stmt = $this->db->prepare("INSERT INTO barang_request 
-            (id_supplier, nama_barang, jumlah_barang, berat, deskripsi) 
-            VALUES (:id_supplier, :nama_barang, :jumlah_barang, :berat, :deskripsi)");
-        
+            (id_supplier, nama_barang, jumlah_barang, berat, deskripsi, 
+             alamat_asal, alamat_tujuan, foto_paket) 
+            VALUES (:id_supplier, :nama_barang, :jumlah_barang, :berat, :deskripsi,
+                    :alamat_asal, :alamat_tujuan, :foto_paket)");
+
         $stmt->bindParam(':id_supplier', $id_supplier);
         $stmt->bindParam(':nama_barang', $nama_barang);
         $stmt->bindParam(':jumlah_barang', $jumlah_barang);
         $stmt->bindParam(':berat', $berat);
         $stmt->bindParam(':deskripsi', $deskripsi);
+        $stmt->bindParam(':alamat_asal', $alamat_asal);
+        $stmt->bindParam(':alamat_tujuan', $alamat_tujuan);
+        $stmt->bindParam(':foto_paket', $foto_paket);
 
         return $stmt->execute();
     }
@@ -37,7 +43,7 @@ class RequestModel {
         $stmt = $this->db->prepare("SELECT br.*, u.username, u.email 
                                     FROM barang_request br 
                                     JOIN users u ON br.id_supplier = u.id 
-                                    ORDER BY br.created_at DESC");
+                                    ORDER BY br.created_at ASC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -71,6 +77,18 @@ class RequestModel {
         if (isset($data['status'])) {
             $fields[] = 'status = ?';
             $params[] = $data['status'];
+        }
+        if (isset($data['alamat_asal'])) {
+            $fields[] = 'alamat_asal = ?';
+            $params[] = $data['alamat_asal'];
+        }
+        if (isset($data['alamat_tujuan'])) {
+            $fields[] = 'alamat_tujuan = ?';
+            $params[] = $data['alamat_tujuan'];
+        }
+        if (isset($data['foto_paket'])) {
+            $fields[] = 'foto_paket = ?';
+            $params[] = $data['foto_paket'];
         }
 
         if (empty($fields)) return false;

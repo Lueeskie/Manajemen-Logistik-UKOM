@@ -16,6 +16,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     <title>Tambah Request - Astral Express</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/supplier-tambah.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -57,7 +58,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                             <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Informasi Paket</h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="<?= BASE_URL ?>supplier/proses-tambah" class="tambah-form">
+                            <form method="POST" action="<?= BASE_URL ?>supplier/proses-tambah" class="tambah-form" enctype="multipart/form-data">
                                 <div class="mb-4">
                                     <label for="nama_barang" class="form-label">Nama Paket (Bisa diisi Nama Barang) <span class="text-danger">*</span></label>
                                     <input type="text" id="nama_barang" name="nama_barang" class="form-control form-control-supplier" placeholder="Contoh: Laptop dan Handphone" required>
@@ -80,9 +81,27 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                 </div>
 
                                 <div class="mb-4">
+                                    <label for="alamat_asal" class="form-label">Alamat Asal (Gudang/Pengambilan) <span class="text-danger">*</span></label>
+                                    <textarea id="alamat_asal" name="alamat_asal" class="form-control form-control-supplier" rows="3" placeholder="Contoh: Jl. Merdeka No. 123, Jakarta Pusat" required></textarea>
+                                    <small class="text-muted">Alamat lokasi untuk pengambilan barang</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="alamat_tujuan" class="form-label">Alamat Tujuan (Penerima) <span class="text-danger">*</span></label>
+                                    <textarea id="alamat_tujuan" name="alamat_tujuan" class="form-control form-control-supplier" rows="3" placeholder="Contoh: Jl. Sudirman No. 456, Bandung" required></textarea>
+                                    <small class="text-muted">Alamat lokasi untuk pengiriman barang</small>
+                                </div>
+
+                                <div class="mb-4">
                                     <label for="deskripsi" class="form-label">Deskripsi (Opsional)</label>
                                     <textarea id="deskripsi" name="deskripsi" class="form-control form-control-supplier" rows="4" placeholder="Catatan tambahan, misal: barang mudah pecah, butuh packing kayu, sudah diasuransikan, dll."></textarea>
                                     <small class="text-muted">Informasi tambahan yang penting untuk pengiriman</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="foto_paket" class="form-label">Foto Paket (Opsional)</label>
+                                    <input type="file" id="foto_paket" name="foto_paket" class="form-control form-control-supplier" accept="image/*">
+                                    <small class="text-muted">Max : 2MB</small>
                                 </div>
 
                                 <div class="d-flex gap-2">
@@ -134,5 +153,30 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () { 
+            <?php if ($flash_success): ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: <?= json_encode($flash_success) ?>,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3554f5'
+                }).then(() => {
+                    window.location.href = '<?= BASE_URL ?>supplier';
+                });
+            <?php endif; ?>
+
+            <?php if ($flash_error): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: <?= json_encode($flash_error) ?>,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545'
+                });
+            <?php endif; ?>
+        });
+    </script>
 </body>
 </html>

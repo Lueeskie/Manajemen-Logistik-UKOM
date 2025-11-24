@@ -77,6 +77,8 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                 <th>Nama Paket</th>
                                                 <th>Jumlah</th>
                                                 <th>Berat (kg)</th>
+                                                <th>Alamat Asal</th>
+                                                <th>Alamat Tujuan</th>
                                                 <th>Status</th>
                                                 <th>Tanggal</th>
                                                 <th>Aksi</th>
@@ -86,13 +88,20 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                             <?php foreach ($requests as $r): ?>
                                             <tr>
                                                 <td><code>#<?= str_pad($r['id_request'], 4, '0', STR_PAD_LEFT) ?></code></td>
-                                                <td><?= htmlspecialchars($r['nama_barang'] ?? 'Tidak ada nama barang') ?></td>
+                                                <td class="text-truncate" style="max-width: 300px;" title="<?= htmlspecialchars($r['nama_barang'] ?? '-') ?>">
+                                                    <?= htmlspecialchars($r['nama_barang'] ?? 'Tidak ada nama barang') ?>
+                                                </td>
                                                 <td><span class="badge bg-primary-soft"><?= $r['jumlah_barang'] ?></span></td>
                                                 <td><span class="badge bg-primary-soft"><?= $r['berat'] ?> kg</span></td>
+                                                <td class="text-truncate" style="max-width: 200px;" title="<?= htmlspecialchars($r['alamat_asal'] ?? '-') ?>">
+                                                    <?= htmlspecialchars(strlen($r['alamat_asal'] ?? '') > 30 ? substr($r['alamat_asal'], 0, 30).'...' : ($r['alamat_asal'] ?? '-')) ?>
+                                                </td>
+                                                <td class="text-truncate" style="max-width: 200px;" title="<?= htmlspecialchars($r['alamat_tujuan'] ?? '-') ?>">
+                                                    <?= htmlspecialchars(strlen($r['alamat_tujuan'] ?? '') > 30 ? substr($r['alamat_tujuan'], 0, 30).'...' : ($r['alamat_tujuan'] ?? '-')) ?>
+                                                </td>
                                                 <td>
                                                     <?php 
                                                         $status = $r['status'] ?? 'Menunggu Konfirmasi';
-                                                        
                                                         if ($status == 'Menunggu Konfirmasi') {
                                                             $statusClass = 'warning';
                                                             $statusIcon = 'clock';
@@ -127,6 +136,11 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                             <i class="bi bi-gear"></i>
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li>
+                                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#detailModal<?= $r['id_request'] ?>">
+                                                                    Detail
+                                                                </a>
+                                                            </li>
                                                             <li>
                                                                 <?php 
                                                                 $status = $r['status'] ?? 'Menunggu Konfirmasi';
@@ -182,6 +196,57 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
             </div>
         </div>
     </main>
+    <?php if (!empty($requests)): ?>
+    <?php foreach ($requests as $r): ?>
+    <div class="modal fade" id="detailModal<?= $r['id_request'] ?>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Request #<?= str_pad($r['id_request'], 4, '0', STR_PAD_LEFT) ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nama Paket:</strong> <?= htmlspecialchars($r['nama_barang'] ?? '-') ?></p>
+                            <p><strong>Jumlah:</strong> <?= $r['jumlah_barang'] ?> unit</p>
+                            <p><strong>Berat:</strong> <?= $r['berat'] ?> kg</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-<?= $statusClass ?? 'secondary' ?>-soft"><?= $r['status'] ?? 'Menunggu' ?></span>
+                            </p>
+                            <p><strong>Tanggal:</strong> <?= date('d M Y H:i', strtotime($r['created_at'])) ?></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Alamat Asal:</strong><br>
+                                <small><?= nl2br(htmlspecialchars($r['alamat_asal'] ?? 'Tidak diisi')) ?></small>
+                            </p>
+                            <p><strong>Alamat Tujuan:</strong><br>
+                                <small><?= nl2br(htmlspecialchars($r['alamat_tujuan'] ?? 'Tidak diisi')) ?></small>
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <p><strong>Deskripsi:</strong><br>
+                        <?= nl2br(htmlspecialchars($r['deskripsi'] ?? 'Tidak ada deskripsi')) ?>
+                    </p>
+                    <?php if (!empty($r['foto_paket'])): ?>
+                        <div class="text-center mt-3">
+                            <p><strong>Foto Paket:</strong></p>
+                            <img src="<?= BASE_URL ?>uploads/paket/<?= htmlspecialchars($r['foto_paket']) ?>" 
+                                 class="img-fluid rounded shadow" style="max-height: 500px;" alt="Foto Paket">
+                        </div>
+                    <?php else: ?>
+                        <p class="text-muted text-center"><em>Belum ada foto paket</em></p>
+                    <?php endif; ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endforeach; ?>
+<?php endif; ?>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>

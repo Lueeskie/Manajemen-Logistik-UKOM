@@ -96,6 +96,20 @@ $isFinal = $status === 'Sampai ke Tujuan';
                                 </div>
 
                                 <div class="mb-4">
+                                    <label class="form-label">Alamat Asal (Gudang/Pengambilan) <span class="text-danger">*</span></label>
+                                    <textarea name="alamat_asal" class="form-control form-control-supplier" rows="2" 
+                                              <?= $canEditData ? 'required' : 'disabled' ?>><?= htmlspecialchars($request['alamat_asal'] ?? '') ?></textarea>
+                                    <small class="text-muted">Alamat lokasi pengambilan barang</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Alamat Tujuan (Penerima) <span class="text-danger">*</span></label>
+                                    <textarea name="alamat_tujuan" class="form-control form-control-supplier" rows="3" 
+                                              <?= $canEditData ? 'required' : 'disabled' ?>><?= htmlspecialchars($request['alamat_tujuan'] ?? '') ?></textarea>
+                                    <small class="text-muted">Alamat lengkap penerima barang</small>
+                                </div>
+
+                                <div class="mb-4">
                                     <label for="deskripsi" class="form-label">Deskripsi</label>
                                     <textarea name="deskripsi" id="deskripsi" class="form-control form-control-supplier" rows="4"
                                               <?= $canEditData ? '' : 'disabled' ?>><?= htmlspecialchars($request['deskripsi'] ?? '') ?></textarea>
@@ -130,6 +144,21 @@ $isFinal = $status === 'Sampai ke Tujuan';
                                         </div>
                                     <?php endif; ?>
                                 </div>
+                                <?php endif; ?>
+                                <?php if ($canEditData): ?>
+                                    <div class="mb-4">
+                                        <label class="form-label">Foto Paket (Opsional)</label>
+                                        <input type="file" name="foto_paket" class="form-control" accept="image/*">
+                                        <small class="text-muted">Max 2MB. Biarkan kosong jika tidak ingin ganti.</small>
+                                        
+                                        <?php if (!empty($request['foto_paket'])): ?>
+                                            <div class="mt-3">
+                                                <p><strong>Foto Saat Ini:</strong></p>
+                                                <img src="<?= BASE_URL ?>uploads/paket/<?= htmlspecialchars($request['foto_paket']) ?>" 
+                                                     class="img-thumbnail" style="max-height: 200px;" alt="Foto Paket">
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 <?php endif; ?>
                                     
                                 <div class="d-flex gap-2">
