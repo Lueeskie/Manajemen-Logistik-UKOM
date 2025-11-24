@@ -54,14 +54,14 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                 <div class="col-lg-8">
                     <div class="content-card">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Informasi Barang</h5>
+                            <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Informasi Paket</h5>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="<?= BASE_URL ?>supplier/proses-tambah" class="tambah-form">
                                 <div class="mb-4">
-                                    <label for="nama_barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
-                                    <input type="text" id="nama_barang" name="nama_barang" class="form-control form-control-supplier" placeholder="Contoh: Laptop ASUS Vivobook 14" required>
-                                    <small class="text-muted">Masukkan nama barang yang akan dikirim</small>
+                                    <label for="nama_barang" class="form-label">Nama Paket (Bisa diisi Nama Barang) <span class="text-danger">*</span></label>
+                                    <input type="text" id="nama_barang" name="nama_barang" class="form-control form-control-supplier" placeholder="Contoh: Laptop dan Handphone" required>
+                                    <small class="text-muted">Masukkan nama paket yang akan dikirim</small>
                                 </div>
 
                                 <input type="hidden" name="id_supplier" value="<?php echo $_SESSION['user_id']; ?>">

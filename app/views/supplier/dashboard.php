@@ -74,7 +74,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                         <thead>
                                             <tr>
                                                 <th>ID Request</th>
-                                                <th>Nama Barang</th>
+                                                <th>Nama Paket</th>
                                                 <th>Jumlah</th>
                                                 <th>Berat (kg)</th>
                                                 <th>Status</th>

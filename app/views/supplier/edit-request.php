@@ -67,14 +67,14 @@ $isFinal = $status === 'Sampai ke Tujuan';
                     <div class="content-card">
                         <div class="card-header">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Informasi Barang</h5>
+                                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Informasi Paket</h5>
                                 <small class="text-muted">ID Request: <code>#<?= str_pad($request['id_request'], 4, '0', STR_PAD_LEFT) ?></code></small>
                             </div>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="<?= BASE_URL ?>supplier/update/<?= $request['id_request'] ?>" class="tambah-form">
                                 <div class="mb-4">
-                                    <label for="nama_barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
+                                    <label for="nama_barang" class="form-label">Nama Barang (Bisa diisi Nama Barang)  <span class="text-danger">*</span></label>
                                     <input type="text" name="nama_barang" id="nama_barang" class="form-control form-control-supplier" 
                                            value="<?= htmlspecialchars($request['nama_barang']) ?>" 
                                            <?= $canEditData ? 'required' : 'disabled' ?>>

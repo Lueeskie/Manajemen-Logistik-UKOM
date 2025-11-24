@@ -36,8 +36,8 @@ $recentResi = $recentResi ?? [];
                     <div class="col-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h1 class="h3 fw-bold mb-2">Selamat datang, <?php echo $_SESSION['username'] ?? 'User'; ?>!</h1>
-                                <p class="text-muted mb-0">Kelola distribusi barang dan pantau stok Anda di sini</p>
+                                <h1 class="h3 fw-bold mb-2">Welcome, <?php echo $_SESSION['username'] ?? 'User'; ?></h1>
+                                <p class="text-muted mb-0">Kelola Inventaris Barang, Resi Pengiriman dan Supplier disini</p>
                             </div>
                             <div>
                             </div>
