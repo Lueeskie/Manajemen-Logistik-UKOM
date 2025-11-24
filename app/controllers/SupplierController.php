@@ -109,12 +109,6 @@ class SupplierController {
         $requestId = (int)$id;
         $request = $this->requestModel->getRequestById($requestId);
 
-        if (!$request || $request['id_supplier'] != $_SESSION['user_id']) {
-            $_SESSION['flash_error'] = "Request tidak ditemukan atau akses ditolak!";
-            header('Location: ' . BASE_URL . 'supplier');
-            exit;
-        }
-
         $active_page = 'supplier';
 
         require __DIR__ . '/../views/header.php';
@@ -135,12 +129,6 @@ class SupplierController {
 
         $requestId = (int)$id;
         $request = $this->requestModel->getRequestById($requestId);
-
-        if (!$request || $request['id_supplier'] != $_SESSION['user_id']) {
-            $_SESSION['flash_error'] = "Akses ditolak!";
-            header('Location: ' . BASE_URL . 'supplier');
-            exit;
-        }
 
         $currentStatus = $request['status'] ?? 'Menunggu Konfirmasi';
         $newStatus = $_POST['status'] ?? $currentStatus;

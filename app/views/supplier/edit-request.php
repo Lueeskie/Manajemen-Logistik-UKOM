@@ -72,7 +72,7 @@ $isFinal = $status === 'Sampai ke Tujuan';
                             </div>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="<?= BASE_URL ?>supplier/update/<?= $request['id_request'] ?>" class="tambah-form">
+                            <form method="POST" action="<?= BASE_URL ?>supplier/update/<?= $request['id_request'] ?>" class="tambah-form" enctype="multipart/form-data">
                                 <div class="mb-4">
                                     <label for="nama_barang" class="form-label">Nama Barang (Bisa diisi Nama Barang)  <span class="text-danger">*</span></label>
                                     <input type="text" name="nama_barang" id="nama_barang" class="form-control form-control-supplier" 
