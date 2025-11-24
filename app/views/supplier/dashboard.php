@@ -120,7 +120,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                         <?= $status ?>
                                                     </span>
                                                 </td>
-                                                <td style="min-width: 180px;"><?= date('d M Y H:i', strtotime($r['created_at'])) ?></td>
+                                                <td style="min-width: 200px;"><?= date('d M Y H:i', strtotime($r['created_at'])) ?></td>
                                                 <td>
                                                     <div class="dropdown">
                                                         <button class="btn btn-sm btn-action" type="button" data-bs-toggle="dropdown" aria-expanded="false">
