@@ -21,7 +21,7 @@ class User {
         return false;
     }
 
-    public function register($username, $email, $password, $role = 'user') {
+    public function register($username, $email, $password, $role = 'Customer') {
         $checkStmt = $this->db->prepare("SELECT id FROM users WHERE username = :username OR email = :email");
         $checkStmt->bindParam(':username', $username);
         $checkStmt->bindParam(':email', $email);

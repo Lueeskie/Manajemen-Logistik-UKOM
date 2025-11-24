@@ -8,7 +8,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+$role = $_SESSION['role'] ?? '';
+$isAdmin = $role === 'Admin';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -234,14 +235,14 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                                     <label class="form-check-label" for="paymentQris">
                                                         QRIS (bayar sekarang)
                                                     </label>
-                                                    <div class="text-muted small">Muncul modal QR statis, lalu konfirmasi pembayaran.</div>
+                                                    <div class="text-muted small">Scan QR untuk menyelesaikan pembayaran sebelum pengiriman diproses.5</div>
                                                 </div>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="radio" name="payment_method" id="paymentCod" value="cod" checked>
                                                     <label class="form-check-label" for="paymentCod">
                                                         COD (Cash on Delivery)
                                                     </label>
-                                                    <div class="text-muted small">Status pembayaran akan diset ke Belum Dibayar.</div>
+                                                    <div class="text-muted small">Pembayaran dilakukan saat paket tiba.</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -456,12 +457,10 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     const tujuan = (tujuanInput?.value || '').trim();
                     const berat = parseFloat(beratInput?.value || '0') || 0;
                     if (!asal || !tujuan) return;
-                    if (jarakInput) jarakInput.value = '...';
-                    if (ongkirInput) ongkirInput.value = '';
 
                     try {
                         const res = await fetch(hitungUrl, {
-                            method: 'POST',
+                            method: 'POST', 
                             headers: {
                                 'Content-Type': 'application/json'
                             },

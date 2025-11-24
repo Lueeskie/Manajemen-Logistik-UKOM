@@ -14,7 +14,8 @@ if (isset($_SESSION['flash_success'])) {
 $stats = $stats ?? ['total' => 0, 'terkirim' => 0, 'proses' => 0, 'tertunda' => 0];
 $recentResi = $recentResi ?? [];
 
-$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+$role = strtolower($_SESSION['role'] ?? '');
+$isAdmin = $role === 'admin';
 ?>
 <!DOCTYPE html>
 <html lang="id">

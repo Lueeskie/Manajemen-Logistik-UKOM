@@ -20,8 +20,8 @@ class AuthController {
             $user = $this->userModel->login($email, $password);
             if ($user) {
                 $_SESSION['user_id'] = $user['id'];
-                $_SESSION['role'] = $user['role'] ?? 'user'; // verifikasi peran, default user
-                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'] ?? 'Customer'; // simpan sesuai DB, bisa "Admin"/"Driver"/"Customer"
+                $_SESSION['username'] = $user['username'] ?? '';
                 header('Location: ' . BASE_URL . 'dashboard');
                 exit;
             } else {

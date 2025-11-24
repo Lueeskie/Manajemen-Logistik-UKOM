@@ -30,8 +30,8 @@ class PengirimanController
 
         $userId = $_SESSION['user_id'];
         $role = $_SESSION['role'] ?? '';
-        $isAdmin = $role === 'admin';
-        $isDriver = $role === 'driver';
+        $isAdmin = $role === 'Admin';
+        $isDriver = $role === 'Driver';
 
         if ($isAdmin || $isDriver) {
             $stats = $this->resiModel->getStatsAll();
@@ -158,7 +158,7 @@ class PengirimanController
         $data['total_jarak'] = $hasilHitung['jarak_km'];
         $data['total_ongkir'] = $hasilHitung['ongkir'];
 
-        $this->resiModel->create($data);
+        $this->resiModel->add   ($data);
 
         if (strtolower($data['status_pembayaran']) === 'terbayar') {
             $_SESSION['flash_success'] = 'anda sukses melakukan pembayaran';
@@ -235,8 +235,8 @@ class PengirimanController
 
         $userId = $_SESSION['user_id'];
         $role = $_SESSION['role'] ?? '';
-        $isAdmin = $role === 'admin';
-        $isDriver = $role === 'driver';
+        $isAdmin = $role === 'Admin';
+        $isDriver = $role === 'Driver';
 
         $resi = ($isAdmin || $isDriver)
             ? $this->resiModel->getByIdAdmin($id)
@@ -269,12 +269,6 @@ class PengirimanController
             exit;
         }
 
-        if (($_SESSION['role'] ?? '') === 'driver') {
-            $_SESSION['flash_error'] = 'Driver tidak diizinkan menghapus resi.';
-            header('Location: ' . BASE_URL . 'pengiriman');
-            exit;
-        }
-
         $id = 0;
         if (isset($_POST['id'])) {
             $id = (int) $_POST['id'];
@@ -285,7 +279,8 @@ class PengirimanController
             exit;
         }
 
-        $deleted = $this->resiModel->deleteById($id, $_SESSION['user_id']);
+
+        $deleted = $this->resiModel->deleteById($id);
         if ($deleted) {
             $_SESSION['flash_success'] = 'Resi berhasil dihapus.';
         } else {
@@ -311,11 +306,17 @@ class PengirimanController
 
         $userId = $_SESSION['user_id'];
         $role = $_SESSION['role'] ?? '';
-        $isAdmin = $role === 'admin';
-        $isDriver = $role === 'driver';
+        $isAdmin = $role === 'Admin';
+        $isDriver = $role === 'Driver';
         $resi = ($isAdmin || $isDriver)
             ? $this->resiModel->getByIdAdmin($id)
             : $this->resiModel->getById($id, $userId);
+
+        if (!$resi) {
+            $_SESSION['flash_error'] = 'Resi tidak ditemukan atau bukan milik Anda.';
+            header('Location: ' . BASE_URL . 'pengiriman');
+            exit;
+        }
 
         $user_info = $this->userModel->getProfile($userId);
         if (!$user_info) {
@@ -343,7 +344,7 @@ class PengirimanController
         }
 
         $role = $_SESSION['role'] ?? '';
-        $isDriver = $role === 'driver';
+        $isDriver = $role === 'Driver';
 
         $id = $this->inputInt('id', 0);
         if ($id <= 0) {
@@ -561,10 +562,10 @@ class PengirimanController
         // Step 3: Konversi ke km dan kalikan tarif km + tarif kg
         // Bulatkan jarak ke bilangan bulat (tanpa desimal)
         $jarakKmRaw = ((float) $distMeters) / 1000;
-        $jarakKm = round($jarakKmRaw, 0); // contoh: 175.53 -> 176
+        $jarakKm = round($jarakKmRaw, 0); 
         $biayaJarak = $jarakKm * $tarifPerKm;
         $biayaBerat = max(0, $beratKg) * $tarifPerKg;
-        $ongkir = round($biayaJarak + $biayaBerat); // rupiah dibulatkan ke integer
+        $ongkir = round($biayaJarak + $biayaBerat); 
 
         return [
             'jarak_km' => $jarakKm,

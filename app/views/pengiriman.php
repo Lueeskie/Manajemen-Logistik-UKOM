@@ -9,8 +9,8 @@
     }
 
     $role = $_SESSION['role'] ?? '';
-    $isAdmin = $role === 'admin';
-    $isDriver = $role === 'driver';
+    $isAdmin = $role === 'Admin';
+    $isDriver = $role === 'Driver';
     ?>
     <!DOCTYPE html>
     <html lang="id">

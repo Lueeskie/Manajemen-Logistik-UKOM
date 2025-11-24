@@ -28,7 +28,7 @@ if (!isset($_SESSION['user_id'])) {
 <body>
     <?php
     $role = $_SESSION['role'] ?? '';
-    $isDriver = $role === 'driver';
+    $isDriver = $role === 'Driver';
     $disableNonStatus = $isDriver ? 'disabled' : '';
     $flashSuccess = $_SESSION['flash_success'] ?? null;
     $flashError = $_SESSION['flash_error'] ?? null;

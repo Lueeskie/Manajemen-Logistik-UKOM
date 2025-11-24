@@ -230,11 +230,11 @@ class Resi
     }
 
 
-    public function deleteById($id, $userId)
+    public function deleteById($id)
     {
-        $stmt = $this->db->prepare("DELETE FROM resi WHERE id = :id AND user_id = :user_id");
+        $stmt = $this->db->prepare("DELETE FROM resi WHERE id = :id");
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-        return $stmt->execute();
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
     }
 }

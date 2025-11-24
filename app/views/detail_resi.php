@@ -8,7 +8,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+$role = strtolower($_SESSION['role'] ?? '');
+$isAdmin = $role === 'admin';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -20,7 +21,7 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/dashboard.css">
     <style>
         .dl-compact dt,
@@ -80,18 +81,20 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                     <i class="bi bi-box-seam"></i>
                     <span>Pengiriman</span>
                 </a>
-                <a href="#" class="sidebar-item disabled">
-                    <i class="bi bi-boxes"></i>
-                    <span>Inventaris Barang</span>
-                </a>
-                <a href="#" class="sidebar-item disabled">
-                    <i class="fa-solid fa-warehouse"></i>
-                    <span>Supplier</span>
-                </a>
-                <a href="#" class="sidebar-item disabled">
-                    <i class="bi bi-people"></i>
-                    <span>Pengguna</span>
-                </a>
+                <?php if ($isAdmin): ?>
+                    <a href="#" class="sidebar-item disabled">
+                        <i class="bi bi-boxes"></i>
+                        <span>Inventaris Barang</span>
+                    </a>
+                    <a href="#" class="sidebar-item disabled">
+                        <i class="fa-solid fa-warehouse"></i>
+                        <span>Supplier</span>
+                    </a>
+                    <a href="#" class="sidebar-item disabled">
+                        <i class="bi bi-people"></i>
+                        <span>Pengguna</span>
+                    </a>
+                <?php endif; ?>
             </div>
         </aside>
 
@@ -202,13 +205,28 @@ $isAdmin = ($_SESSION['role'] ?? '') === 'admin';
                                 <dl class="row mb-0 dl-compact">
                                     <dt class="col-sm-5 text-muted small">Pengiriman</dt>
                                     <dd class="col-sm-7">
-                                        <span class="badge bg-<?php echo strtolower($resi['status_pengiriman']) === 'terkirim' ? 'success' : (strtolower($resi['status_pengiriman']) === 'dalam proses' ? 'warning' : 'secondary'); ?>">
+                                        <?php
+                                        $statKey = strtolower($resi['status_pengiriman'] ?? '');
+                                        $statClass = 'text-secondary';
+                                        if ($statKey === 'terkirim') {
+                                            $statClass = 'text-success';
+                                        } elseif ($statKey === 'dalam proses') {
+                                            $statClass = 'text-warning';
+                                        } elseif ($statKey === 'tertunda') {
+                                            $statClass = 'text-danger';
+                                        }
+                                        ?>
+                                        <span class="fw-semibold <?php echo $statClass; ?>">
                                             <?php echo !empty($resi['status_pengiriman']) ? ucwords($resi['status_pengiriman']) : '-'; ?>
                                         </span>
                                     </dd>
                                     <dt class="col-sm-5 text-muted small">Pembayaran</dt>
                                     <dd class="col-sm-7">
-                                        <span class="badge bg-<?php echo strtolower($resi['status_pembayaran']) === 'terbayar' ? 'success' : 'danger'; ?>">
+                                        <?php
+                                        $payKey = strtolower($resi['status_pembayaran'] ?? '');
+                                        $payClass = $payKey === 'terbayar' ? 'text-success' : 'text-danger';
+                                        ?>
+                                        <span class="fw-semibold <?php echo $payClass; ?>">
                                             <?php echo !empty($resi['status_pembayaran']) ? ucwords($resi['status_pembayaran']) : 'Belum Bayar'; ?>
                                         </span>
                                     </dd>
