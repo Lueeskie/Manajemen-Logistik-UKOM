@@ -19,6 +19,12 @@
     --shadow-lg: 0 16px 48px rgba(37, 53, 104, 0.16);
     --success: #15803d;
     --success-light: rgba(34, 197, 94, 0.15);
+    --warning: #b45309;
+    --warning-light: rgba(245, 158, 11, 0.15);
+    --danger: #991b1b;
+    --danger-light: rgba(220, 38, 38, 0.15);
+    --secondary: #475569;
+    --secondary-light: rgba(100, 116, 139, 0.15);
     --info: #0ea5e9;
     --info-light: rgba(14, 165, 233, 0.15);
 }
@@ -401,6 +407,15 @@ body::before {
 }
 
 /* Page-specific: Badge for "Sent" status */
+.badge {
+    padding: 0.45rem 0.9rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+}
+
 .badge.bg-success-light {
     background: linear-gradient(135deg, var(--success-light), rgba(34, 197, 94, 0.1)) !important;
     border: 1px solid rgba(34, 197, 94, 0.3);
@@ -440,7 +455,6 @@ body::before {
     color: var(--text-dark);
 }
 
-/* Buttons (same as Dashboard, with page-specific) */
 .btn-outline-primary {
     border: 1px solid var(--primary);
     color: var(--primary);
@@ -660,3 +674,34 @@ body::before {
     height: 100%;
     object-fit: cover;
 }
+
+.bg-success-light {
+    background: linear-gradient(135deg, var(--success-light), rgba(34, 197, 94, 0.1)) !important;
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.bg-primary-light {
+    background: linear-gradient(135deg, rgba(37, 53, 104, 0.15), rgba(74, 111, 165, 0.1)) !important;
+    border-color: rgba(37, 53, 104, 0.3);
+}
+
+.bg-warning-light {
+    background: linear-gradient(135deg, var(--warning-light), rgba(245, 158, 11, 0.1)) !important;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.bg-danger-light {
+    background: linear-gradient(135deg, var(--danger-light), rgba(220, 38, 38, 0.1)) !important;
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+.bg-secondary-light {
+    background: linear-gradient(135deg, var(--secondary-light), rgba(100, 116, 139, 0.1)) !important;
+    border-color: rgba(100, 116, 139, 0.3);
+}
+
+.text-success { color: var(--success) !important; }
+.text-primary { color: var(--primary) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-danger { color: var(--danger) !important; }
+.text-secondary { color: var(--secondary) !important; }

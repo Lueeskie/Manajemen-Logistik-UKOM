@@ -122,6 +122,37 @@ class InventarisController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Add: POST method confirmed");
             error_log("Add: POST data = " . print_r($_POST, true));
+            error_log("Add: FILES data = " . print_r($_FILES, true));
+            
+            // Handle foto upload
+            $foto = '';
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+                $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                $filename = $_FILES['foto']['name'];
+                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                
+                if (in_array($ext, $allowed)) {
+                    // Generate unique filename
+                    $newFilename = 'inv_' . time() . '_' . uniqid() . '.' . $ext;
+                    $uploadPath = __DIR__ . '/../../public/uploads/inventaris/';
+                    
+                    // Buat folder jika belum ada
+                    if (!is_dir($uploadPath)) {
+                        mkdir($uploadPath, 0777, true);
+                    }
+                    
+                    if (move_uploaded_file($_FILES['foto']['tmp_name'], $uploadPath . $newFilename)) {
+                        $foto = $newFilename;
+                        error_log("Add: Photo uploaded successfully - " . $newFilename);
+                    } else {
+                        error_log("Add: Failed to move uploaded file");
+                    }
+                } else {
+                    $_SESSION['flash_error'] = 'Format foto tidak valid! Gunakan JPG, JPEG, PNG, atau GIF.';
+                    header('Location: ' . BASE_URL . 'inventaris_barang');
+                    exit;
+                }
+            }
             
             $data = [
                 'nomor_resi' => trim($_POST['nomor_resi'] ?? ''),
@@ -129,6 +160,7 @@ class InventarisController {
                 'berat' => (float)($_POST['berat'] ?? 0.0),
                 'jumlah' => (int)($_POST['jumlah'] ?? 0),
                 'deskripsi' => trim($_POST['deskripsi'] ?? ''),
+                'foto' => $foto,
                 'status' => $_POST['status'] ?? 'Stored'
             ];
 
@@ -159,6 +191,13 @@ class InventarisController {
                         $_SESSION['flash_success'] = 'Barang "' . htmlspecialchars($data['nama_barang']) . '" berhasil ditambahkan ke resi ' . htmlspecialchars($data['nomor_resi']) . '!';
                         error_log("Add: SUCCESS - Barang ditambahkan");
                     } else {
+                        // Hapus foto jika insert gagal
+                        if (!empty($foto)) {
+                            $fotoPath = __DIR__ . '/../../public/uploads/inventaris/' . $foto;
+                            if (file_exists($fotoPath)) {
+                                unlink($fotoPath);
+                            }
+                        }
                         $_SESSION['flash_error'] = 'Gagal menambahkan barang! Silakan coba lagi.';
                         error_log("Add: FAILED - Database insert failed");
                     }
@@ -186,21 +225,74 @@ class InventarisController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
             $id = $_POST['id'];
+            
+            error_log("=== CONTROLLER EDIT ===");
+            error_log("POST data: " . print_r($_POST, true));
+            error_log("FILES data: " . print_r($_FILES, true));
+            
+            // Get data lama untuk foto
+            $oldItem = $this->inventarisModel->getById($id);
+            $foto = $oldItem['foto'] ?? ''; // Gunakan foto lama sebagai default
+            
+            // Handle foto upload baru
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+                $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+                $filename = $_FILES['foto']['name'];
+                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                
+                if (in_array($ext, $allowed)) {
+                    // Generate unique filename
+                    $newFilename = 'inv_' . time() . '_' . uniqid() . '.' . $ext;
+                    $uploadPath = __DIR__ . '/../../public/uploads/inventaris/';
+                    
+                    // Buat folder jika belum ada
+                    if (!is_dir($uploadPath)) {
+                        mkdir($uploadPath, 0777, true);
+                    }
+                    
+                    if (move_uploaded_file($_FILES['foto']['tmp_name'], $uploadPath . $newFilename)) {
+                        // Hapus foto lama jika ada
+                        if (!empty($foto)) {
+                            $oldFotoPath = $uploadPath . $foto;
+                            if (file_exists($oldFotoPath)) {
+                                unlink($oldFotoPath);
+                                error_log("Edit: Deleted old photo - " . $foto);
+                            }
+                        }
+                        
+                        $foto = $newFilename;
+                        error_log("Edit: New photo uploaded - " . $newFilename);
+                    } else {
+                        error_log("Edit: Failed to move uploaded file");
+                    }
+                } else {
+                    $_SESSION['flash_error'] = 'Format foto tidak valid! Gunakan JPG, JPEG, PNG, atau GIF.';
+                    header('Location: ' . BASE_URL . 'inventaris_barang');
+                    exit;
+                }
+            }
+            
             $data = [
-                'nomor_resi' => $_POST['nomor_resi'] ?? '',
-                'nama_barang' => $_POST['nama_barang'] ?? '',
+                'nomor_resi' => trim($_POST['nomor_resi'] ?? ''),
+                'nama_barang' => trim($_POST['nama_barang'] ?? ''),
                 'berat' => (float)($_POST['berat'] ?? 0.0),
                 'jumlah' => (int)($_POST['jumlah'] ?? 0),
-                'deskripsi' => $_POST['deskripsi'] ?? '',
+                'deskripsi' => trim($_POST['deskripsi'] ?? ''),
+                'foto' => $foto,
                 'status' => $_POST['status'] ?? 'Stored'
             ];
+
+            error_log("Processed data: " . print_r($data, true));
+            error_log("Status yang akan disimpan: " . $data['status']);
 
             if (empty($data['nama_barang']) || empty($data['nomor_resi']) || $data['berat'] < 0 || $data['jumlah'] < 0) {
                 $_SESSION['flash_error'] = 'Data tidak valid!';
             } elseif ($this->inventarisModel->update($id, $data)) {
                 $_SESSION['flash_success'] = 'Barang berhasil diupdate!';
+                error_log("Controller: Update success dengan status " . $data['status']);
             } else {
                 $_SESSION['flash_error'] = 'Gagal mengupdate barang!';
+                error_log("Controller: Update failed");
             }
         }
         header('Location: ' . BASE_URL . 'inventaris_barang');

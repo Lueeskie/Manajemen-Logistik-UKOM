@@ -164,6 +164,7 @@ if ($edit_mode) {
                                                     </th>
                                                     <th>ID</th>
                                                     <th>No Resi</th>
+                                                    <th>Foto</th>
                                                     <th>Nama Barang</th>
                                                     <th>Berat (kg)</th>
                                                     <th>Jumlah</th>
@@ -192,6 +193,17 @@ if ($edit_mode) {
                                                             </td>
                                                             <td><?= htmlspecialchars($row['id_barang']) ?></td>
                                                             <td><?= htmlspecialchars($row['nomor_resi']) ?></td>
+                                                            <td>
+                                                                <?php if (!empty($row['foto'])): ?>
+                                                                    <img src="<?= BASE_URL ?>uploads/inventaris/<?= htmlspecialchars($row['foto']) ?>" 
+                                                                        class="img-thumbnail" 
+                                                                        style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
+                                                                        onclick="showImageModal('<?= BASE_URL ?>uploads/inventaris/<?= htmlspecialchars($row['foto']) ?>')"
+                                                                        alt="Foto barang">
+                                                                <?php else: ?>
+                                                                    <span class="text-muted"><i class="bi bi-image"></i></span>
+                                                                <?php endif; ?>
+                                                            </td>
                                                             <td><?= htmlspecialchars($row['nama_barang']) ?></td>
                                                             <td><?= number_format($row['berat'], 2) ?></td>
                                                             <td><?= number_format($row['jumlah']) ?></td>
@@ -199,18 +211,37 @@ if ($edit_mode) {
                                                             <td><span class="badge bg-<?= $status_color ?>-light text-<?= $status_color ?>"><?= htmlspecialchars($row['status']) ?></span></td>
                                                             <td><?= date('d M Y', strtotime($row['created_at'])) ?></td>
                                                             <td>
-                                                                <a href="<?= BASE_URL ?>inventaris_barang?action=edit&id=<?= $row['id_barang'] ?>" class="btn btn-sm btn-outline-primary me-1">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </a>
-                                                                <a href="<?= BASE_URL ?>inventaris_barang?action=delete&id=<?= $row['id_barang'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Yakin hapus <?= htmlspecialchars($row['nama_barang']) ?>?')">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </a>
+                                                                <!-- Dropdown Action Button -->
+                                                                <div class="dropdown">
+                                                                    <button class="btn btn-sm btn-outline-secondary" 
+                                                                            type="button" 
+                                                                            id="dropdownAction<?= $row['id_barang'] ?>" 
+                                                                            data-bs-toggle="dropdown" 
+                                                                            aria-expanded="false">
+                                                                        <i class="bi bi-gear"></i>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAction<?= $row['id_barang'] ?>">
+                                                                        <li>
+                                                                            <a class="dropdown-item" href="<?= BASE_URL ?>inventaris_barang?action=edit&id=<?= $row['id_barang'] ?>">
+                                                                                <i class="bi bi-pencil me-2 text-primary"></i>Edit
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><hr class="dropdown-divider"></li>
+                                                                        <li>
+                                                                            <a class="dropdown-item text-danger" 
+                                                                            href="<?= BASE_URL ?>inventaris_barang?action=delete&id=<?= $row['id_barang'] ?>" 
+                                                                            onclick="return confirm('Yakin hapus <?= htmlspecialchars($row['nama_barang']) ?>?')">
+                                                                                <i class="bi bi-trash me-2"></i>Hapus
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 <?php else: ?>
                                                     <tr>
-                                                        <td colspan="10" class="text-center text-muted py-4">
+                                                        <td colspan="11" class="text-center text-muted py-4">
                                                             <i class="bi bi-boxes fs-1 mb-3"></i><br>
                                                             Belum ada data inventaris barang
                                                         </td>
@@ -230,84 +261,127 @@ if ($edit_mode) {
 
     <!-- Modal Tambah/Edit Inventaris -->
     <div class="modal fade" id="modalInventaris" tabindex="-1" aria-labelledby="modalInventarisLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalInventarisLabel"><?= $edit_mode ? 'Edit' : 'Tambah' ?> Inventaris Barang</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="<?= BASE_URL ?>inventaris_barang" id="formInventaris">
+                <form method="POST" action="<?= BASE_URL ?>inventaris_barang" id="formInventaris" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="<?= $edit_mode ? 'edit' : 'add' ?>">
                     <?php if ($edit_mode): ?>
                         <input type="hidden" name="id" value="<?= $edit_item['id_barang'] ?>">
                     <?php endif; ?>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="nomor_resi" class="form-label">No Resi <span class="text-danger">*</span></label>
-                            <div class="position-relative">
-                                <input type="text" 
-                                    class="form-control" 
-                                    id="nomor_resi" 
-                                    name="nomor_resi"
-                                    value="<?= htmlspecialchars($nomor_resi) ?>" 
-                                    required
-                                    maxlength="50"
-                                    autocomplete="off"
-                                    placeholder="Ketik nomor resi...">
-                                <div id="resiDropdown" class="autocomplete-dropdown">
-                                    <!-- Dropdown items akan muncul di sini -->
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="nomor_resi" class="form-label">No Resi <span class="text-danger">*</span></label>
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                            class="form-control" 
+                                            id="nomor_resi" 
+                                            name="nomor_resi"
+                                            value="<?= htmlspecialchars($nomor_resi) ?>" 
+                                            required
+                                            maxlength="50"
+                                            autocomplete="off"
+                                            placeholder="Ketik nomor resi...">
+                                        <div id="resiDropdown" class="autocomplete-dropdown">
+                                            <!-- Dropdown items akan muncul di sini -->
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>Bisa gunakan nomor resi yang sama untuk beberapa barang
+                                    </small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="nama_barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                        class="form-control" 
+                                        id="nama_barang" 
+                                        name="nama_barang" 
+                                        value="<?= htmlspecialchars($nama_barang) ?>" 
+                                        required 
+                                        maxlength="100">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="berat" class="form-label">Berat (kg) <span class="text-danger">*</span></label>
+                                            <input type="number" 
+                                                step="0.01" 
+                                                class="form-control" 
+                                                id="berat" 
+                                                name="berat" 
+                                                value="<?= $berat ?>" 
+                                                min="0" 
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="jumlah" class="form-label">Jumlah <span class="text-danger">*</span></label>
+                                            <input type="number" 
+                                                class="form-control" 
+                                                id="jumlah" 
+                                                name="jumlah" 
+                                                value="<?= $jumlah ?>" 
+                                                min="1" 
+                                                required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="deskripsi" class="form-label">Deskripsi</label>
+                                    <textarea class="form-control" 
+                                        id="deskripsi" 
+                                        name="deskripsi" 
+                                        rows="3" 
+                                        maxlength="255"><?= htmlspecialchars($deskripsi) ?></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="Stored" <?= ($status === 'Stored') ? 'selected' : '' ?>>Stored</option>
+                                        <option value="Delivered" <?= ($status === 'Delivered') ? 'selected' : '' ?>>Delivered</option>
+                                        <option value="Returned" <?= ($status === 'Returned') ? 'selected' : '' ?>>Returned</option>
+                                    </select>
                                 </div>
                             </div>
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle me-1"></i>Bisa gunakan nomor resi yang sama untuk beberapa barang
-                            </small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nama_barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
-                            <input type="text" 
-                                class="form-control" 
-                                id="nama_barang" 
-                                name="nama_barang" 
-                                value="<?= htmlspecialchars($nama_barang) ?>" 
-                                required 
-                                maxlength="100">
-                        </div>
-                        <div class="mb-3">
-                            <label for="berat" class="form-label">Berat (kg) <span class="text-danger">*</span></label>
-                            <input type="number" 
-                                step="0.01" 
-                                class="form-control" 
-                                id="berat" 
-                                name="berat" 
-                                value="<?= $berat ?>" 
-                                min="0" 
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="jumlah" class="form-label">Jumlah <span class="text-danger">*</span></label>
-                            <input type="number" 
-                                class="form-control" 
-                                id="jumlah" 
-                                name="jumlah" 
-                                value="<?= $jumlah ?>" 
-                                min="1" 
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="deskripsi" class="form-label">Deskripsi</label>
-                            <textarea class="form-control" 
-                                id="deskripsi" 
-                                name="deskripsi" 
-                                rows="3" 
-                                maxlength="255"><?= htmlspecialchars($deskripsi) ?></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" id="status" name="status" required>
-                                <option value="Stored" <?= ($status === 'Stored') ? 'selected' : '' ?>>Stored</option>
-                                <option value="Delivered" <?= ($status === 'Delivered') ? 'selected' : '' ?>>Delivered</option>
-                                <option value="Returned" <?= ($status === 'Returned') ? 'selected' : '' ?>>Returned</option>
-                            </select>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="foto" class="form-label">Foto Barang</label>
+                                    <input type="file" 
+                                        class="form-control" 
+                                        id="foto" 
+                                        name="foto" 
+                                        accept="image/jpeg,image/jpg,image/png,image/gif">
+                                    <small class="text-muted">Format: JPG, JPEG, PNG, GIF (Max 2MB)</small>
+                                </div>
+                                <div class="text-center">
+                                    <?php if ($edit_mode && !empty($edit_item['foto'])): ?>
+                                        <img src="<?= BASE_URL ?>uploads/inventaris/<?= htmlspecialchars($edit_item['foto']) ?>" 
+                                            id="previewFoto" 
+                                            class="img-thumbnail mb-2" 
+                                            style="max-width: 100%; max-height: 200px;"
+                                            alt="Foto barang">
+                                        <div>
+                                            <small class="text-muted">Foto saat ini</small>
+                                        </div>
+                                    <?php else: ?>
+                                        <img src="<?= BASE_URL ?>assets/no-image.png" 
+                                            id="previewFoto" 
+                                            class="img-thumbnail mb-2" 
+                                            style="max-width: 100%; max-height: 200px; display: none;"
+                                            alt="Preview foto">
+                                        <div id="noImageText" class="text-muted">
+                                            <i class="bi bi-image fs-1"></i>
+                                            <p>Belum ada foto</p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -690,6 +764,38 @@ if ($edit_mode) {
             }
             
             console.log('Form validation passed, submitting...');
+        });
+
+        // Preview foto sebelum upload
+        document.getElementById('foto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('previewFoto');
+            const noImageText = document.getElementById('noImageText');
+            
+            if (file) {
+                // Validasi ukuran file (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file terlalu besar! Maksimal 2MB.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validasi tipe file
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Format file tidak valid! Gunakan JPG, PNG, atau GIF.');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    if (noImageText) noImageText.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
         });
     </script>
 </body>

@@ -181,36 +181,49 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php if (!empty($histori)): ?>
-                                                <?php foreach ($histori as $row): ?>
-                                                    <tr>
-                                                        <td><?= htmlspecialchars($row['id_barang']) ?></td>
-                                                        <td><?= htmlspecialchars($row['nomor_resi']) ?></td>
-                                                        <td><?= htmlspecialchars($row['nama_barang']) ?></td>
-                                                        <td><?= number_format($row['berat'], 2) ?></td>
-                                                        <td><?= number_format($row['jumlah']) ?></td>
-                                                        <td><?= htmlspecialchars(substr($row['deskripsi'], 0, 50)) . (strlen($row['deskripsi']) > 50 ? '...' : '') ?></td>
-                                                        <td><span class="badge bg-success-light text-success">Delivered</span></td>
-                                                        <td><?= date('d M Y H:i', strtotime($row['updated_at'] ?? $row['created_at'])) ?></td>
-                                                        <td>
-                                                            <button class="btn btn-sm btn-outline-info" 
-                                                                data-bs-toggle="modal" 
-                                                                data-bs-target="#detailModal"
-                                                                onclick='showDetail(<?= json_encode($row, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
-                                                                <i class="bi bi-eye"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
+                                        <?php if (!empty($histori)): ?>
+                                            <?php foreach ($histori as $row): ?>
+                                                <?php
+                                                // Tentukan warna badge berdasarkan status - SAMA SEPERTI INVENTARIS
+                                                $status_color = match($row['status']) {
+                                                    'Stored' => 'success',
+                                                    'Delivered' => 'primary',
+                                                    'Returned' => 'warning',
+                                                    default => 'secondary'
+                                                };
+                                                ?>
                                                 <tr>
-                                                    <td colspan="9" class="text-center text-muted py-4">
-                                                        <i class="bi bi-clock-history fs-1 mb-3"></i><br>
-                                                        Belum ada histori pengiriman barang
+                                                    <td><?= htmlspecialchars($row['id_barang']) ?></td>
+                                                    <td><?= htmlspecialchars($row['nomor_resi']) ?></td>
+                                                    <td><?= htmlspecialchars($row['nama_barang']) ?></td>
+                                                    <td><?= number_format($row['berat'], 2) ?></td>
+                                                    <td><?= number_format($row['jumlah']) ?></td>
+                                                    <td><?= htmlspecialchars(substr($row['deskripsi'], 0, 50)) . (strlen($row['deskripsi']) > 50 ? '...' : '') ?></td>
+                                                    <td>
+                                                        <span class="badge bg-<?= $status_color ?>-light text-<?= $status_color ?>">
+                                                            <?= htmlspecialchars($row['status']) ?>
+                                                        </span>
+                                                    </td>
+                                                    <td><?= date('d M Y H:i', strtotime($row['updated_at'] ?? $row['created_at'])) ?></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-info" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#detailModal"
+                                                            onclick='showDetail(<?= json_encode($row, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
-                                            <?php endif; ?>
-                                        </tbody>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="9" class="text-center text-muted py-4">
+                                                    <i class="bi bi-clock-history fs-1 mb-3"></i><br>
+                                                    Belum ada histori pengiriman barang
+                                                </td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -230,7 +243,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="detailContent">
-                    <!-- Content will be filled by JavaScript -->
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -243,8 +256,37 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     <script>
         // Show detail modal
         function showDetail(data) {
+            // Tentukan badge class berdasarkan status
+            let badgeClass = 'bg-secondary';
+            
+            if (data.status === 'Delivered') {
+                badgeClass = 'bg-primary';
+            } else if (data.status === 'Returned') {
+                badgeClass = 'bg-warning';
+            } else if (data.status === 'Stored') {
+                badgeClass = 'bg-success';
+            }
+            
+            // Foto section
+            let fotoHtml = '';
+            if (data.foto) {
+                fotoHtml = `
+                    <tr>
+                        <th>Foto Barang</th>
+                        <td>
+                            <img src="<?= BASE_URL ?>uploads/inventaris/${data.foto}" 
+                                class="img-thumbnail" 
+                                style="max-width: 200px; max-height: 200px; cursor: pointer;"
+                                onclick="window.open(this.src, '_blank')"
+                                alt="Foto barang">
+                        </td>
+                    </tr>
+                `;
+            }
+            
             const content = `
                 <table class="table table-bordered">
+                    ${fotoHtml}
                     <tr>
                         <th width="40%">ID Barang</th>
                         <td>${data.id_barang}</td>
@@ -271,14 +313,14 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                     </tr>
                     <tr>
                         <th>Status</th>
-                        <td><span class="badge bg-success">Delivered</span></td>
+                        <td><span class="badge ${badgeClass}">${data.status}</span></td>
                     </tr>
                     <tr>
                         <th>Tanggal Dibuat</th>
                         <td>${new Date(data.created_at).toLocaleString('id-ID')}</td>
                     </tr>
                     <tr>
-                        <th>Tanggal Dikirim</th>
+                        <th>Tanggal ${data.status === 'Returned' ? 'Dikembalikan' : 'Dikirim'}</th>
                         <td>${new Date(data.updated_at || data.created_at).toLocaleString('id-ID')}</td>
                     </tr>
                 </table>

@@ -10,16 +10,24 @@ class InventarisModel {
         $this->db = Database::getInstance();
     }
 
-    // Fetch all inventaris (hanya yang belum dikirim)
+    // Fetch all inventaris (hanya yang belum dikirim/dikembalikan)
     public function getAll() {
-        $stmt = $this->db->prepare("SELECT * FROM inventaris_barang WHERE status != 'Delivered' ORDER BY nomor_resi, created_at DESC");
+        $stmt = $this->db->prepare("
+            SELECT * FROM inventaris_barang 
+            WHERE status NOT IN ('Delivered', 'Returned') 
+            ORDER BY nomor_resi, created_at DESC
+        ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Fetch histori barang yang sudah dikirim
     public function getHistori() {
-        $stmt = $this->db->prepare("SELECT * FROM inventaris_barang WHERE status = 'Delivered' ORDER BY nomor_resi, updated_at DESC");
+        $stmt = $this->db->prepare("
+            SELECT * FROM inventaris_barang 
+            WHERE status IN ('Delivered', 'Returned') 
+            ORDER BY nomor_resi, updated_at DESC
+        ");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -32,12 +40,12 @@ class InventarisModel {
             
             error_log("Create inventaris: nomor_resi = " . $data['nomor_resi']);
 
-            // Insert dengan id_resi empty string
+            // Insert dengan id_resi empty string dan foto
             $stmt = $this->db->prepare("
                 INSERT INTO inventaris_barang 
-                (id_resi, nomor_resi, nama_barang, berat, jumlah, deskripsi, status) 
+                (id_resi, nomor_resi, nama_barang, berat, jumlah, deskripsi, foto, status) 
                 VALUES 
-                (:id_resi, :nomor_resi, :nama_barang, :berat, :jumlah, :deskripsi, :status)
+                (:id_resi, :nomor_resi, :nama_barang, :berat, :jumlah, :deskripsi, :foto, :status)
             ");
             
             $stmt->bindParam(':id_resi', $id_resi, PDO::PARAM_STR);
@@ -46,6 +54,7 @@ class InventarisModel {
             $stmt->bindParam(':berat', $data['berat']);
             $stmt->bindParam(':jumlah', $data['jumlah'], PDO::PARAM_INT);
             $stmt->bindParam(':deskripsi', $data['deskripsi'], PDO::PARAM_STR);
+            $stmt->bindParam(':foto', $data['foto'], PDO::PARAM_STR);
             $stmt->bindParam(':status', $data['status'], PDO::PARAM_STR);
             
             $result = $stmt->execute();
@@ -80,6 +89,8 @@ class InventarisModel {
             // id_resi diisi empty string
             $id_resi = '';
             
+            error_log("Update inventaris: id_barang = $id, status = " . $data['status']);
+            
             $stmt = $this->db->prepare("
                 UPDATE inventaris_barang 
                 SET id_resi = :id_resi, 
@@ -87,8 +98,10 @@ class InventarisModel {
                     nama_barang = :nama_barang, 
                     berat = :berat, 
                     jumlah = :jumlah, 
-                    deskripsi = :deskripsi, 
-                    status = :status 
+                    deskripsi = :deskripsi,
+                    foto = :foto,
+                    status = :status,
+                    updated_at = NOW()
                 WHERE id_barang = :id
             ");
             
@@ -98,10 +111,17 @@ class InventarisModel {
             $stmt->bindParam(':berat', $data['berat']);
             $stmt->bindParam(':jumlah', $data['jumlah'], PDO::PARAM_INT);
             $stmt->bindParam(':deskripsi', $data['deskripsi'], PDO::PARAM_STR);
+            $stmt->bindParam(':foto', $data['foto'], PDO::PARAM_STR);
             $stmt->bindParam(':status', $data['status'], PDO::PARAM_STR);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             
-            return $stmt->execute();
+            $result = $stmt->execute();
+            
+            if ($result) {
+                error_log("Update inventaris SUCCESS - Status: " . $data['status']);
+            }
+            
+            return $result;
         } catch (PDOException $e) {
             error_log("Update inventaris error: " . $e->getMessage());
             return false;
@@ -111,16 +131,29 @@ class InventarisModel {
     // Delete inventaris
     public function delete($id) {
         try {
+            // Get foto filename sebelum delete
+            $item = $this->getById($id);
+            
             $stmt = $this->db->prepare("DELETE FROM inventaris_barang WHERE id_barang = :id");
             $stmt->bindParam(':id', $id);
-            return $stmt->execute();
+            $result = $stmt->execute();
+            
+            if ($result && !empty($item['foto'])) {
+                $fotoPath = __DIR__ . '/../../public/uploads/inventaris/' . $item['foto'];
+                if (file_exists($fotoPath)) {
+                    unlink($fotoPath);
+                    error_log("Deleted photo: " . $item['foto']);
+                }
+            }
+            
+            return $result;
         } catch (PDOException $e) {
             error_log("Delete inventaris error: " . $e->getMessage());
             return false;
         }
     }
 
-    // Kirim barang (batch update status ke 'Delivered')
+    // Kirim barang (batch update status ke Delivered)
     public function kirimBarang($ids) {
         try {
             if (empty($ids) || !is_array($ids)) {
@@ -131,12 +164,14 @@ class InventarisModel {
             error_log("kirimBarang: Processing " . count($ids) . " items");
             error_log("kirimBarang: IDs = " . print_r($ids, true));
 
-            // Buat placeholder untuk prepared statement
+            // Jangan overwrite status Returned
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             
-            // Try with updated_at first
             try {
-                $sql = "UPDATE inventaris_barang SET status = 'Delivered', updated_at = NOW() WHERE id_barang IN ($placeholders)";
+                $sql = "UPDATE inventaris_barang 
+                        SET status = 'Delivered', updated_at = NOW() 
+                        WHERE id_barang IN ($placeholders) 
+                        AND status != 'Returned'";
                 error_log("kirimBarang SQL: " . $sql);
                 
                 $stmt = $this->db->prepare($sql);
@@ -147,10 +182,12 @@ class InventarisModel {
                 
                 return $result && $rowCount > 0;
             } catch (PDOException $e) {
-                // If updated_at doesn't exist, try without it
                 error_log("kirimBarang: Trying without updated_at. Error was: " . $e->getMessage());
                 
-                $sql = "UPDATE inventaris_barang SET status = 'Delivered' WHERE id_barang IN ($placeholders)";
+                $sql = "UPDATE inventaris_barang 
+                        SET status = 'Delivered' 
+                        WHERE id_barang IN ($placeholders) 
+                        AND status != 'Returned'";
                 $stmt = $this->db->prepare($sql);
                 $result = $stmt->execute($ids);
                 

@@ -259,7 +259,6 @@ body::before {
     font-weight: 700;
 }
 
-/* Page-specific: Header Buttons (Enhanced for "Tambah Barang" and "Histori Pengiriman") */
 .d-flex.gap-2 {
     gap: 0.75rem;
 }
