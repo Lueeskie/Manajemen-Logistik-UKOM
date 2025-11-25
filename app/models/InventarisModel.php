@@ -1,4 +1,3 @@
-<!-- inventarisModel.php -->
 <?php
 
 require_once __DIR__ . '/../../config/database.php';
@@ -36,7 +35,7 @@ class InventarisModel {
     public function create($data) {
         try {
             // id_resi diisi empty string karena NOT NULL
-            $id_resi = ''; // Empty string untuk CHAR(3) NOT NULL
+            $id_resi = '';
             
             error_log("Create inventaris: nomor_resi = " . $data['nomor_resi']);
 
@@ -221,7 +220,7 @@ class InventarisModel {
         }
     }
 
-    // Search nomor resi dari TABEL RESI untuk autocomplete
+    // Search nomor resi dari tabel resi autocomplete
     public function searchResi($search = '') {
         try {
             error_log("searchResi called with search: '$search'");
@@ -254,7 +253,6 @@ class InventarisModel {
             error_log("Search resi error: " . $e->getMessage());
             error_log("Error code: " . $e->getCode());
             
-            // FALLBACK: Jika tabel resi tidak ada, coba dari inventaris_barang
             error_log("Trying fallback to inventaris_barang table");
             
             try {

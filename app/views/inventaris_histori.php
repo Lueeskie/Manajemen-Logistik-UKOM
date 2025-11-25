@@ -1,6 +1,4 @@
-<!-- inventaris_histori.php -->
 <?php
-// Extract flash messages
 $flash_success = $_SESSION['flash_success'] ?? '';
 $flash_error = $_SESSION['flash_error'] ?? '';
 unset($_SESSION['flash_success'], $_SESSION['flash_error']);
@@ -184,9 +182,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                         <?php if (!empty($histori)): ?>
                                             <?php foreach ($histori as $row): ?>
                                                 <?php
-                                                // Tentukan warna badge berdasarkan status - SAMA SEPERTI INVENTARIS
                                                 $status_color = match($row['status']) {
-                                                    'Stored' => 'success',
                                                     'Delivered' => 'primary',
                                                     'Returned' => 'warning',
                                                     default => 'secondary'

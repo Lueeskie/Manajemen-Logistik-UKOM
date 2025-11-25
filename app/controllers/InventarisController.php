@@ -1,4 +1,3 @@
-<!-- inventarisController.php -->
 <?php
 
 require_once __DIR__ . '/../models/InventarisModel.php';
@@ -76,7 +75,7 @@ class InventarisController {
         require __DIR__ . '/../views/inventaris_histori.php';
     }
 
-    // API endpoint untuk autocomplete nomor resi
+    //untuk autocomplete nomor resi
     public function getResiList() {
         // Bersihkan output buffer sebelumnya
         if (ob_get_level()) {
@@ -330,7 +329,6 @@ class InventarisController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $selectedIds = $_POST['selected_items'] ?? [];
 
-            // Debug: Log selected IDs
             error_log("Selected IDs: " . print_r($selectedIds, true));
 
             if (empty($selectedIds)) {
