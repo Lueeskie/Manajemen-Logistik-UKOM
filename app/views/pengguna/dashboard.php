@@ -170,8 +170,9 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
             tableRows.forEach(row => {
                 let username = row.cells[1].textContent.toLowerCase();
                 let email = row.cells[2].textContent.toLowerCase();
+                let role = row.cells[3].textContent.toLowerCase();
                 
-                if (username.includes(searchValue) || email.includes(searchValue)) {
+                if (username.includes(searchValue) || email.includes(searchValue) || role.includes(searchValue)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';

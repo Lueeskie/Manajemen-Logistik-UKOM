@@ -198,53 +198,120 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     </main>
     <?php if (!empty($requests)): ?>
     <?php foreach ($requests as $r): ?>
-    <div class="modal fade" id="detailModal<?= $r['id_request'] ?>" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Detail Request #<?= str_pad($r['id_request'], 4, '0', STR_PAD_LEFT) ?></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Nama Paket:</strong> <?= htmlspecialchars($r['nama_barang'] ?? '-') ?></p>
-                            <p><strong>Jumlah:</strong> <?= $r['jumlah_barang'] ?> unit</p>
-                            <p><strong>Berat:</strong> <?= $r['berat'] ?> kg</p>
-                            <p><strong>Status:</strong> 
-                                <span class="badge bg-<?= $statusClass ?? 'secondary' ?>-soft"><?= $r['status'] ?? 'Menunggu' ?></span>
-                            </p>
-                            <p><strong>Tanggal:</strong> <?= date('d M Y H:i', strtotime($r['created_at'])) ?></p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Alamat Asal:</strong><br>
-                                <small><?= nl2br(htmlspecialchars($r['alamat_asal'] ?? 'Tidak diisi')) ?></small>
-                            </p>
-                            <p><strong>Alamat Tujuan:</strong><br>
-                                <small><?= nl2br(htmlspecialchars($r['alamat_tujuan'] ?? 'Tidak diisi')) ?></small>
-                            </p>
-                        </div>
+        <?php
+        $status = $r['status'] ?? 'Menunggu Konfirmasi';
+        if ($status == 'Menunggu Konfirmasi') {
+            $modalStatusClass = 'warning';
+            $modalStatusIcon = 'clock';
+        } elseif ($status == 'Dikonfirmasi') {
+            $modalStatusClass = 'info';
+            $modalStatusIcon = 'check-circle';
+        } elseif ($status == 'Dikirim') {
+            $modalStatusClass = 'primary';
+            $modalStatusIcon = 'truck';
+        } elseif ($status == 'Sampai ke Tujuan') {
+            $modalStatusClass = 'success';
+            $modalStatusIcon = 'box-seam';
+        } elseif ($status == 'Ditolak') {
+            $modalStatusClass = 'danger';
+            $modalStatusIcon = 'x-circle';
+        } else {
+            $modalStatusClass = 'secondary';
+            $modalStatusIcon = '';
+        }
+        ?>
+        <div class="modal fade" id="detailModal<?= $r['id_request'] ?>" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-file-text-fill"></i>
+                            Detail Request #<?= str_pad($r['id_request'], 4, '0', STR_PAD_LEFT) ?>
+                        </h5>
                     </div>
-                    <hr>
-                    <p><strong>Deskripsi:</strong><br>
-                        <?= nl2br(htmlspecialchars($r['deskripsi'] ?? 'Tidak ada deskripsi')) ?>
-                    </p>
-                    <?php if (!empty($r['foto_paket'])): ?>
-                        <div class="text-center mt-3">
-                            <p><strong>Foto Paket:</strong></p>
-                            <img src="<?= BASE_URL ?>uploads/paket/<?= htmlspecialchars($r['foto_paket']) ?>" 
-                                 class="img-fluid rounded shadow" style="max-height: 500px;" alt="Foto Paket">
+                    <div class="modal-body">
+                        <div class="info-box">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><i class="bi bi-box-seam me-2"></i>Nama Paket</strong>
+                                    <p class="mb-0 mt-1"><?= htmlspecialchars($r['nama_barang'] ?? '-') ?></p>
+                                </div>
+                                <span class="badge bg-<?= $modalStatusClass ?>-soft">
+                                    <?php if ($modalStatusIcon): ?>
+                                        <i class="bi bi-<?= $modalStatusIcon ?> me-1"></i>
+                                    <?php endif; ?>
+                                    <?= $status ?>
+                                </span>
+                            </div>
                         </div>
-                    <?php else: ?>
-                        <p class="text-muted text-center"><em>Belum ada foto paket</em></p>
-                    <?php endif; ?>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <strong><i class="bi bi-123 me-2"></i>Jumlah Barang</strong>
+                                    <p class="mb-0"><?= $r['jumlah_barang'] ?> unit</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-item">
+                                    <strong><i class="bi bi-weight me-2"></i>Berat Total</strong>
+                                    <p class="mb-0"><?= $r['berat'] ?> kg</p>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="detail-item">
+                                    <strong><i class="bi bi-calendar-event me-2"></i>Tanggal Dibuat</strong>
+                                    <p class="mb-0"><?= date('d F Y, H:i', strtotime($r['created_at'])) ?> WIB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-geo-alt me-2"></i>Alamat Asal</strong>
+                                <p class="mb-0 mt-2"><small><?= nl2br(htmlspecialchars($r['alamat_asal'] ?? 'Tidak diisi')) ?></small></p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-geo-alt-fill me-2"></i>Alamat Tujuan</strong>
+                                <p class="mb-0 mt-2"><small><?= nl2br(htmlspecialchars($r['alamat_tujuan'] ?? 'Tidak diisi')) ?></small></p>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div>
+                            <strong><i class="bi bi-file-text me-2"></i>Deskripsi Paket</strong>
+                            <p class="mb-0 mt-2"><?= nl2br(htmlspecialchars($r['deskripsi'] ?? 'Tidak ada deskripsi')) ?></p>
+                        </div>
+
+                        <?php if (!empty($r['foto_paket'])): ?>
+                            <hr>
+                            <div class="text-center">
+                                <strong><i class="bi bi-image me-2"></i>Foto Paket</strong>
+                                <div class="mt-3">
+                                    <img src="<?= BASE_URL ?>uploads/paket/<?= htmlspecialchars($r['foto_paket']) ?>" 
+                                         class="img-fluid" 
+                                         style="max-height: 450px; object-fit: contain;" 
+                                         alt="Foto Paket">
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <hr>
+                            <div class="text-center py-4" style="background: rgba(100, 116, 139, 0.05); border-radius: 12px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mb-0 mt-2"><em>Belum ada foto paket</em></p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-2"></i>Tutup
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     <?php endforeach; ?>
 <?php endif; ?>
 

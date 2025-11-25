@@ -51,6 +51,9 @@ class PengirimanController
             ];
         }
 
+        $active_page = 'pengiriman';
+        
+        require __DIR__ . '/../views/header.php';
         require __DIR__ . '/../views/pengiriman.php';
     }
 
