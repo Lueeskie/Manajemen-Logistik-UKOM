@@ -1,11 +1,13 @@
-<!-- index.php -->
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../config/database.php'; 
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
 require_once __DIR__ . '/../app/controllers/InventarisController.php';
+require_once __DIR__ . '/../app/controllers/PengirimanController.php';
+require_once __DIR__ . '/../app/controllers/SupplierController.php';
+require_once __DIR__ . '/../app/controllers/UserController.php';
 
 $basePath = '/Manajemen-Logistik-UKOM/public/';
 
@@ -21,26 +23,21 @@ if (strpos($uri, $basePath) === 0) {
     $uri = '/';
 }
 
-// Handle inventaris_barang routes (sebelum switch untuk catch semua sub-routes)
+
 if (strpos($uri, '/inventaris_barang') === 0) {
     $inventaris = new InventarisController();
-    
-    // Route: /inventaris_barang/get-resi (AJAX - autocomplete) - HARUS PALING ATAS
     if ($uri === '/inventaris_barang/get-resi') {
         $inventaris->getResiList();
         exit; // Penting: Stop execution setelah API call
     }
-    // Route: /inventaris_barang/histori
     elseif ($uri === '/inventaris_barang/histori') {
         $inventaris->histori();
         exit;
     }
-    // Route: /inventaris_barang/kirim (POST)
     elseif ($uri === '/inventaris_barang/kirim') {
         $inventaris->kirim();
         exit;
     }
-    // Route: /inventaris_barang (default) - Handle POST untuk add/edit
     elseif ($uri === '/inventaris_barang') {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $post_action = $_POST['action'] ?? '';
@@ -52,8 +49,6 @@ if (strpos($uri, '/inventaris_barang') === 0) {
                 exit;
             }
         }
-        
-        // GET request dengan action
         $action = $_GET['action'] ?? 'index';
         if ($action === 'delete' && isset($_GET['id'])) {
             $inventaris->delete();
@@ -66,8 +61,6 @@ if (strpos($uri, '/inventaris_barang') === 0) {
     
     exit;
 }
-
-// Switch untuk routes lainnya
 switch ($uri) {
     case '/':
     case '/login':
@@ -98,8 +91,94 @@ switch ($uri) {
         $profile = new ProfileController();
         $profile->changePassword();
         break;
-    default:
+    case '/pengiriman':
+        $pengiriman = new PengirimanController();
+        $pengiriman->index();
+        break;
+
+    case '/pengiriman/tambah':
+        $pengiriman = new PengirimanController();
+        $pengiriman->add();
+        break;
+
+    case '/pengiriman/store':
+        $pengiriman = new PengirimanController();
+        $pengiriman->store();
+        break;
+
+    case '/pengiriman/hitung-jarak':
+        $pengiriman = new PengirimanController();
+        $pengiriman->hitungJarakAjax();
+        break;
+
+    case '/pengiriman/edit':
+        $pengiriman = new PengirimanController();
+        $pengiriman->edit();
+        break;
+
+    case '/pengiriman/update':
+        $pengiriman = new PengirimanController();
+        $pengiriman->update();
+        break;
+
+    case '/pengiriman/detail':
+        $pengiriman = new PengirimanController();
+        $pengiriman->detail();
+        break;
+
+    case '/pengiriman/delete':
+        $pengiriman = new PengirimanController();
+        $pengiriman->delete();
+        break;
+    case '/supplier':
+        $supplier = new SupplierController();
+        $supplier->dashboard();
+        break;
+    case '/supplier/tambah':
+        $supplier = new SupplierController();
+        $supplier->tambahForm();
+        break;
+    case '/supplier/proses-tambah':
+        $supplier = new SupplierController();
+        $supplier->tambahRequest();
+        break;
+    case '/pengguna':
+        $userCtrl = new UserController();
+        $userCtrl->index();
+        break;
+    case '/pengguna/tambah':
+        $userCtrl = new UserController();
+        $userCtrl->tambah();
+        break;
+    case '/pengguna/store':
+        $userCtrl = new UserController();
+        $userCtrl->store();
+        break;
+    case (preg_match('#^/pengguna/edit/(\d+)$#', $uri, $matches) ? true : false):
+        $userCtrl = new UserController();
+        $userCtrl->edit($matches[1]);
+        break;
+    case (preg_match('#^/pengguna/update/(\d+)$#', $uri, $matches) ? true : false):
+        $userCtrl = new UserController();
+        $userCtrl->update($matches[1]);
+        break;
+    case (preg_match('#^/pengguna/hapus/(\d+)$#', $uri, $matches) ? true : false):
+        $userCtrl = new UserController();
+        $userCtrl->hapus($matches[1]);
+        break;
+    case (preg_match('#^/supplier/edit/(\d+)$#', $uri, $matches) ? true : false):
+        $supplier = new SupplierController();
+        $supplier->editForm($matches[1]);
+        break;
+    case (preg_match('#^/supplier/update/(\d+)$#', $uri, $matches) ? true : false):
+        $supplier = new SupplierController();
+        $supplier->updateRequest($matches[1]);
+        break;
+    case (preg_match('#^/supplier/hapus/(\d+)$#', $uri, $matches) ? true : false):
+        $supplier = new SupplierController();
+        $supplier->hapus($matches[1]);
+        break;
+        default:
         http_response_code(404);
         echo "Page not found";
 }
-?>

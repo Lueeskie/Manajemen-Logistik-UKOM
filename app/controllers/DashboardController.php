@@ -23,8 +23,6 @@ class DashboardController {
         $userId = $_SESSION['user_id'];
         $stats = $this->resiModel->getStats($userId);
         $recentResi = $this->resiModel->getRecentResi($userId);
-
-        // Ambil data user untuk foto profil menggunakan method getProfile
         $user_info = $this->userModel->getProfile($userId);
         if (!$user_info) {
             $user_info = [
@@ -36,6 +34,8 @@ class DashboardController {
             ];
         }
 
+        $active_page = 'dashboard';
+        require __DIR__ . '/../views/header.php';
         require __DIR__ . '/../views/dashboard.php';
     }
 }
