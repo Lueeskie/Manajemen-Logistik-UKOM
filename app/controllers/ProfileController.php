@@ -33,6 +33,9 @@ class ProfileController
         $flash_error = $_SESSION['flash_error'] ?? '';
         unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 
+        $active_page = 'profile';
+
+        require __DIR__ . '/../views/header.php';
         require __DIR__ . '/../views/profile.php';
     }
 
@@ -94,6 +97,9 @@ class ProfileController
         if ($this->userModel->updateProfile($userId, $data)) {
             $_SESSION['flash_success'] = "Profil berhasil diperbarui!";
             $_SESSION['username'] = $data['username'];
+            if (isset($data['foto'])) {
+                $_SESSION['foto_profil'] = $data['foto'];
+            }
         } else {
             $_SESSION['flash_error'] = "Gagal memperbarui profil. Coba lagi.";
         }
@@ -174,7 +180,7 @@ class ProfileController
         }
 
         $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-        $maxSize = 2 * 1024 * 1024; // 2 MB
+        $maxSize = 2 * 1024 * 1024;
 
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $file['tmp_name']);
