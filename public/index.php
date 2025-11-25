@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../config/database.php'; 
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
+require_once __DIR__ . '/../app/controllers/PengirimanController.php';
 require_once __DIR__ . '/../app/controllers/SupplierController.php';
 require_once __DIR__ . '/../app/controllers/UserController.php';
 
@@ -50,6 +51,45 @@ switch ($uri) {
     case '/profile/change-password':
         $profile = new ProfileController();
         $profile->changePassword();
+        break;
+    case '/pengiriman':
+        $pengiriman = new PengirimanController();
+        $pengiriman->index();
+        break;
+
+    case '/pengiriman/tambah':
+        $pengiriman = new PengirimanController();
+        $pengiriman->add();
+        break;
+
+    case '/pengiriman/store':
+        $pengiriman = new PengirimanController();
+        $pengiriman->store();
+        break;
+
+    case '/pengiriman/hitung-jarak':
+        $pengiriman = new PengirimanController();
+        $pengiriman->hitungJarakAjax();
+        break;
+
+    case '/pengiriman/edit':
+        $pengiriman = new PengirimanController();
+        $pengiriman->edit();
+        break;
+
+    case '/pengiriman/update':
+        $pengiriman = new PengirimanController();
+        $pengiriman->update();
+        break;
+
+    case '/pengiriman/detail':
+        $pengiriman = new PengirimanController();
+        $pengiriman->detail();
+        break;
+
+    case '/pengiriman/delete':
+        $pengiriman = new PengirimanController();
+        $pengiriman->delete();
         break;
     case '/supplier':
         $supplier = new SupplierController();
@@ -103,4 +143,3 @@ switch ($uri) {
         http_response_code(404);
         echo "Page not found";
 }
-?>

@@ -13,6 +13,9 @@ if (isset($_SESSION['flash_success'])) {
 
 $stats = $stats ?? ['total' => 0, 'terkirim' => 0, 'proses' => 0, 'tertunda' => 0];
 $recentResi = $recentResi ?? [];
+
+$role = strtolower($_SESSION['role'] ?? '');
+$isAdmin = $role === 'admin';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -91,7 +94,7 @@ $recentResi = $recentResi ?? [];
                     </div>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-3" id="pengiriman-section">
                     <div class="col-lg-12">
                         <div class="card content-card">
                             <div class="card-header">
@@ -146,21 +149,59 @@ $recentResi = $recentResi ?? [];
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const sidebarItems = document.querySelectorAll('.sidebar-menu .sidebar-item');
+                        const pengirimanSection = document.getElementById('pengiriman-section');
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        <?php if (!empty($flash_success)) : ?>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: <?= json_encode($flash_success) ?>,
-                confirmButtonColor: '#3554f5'
-            });
-        <?php endif; ?>
-    </script>
+                        function setActive(navName) {
+                            sidebarItems.forEach(item => {
+                                const itemNav = item.getAttribute('data-nav');
+                                if (itemNav) {
+                                    item.classList.toggle('active', itemNav === navName);
+                                }
+                            });
+                        }
+
+                        sidebarItems.forEach(item => {
+                            const target = item.getAttribute('href');
+                            if (target && target.startsWith('#')) {
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    const destination = document.querySelector(target);
+                                    if (destination) {
+                                        destination.scrollIntoView({
+                                            behavior: 'smooth',
+                                            block: 'start'
+                                        });
+                                        history.replaceState(null, '', target);
+                                        setActive(this.getAttribute('data-nav'));
+                                    }
+                                });
+                            }
+                        });
+
+                        if (window.location.hash === '#pengiriman-section' && pengirimanSection) {
+                            pengirimanSection.scrollIntoView({
+                                behavior: 'auto',
+                                block: 'start'
+                            });
+                            setActive('pengiriman');
+                        } else {
+                            setActive('dashboard');
+                        }
+                    });
+
+                    <?php if (!empty($flash_success)) : ?>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: <?= json_encode($flash_success) ?>,
+                            confirmButtonColor: '#3554f5'
+                        });
+                    <?php endif; ?>
+                </script>
 </body>
 
 </html>

@@ -25,7 +25,7 @@ class AuthController {
                 $_SESSION['role']      = $user['role'];
                 $_SESSION['id_role']   = $user['id_role'];
                 $_SESSION['foto_profil'] = $user['foto'];
-
+              
                 header('Location: ' . BASE_URL . 'dashboard');
                 exit;
             } else {
