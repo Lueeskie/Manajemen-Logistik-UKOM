@@ -4,6 +4,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
+require_once __DIR__ . '/../app/controllers/InventarisController.php';
 require_once __DIR__ . '/../app/controllers/PengirimanController.php';
 require_once __DIR__ . '/../app/controllers/SupplierController.php';
 require_once __DIR__ . '/../app/controllers/UserController.php';
@@ -22,6 +23,44 @@ if (strpos($uri, $basePath) === 0) {
     $uri = '/';
 }
 
+
+if (strpos($uri, '/inventaris_barang') === 0) {
+    $inventaris = new InventarisController();
+    if ($uri === '/inventaris_barang/get-resi') {
+        $inventaris->getResiList();
+        exit; // Penting: Stop execution setelah API call
+    }
+    elseif ($uri === '/inventaris_barang/histori') {
+        $inventaris->histori();
+        exit;
+    }
+    elseif ($uri === '/inventaris_barang/kirim') {
+        $inventaris->kirim();
+        exit;
+    }
+    elseif ($uri === '/inventaris_barang') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $post_action = $_POST['action'] ?? '';
+            if ($post_action === 'add') {
+                $inventaris->add();
+                exit;
+            } elseif ($post_action === 'edit') {
+                $inventaris->edit();
+                exit;
+            }
+        }
+        $action = $_GET['action'] ?? 'index';
+        if ($action === 'delete' && isset($_GET['id'])) {
+            $inventaris->delete();
+            exit;
+        } else {
+            $inventaris->index();
+            exit;
+        }
+    }
+    
+    exit;
+}
 switch ($uri) {
     case '/':
     case '/login':
