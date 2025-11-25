@@ -14,171 +14,149 @@ $basePath = '/Manajemen-Logistik-UKOM/public/';
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 if (strpos($uri, $basePath) === 0) {
     $uri = substr($uri, strlen($basePath));
-    if ($uri === '') {
-        $uri = '/';
-    } else {
-        $uri = '/' . ltrim($uri, '/');
-    }
+    $uri = $uri === '' ? '/' : '/' . ltrim($uri, '/');
 } else {
     $uri = '/';
 }
 
-
-if (strpos($uri, '/inventaris_barang') === 0) {
-    $inventaris = new InventarisController();
-    if ($uri === '/inventaris_barang/get-resi') {
-        $inventaris->getResiList();
-        exit; // Penting: Stop execution setelah API call
-    }
-    elseif ($uri === '/inventaris_barang/histori') {
-        $inventaris->histori();
-        exit;
-    }
-    elseif ($uri === '/inventaris_barang/kirim') {
-        $inventaris->kirim();
-        exit;
-    }
-    elseif ($uri === '/inventaris_barang') {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $post_action = $_POST['action'] ?? '';
-            if ($post_action === 'add') {
-                $inventaris->add();
-                exit;
-            } elseif ($post_action === 'edit') {
-                $inventaris->edit();
-                exit;
-            }
-        }
-        $action = $_GET['action'] ?? 'index';
-        if ($action === 'delete' && isset($_GET['id'])) {
-            $inventaris->delete();
-            exit;
-        } else {
-            $inventaris->index();
-            exit;
-        }
-    }
-    
-    exit;
-}
-switch ($uri) {
-    case '/':
-    case '/login':
+switch (true) {
+    case $uri === '/' || $uri === '/login':
         $auth = new AuthController();
         $auth->login();
         break;
-    case '/register':
+    case $uri === '/register':
         $auth = new AuthController();
         $auth->register();
         break;
-    case '/logout':
+    case $uri === '/logout':
         $auth = new AuthController();
         $auth->logout();
         break;
-    case '/dashboard':
+    case $uri === '/dashboard':
         $dashboard = new DashboardController();
         $dashboard->index();
         break;
-    case '/profile':
+    case $uri === '/profile':
         $profile = new ProfileController();
         $profile->index();
         break;
-    case '/profile/update':
+    case $uri === '/profile/update':
         $profile = new ProfileController();
         $profile->update();
         break;
-    case '/profile/change-password':
+    case $uri === '/profile/change-password':
         $profile = new ProfileController();
         $profile->changePassword();
         break;
-    case '/pengiriman':
+    case $uri === '/pengiriman':
         $pengiriman = new PengirimanController();
         $pengiriman->index();
         break;
-
-    case '/pengiriman/tambah':
+    case $uri === '/pengiriman/tambah':
         $pengiriman = new PengirimanController();
         $pengiriman->add();
         break;
-
-    case '/pengiriman/store':
+    case $uri === '/pengiriman/store':
         $pengiriman = new PengirimanController();
         $pengiriman->store();
         break;
-
-    case '/pengiriman/hitung-jarak':
+    case $uri === '/pengiriman/hitung-jarak':
         $pengiriman = new PengirimanController();
         $pengiriman->hitungJarakAjax();
         break;
-
-    case '/pengiriman/edit':
+    case preg_match('#^/pengiriman/edit/(\d+)$#', $uri, $m):
         $pengiriman = new PengirimanController();
-        $pengiriman->edit();
+        $pengiriman->edit($m[1]);
         break;
-
-    case '/pengiriman/update':
+    case preg_match('#^/pengiriman/update/(\d+)$#', $uri, $m):
         $pengiriman = new PengirimanController();
-        $pengiriman->update();
+        $pengiriman->update($m[1]);
         break;
-
-    case '/pengiriman/detail':
+    case $uri === '/pengiriman/detail':
         $pengiriman = new PengirimanController();
         $pengiriman->detail();
         break;
-
-    case '/pengiriman/delete':
+    case $uri === '/pengiriman/delete':
         $pengiriman = new PengirimanController();
         $pengiriman->delete();
         break;
-    case '/supplier':
+    case $uri === '/supplier':
         $supplier = new SupplierController();
         $supplier->dashboard();
         break;
-    case '/supplier/tambah':
+    case $uri === '/supplier/tambah':
         $supplier = new SupplierController();
         $supplier->tambahForm();
         break;
-    case '/supplier/proses-tambah':
+    case $uri === '/supplier/proses-tambah':
         $supplier = new SupplierController();
         $supplier->tambahRequest();
         break;
-    case '/pengguna':
+    case preg_match('#^/supplier/edit/(\d+)$#', $uri, $m):
+        $supplier = new SupplierController();
+        $supplier->editForm($m[1]);
+        break;
+    case preg_match('#^/supplier/update/(\d+)$#', $uri, $m):
+        $supplier = new SupplierController();
+        $supplier->updateRequest($m[1]);
+        break;
+    case preg_match('#^/supplier/hapus/(\d+)$#', $uri, $m):
+        $supplier = new SupplierController();
+        $supplier->hapus($m[1]);
+        break;
+    case $uri === '/inventaris_barang':
+        $inventaris = new InventarisController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            if ($action === 'add') $inventaris->add();
+            elseif ($action === 'edit') $inventaris->edit();
+        } else {
+            $getAction = $_GET['action'] ?? 'index';
+            if ($getAction === 'delete' && isset($_GET['id'])) {
+                $inventaris->delete();
+            } else {
+                $inventaris->index();
+            }
+        }
+        break;
+    case $uri === '/inventaris_barang/get-resi':
+        $inventaris = new InventarisController();
+        $inventaris->getResiList();
+        break;
+    case $uri === '/inventaris_barang/histori':
+        $inventaris = new InventarisController();
+        $inventaris->histori();
+        break;
+    case $uri === '/inventaris_barang/kirim':
+        $inventaris = new InventarisController();
+        $inventaris->kirim();
+        break;
+    case $uri === '/pengguna':
         $userCtrl = new UserController();
         $userCtrl->index();
         break;
-    case '/pengguna/tambah':
+    case $uri === '/pengguna/tambah':
         $userCtrl = new UserController();
         $userCtrl->tambah();
         break;
-    case '/pengguna/store':
+    case $uri === '/pengguna/store':
         $userCtrl = new UserController();
         $userCtrl->store();
         break;
-    case (preg_match('#^/pengguna/edit/(\d+)$#', $uri, $matches) ? true : false):
+    case preg_match('#^/pengguna/edit/(\d+)$#', $uri, $m):
         $userCtrl = new UserController();
-        $userCtrl->edit($matches[1]);
+        $userCtrl->edit($m[1]);
         break;
-    case (preg_match('#^/pengguna/update/(\d+)$#', $uri, $matches) ? true : false):
+    case preg_match('#^/pengguna/update/(\d+)$#', $uri, $m):
         $userCtrl = new UserController();
-        $userCtrl->update($matches[1]);
+        $userCtrl->update($m[1]);
         break;
-    case (preg_match('#^/pengguna/hapus/(\d+)$#', $uri, $matches) ? true : false):
+    case preg_match('#^/pengguna/hapus/(\d+)$#', $uri, $m):
         $userCtrl = new UserController();
-        $userCtrl->hapus($matches[1]);
-        break;
-    case (preg_match('#^/supplier/edit/(\d+)$#', $uri, $matches) ? true : false):
-        $supplier = new SupplierController();
-        $supplier->editForm($matches[1]);
-        break;
-    case (preg_match('#^/supplier/update/(\d+)$#', $uri, $matches) ? true : false):
-        $supplier = new SupplierController();
-        $supplier->updateRequest($matches[1]);
-        break;
-    case (preg_match('#^/supplier/hapus/(\d+)$#', $uri, $matches) ? true : false):
-        $supplier = new SupplierController();
-        $supplier->hapus($matches[1]);
+        $userCtrl->hapus($m[1]);
         break;
         default:
         http_response_code(404);
-        echo "Page not found";
+        echo "<h1>404 - Page Not Found</h1><p>URL: $uri</p>";
+        break;
 }
