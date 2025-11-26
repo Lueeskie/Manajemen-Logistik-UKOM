@@ -158,7 +158,7 @@ $isAdmin = $role === 'Admin';
                                         </div>
                                         <div class="col-md-6">
                                             <label for="originCityCode" class="form-label">Origin City Code</label>
-                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" placeholder="CTH: BDG" maxlength="10" required readonly>
+                                            <input type="text" class="form-control" id="originCityCode" name="origin_city_code" placeholder="CTH: 3247" maxlength="10" required readonly>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatAsal" class="form-label">Alamat Lengkap</label>
@@ -184,8 +184,8 @@ $isAdmin = $role === 'Admin';
                                             <input list="listKotaTujuan" class="form-control" id="kotaPenerima" name="kota_penerima" placeholder="Pilih kota" autocomplete="off" required>
                                             <datalist id="listKotaTujuan">
                                                 <?php if (!empty($listKota)): ?>
-                                                    <?php foreach ($listKota as $k): ?>
-                                                        <option value="<?= htmlspecialchars($k['nama']) ?>" data-code="<?= htmlspecialchars($k['id_kota']) ?>"></option>
+                                                    <?php foreach ($listKota as $kota): ?>
+                                                        <option value="<?= htmlspecialchars($kota['nama']) ?>" data-code="<?= htmlspecialchars($kota['id_kota']) ?>"></option>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
                                             </datalist>
@@ -193,7 +193,7 @@ $isAdmin = $role === 'Admin';
                                         </div>
                                         <div class="col-md-6">
                                             <label for="destinationCityCode" class="form-label">Destination City Code</label>
-                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" placeholder="CTH: SBY" maxlength="10" required readonly>
+                                            <input type="text" class="form-control" id="destinationCityCode" name="destination_city_code" placeholder="CTH: 3127" maxlength="10" required readonly>
                                         </div>
                                         <div class="col-12">
                                             <label for="alamatTujuan" class="form-label">Alamat Tujuan</label>

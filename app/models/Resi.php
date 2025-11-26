@@ -31,6 +31,7 @@ class Resi
             WHERE r.user_id = :user_id
             GROUP BY sp.status
         ");
+        
         $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
         $counts = ['Terkirim' => 0, 'Dalam Proses' => 0, 'Tertunda' => 0];
@@ -63,6 +64,7 @@ class Resi
                 FROM status_pengiriman
                 GROUP BY id_resi
             ) latest ON latest.max_status = sp.id_status
+            JOIN resi r ON r.id = sp.id_resi
             GROUP BY sp.status
         ");
         $counts = ['Terkirim' => 0, 'Dalam Proses' => 0, 'Tertunda' => 0];
@@ -250,13 +252,55 @@ class Resi
         return $stmt->execute();
     }
 
+    public function updateByIdAdmin($id, array $data)
+    {
+        $sql = "UPDATE resi SET
+                    nomor_resi = :nomor_resi,
+                    nama_pengirim = :nama_pengirim,
+                    telpon_pengirim = :telpon_pengirim,
+                    kota_pengirim = :kota_pengirim,
+                    alamat_asal = :alamat_asal,
+                    nama_penerima = :nama_penerima,
+                    telpon_penerima = :telpon_penerima,
+                    kota_penerima = :kota_penerima,
+                    origin_city_code = :origin_city_code,
+                    destination_city_code = :destination_city_code,
+                    alamat_tujuan = :alamat_tujuan,
+                    jumlah_paket = :jumlah_paket,
+                    berat_total = :berat_total,
+                    total_jarak = :total_jarak,
+                    total_ongkir = :total_ongkir,
+                    status_pembayaran = :status_pembayaran
+                WHERE id = :id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':nomor_resi', $data['nomor_resi']);
+        $stmt->bindValue(':nama_pengirim', $data['nama_pengirim']);
+        $stmt->bindValue(':telpon_pengirim', $data['telpon_pengirim']);
+        $stmt->bindValue(':kota_pengirim', $data['kota_pengirim']);
+        $stmt->bindValue(':alamat_asal', $data['alamat_asal']);
+        $stmt->bindValue(':nama_penerima', $data['nama_penerima']);
+        $stmt->bindValue(':telpon_penerima', $data['telpon_penerima']);
+        $stmt->bindValue(':kota_penerima', $data['kota_penerima']);
+        $stmt->bindValue(':origin_city_code', $data['origin_city_code']);
+        $stmt->bindValue(':destination_city_code', $data['destination_city_code']);
+        $stmt->bindValue(':alamat_tujuan', $data['alamat_tujuan']);
+        $stmt->bindValue(':jumlah_paket', $data['jumlah_paket'], PDO::PARAM_INT);
+        $stmt->bindValue(':berat_total', $data['berat_total']);
+        $stmt->bindValue(':total_jarak', $data['total_jarak']);
+        $stmt->bindValue(':total_ongkir', $data['total_ongkir']);
+        $stmt->bindValue(':status_pembayaran', $data['status_pembayaran']);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
 
     public function deleteById($id)
     {
         try {
             $this->db->beginTransaction();
 
-            // Hapus status terkait terlebih dahulu agar tidak melanggar FK
             $stmtStatus = $this->db->prepare("DELETE FROM status_pengiriman WHERE id_resi = :id_resi");
             $stmtStatus->bindValue(':id_resi', $id, PDO::PARAM_INT);
             $stmtStatus->execute();

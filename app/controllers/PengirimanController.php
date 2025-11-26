@@ -351,6 +351,7 @@ class PengirimanController
         }
 
         $role = $_SESSION['role'] ?? '';
+        $isAdmin = $role === 'Admin';
         $isDriver = $role === 'Driver';
 
         $id = $this->inputInt('id', 0);
@@ -445,7 +446,12 @@ class PengirimanController
         $data['total_jarak'] = $hasilHitung['jarak_km'];
         $data['total_ongkir'] = $hasilHitung['ongkir'];
 
-        $updated = $this->resiModel->updateById($id, $_SESSION['user_id'], $data);
+        // Admin boleh mengedit semua resi, user lain hanya miliknya sendiri
+        if ($isAdmin) {
+            $updated = $this->resiModel->updateByIdAdmin($id, $data);
+        } else {
+            $updated = $this->resiModel->updateById($id, $_SESSION['user_id'], $data);
+        }
         if (!$updated) {
             $_SESSION['flash_error'] = 'Gagal memperbarui resi.';
             header('Location: ' . BASE_URL . 'pengiriman');

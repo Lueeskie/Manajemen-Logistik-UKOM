@@ -1,14 +1,17 @@
 <?php
 require_once __DIR__ . '/../../config/database.php';
 
-class User {
+class User
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Database::getInstance();
     }
-    
-    public function login($email, $password) {
+
+    public function login($email, $password)
+    {
         $stmt = $this->db->prepare("
             SELECT u.*, r.nama_role 
             FROM users u
@@ -27,7 +30,8 @@ class User {
         return false;
     }
 
-    public function register($username, $email, $password, $nama_role = 'user') {
+    public function register($username, $email, $password, $nama_role = 'user')
+    {
         $check = $this->db->prepare("SELECT id FROM users WHERE username = :username OR email = :email");
         $check->execute([':username' => $username, ':email' => $email]);
         if ($check->fetch()) return false;
@@ -38,7 +42,7 @@ class User {
 
         if (!$id_role) {
             $roleStmt->execute([':nama_role' => 'user']);
-            $id_role = $roleStmt->fetchColumn() ?: 5;
+            $id_role = $roleStmt->fetchColumn() ?: 4;
         }
 
         $stmt = $this->db->prepare("
@@ -55,7 +59,8 @@ class User {
         return $stmt->rowCount() > 0;
     }
 
-    public function getAllUsers() {
+    public function getAllUsers()
+    {
         $query = "
             SELECT 
                 u.*, 
@@ -74,7 +79,8 @@ class User {
         return $users;
     }
 
-    public function getProfile($userId) {
+    public function getProfile($userId)
+    {
         $stmt = $this->db->prepare("
             SELECT u.id, u.username, u.email, u.telepon, u.alamat, u.foto, r.nama_role 
             FROM users u
@@ -88,7 +94,8 @@ class User {
         return $user ?: false;
     }
 
-    public function updateProfile($userId, $data) {
+    public function updateProfile($userId, $data)
+    {
         $fields = [
             'username = :username',
             'telepon = :telepon',
@@ -111,7 +118,8 @@ class User {
         return $stmt->execute($params);
     }
 
-    public function changePassword($userId, $currentPassword, $newPassword) {
+    public function changePassword($userId, $currentPassword, $newPassword)
+    {
         $stmt = $this->db->prepare("SELECT password FROM users WHERE id = :id");
         $stmt->execute([':id' => $userId]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -128,14 +136,16 @@ class User {
         return true;
     }
 
-    public function getAllRoles() {
+    public function getAllRoles()
+    {
         $query = "SELECT id_role, nama_role FROM roles ORDER BY nama_role ASC";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function updateUser($userId, $data) {
+    public function updateUser($userId, $data)
+    {
         $fields = [];
         $params = [':id' => $userId];
 
@@ -160,7 +170,7 @@ class User {
             $params[':telepon'] = $data['telepon'];
         }
         if (isset($data['alamat'])) {
-            $fields[] = 'alamat = :alamat'; 
+            $fields[] = 'alamat = :alamat';
             $params[':alamat'] = $data['alamat'];
         }
 

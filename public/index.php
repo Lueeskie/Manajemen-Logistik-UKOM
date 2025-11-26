@@ -64,13 +64,13 @@ switch (true) {
         $pengiriman = new PengirimanController();
         $pengiriman->hitungJarakAjax();
         break;
-    case preg_match('#^/pengiriman/edit/(\d+)$#', $uri, $m):
+    case $uri === '/pengiriman/edit':
         $pengiriman = new PengirimanController();
-        $pengiriman->edit($m[1]);
+        $pengiriman->edit();
         break;
-    case preg_match('#^/pengiriman/update/(\d+)$#', $uri, $m):
+    case $uri === '/pengiriman/update':
         $pengiriman = new PengirimanController();
-        $pengiriman->update($m[1]);
+        $pengiriman->update();
         break;
     case $uri === '/pengiriman/detail':
         $pengiriman = new PengirimanController();
