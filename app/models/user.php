@@ -38,7 +38,7 @@ class User {
 
         if (!$id_role) {
             $roleStmt->execute([':nama_role' => 'user']);
-            $id_role = $roleStmt->fetchColumn() ?: 5;
+            $id_role = $roleStmt->fetchColumn() ?: 4;
         }
 
         $stmt = $this->db->prepare("

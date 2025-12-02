@@ -7,7 +7,7 @@ class RequestModel {
     public function __construct() {
         $this->db = Database::getInstance();
     }
-
+    //masukin data ke database/tabel barang_request
     public function createRequest($id_supplier, $nama_barang, $jumlah_barang, $berat, 
                                  $deskripsi = '', $alamat_asal = '', $alamat_tujuan = '', $foto_paket = null) {
         $stmt = $this->db->prepare("INSERT INTO barang_request 
@@ -15,7 +15,7 @@ class RequestModel {
              alamat_asal, alamat_tujuan, foto_paket) 
             VALUES (:id_supplier, :nama_barang, :jumlah_barang, :berat, :deskripsi,
                     :alamat_asal, :alamat_tujuan, :foto_paket)");
-
+        //mengubah placeholder id_supplier dengan value/nilai dari $id_supllier yang sudah diisi user
         $stmt->bindParam(':id_supplier', $id_supplier);
         $stmt->bindParam(':nama_barang', $nama_barang);
         $stmt->bindParam(':jumlah_barang', $jumlah_barang);

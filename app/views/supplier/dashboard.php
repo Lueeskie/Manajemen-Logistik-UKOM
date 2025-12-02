@@ -144,9 +144,30 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                             <li>
                                                                 <?php 
                                                                 $status = $r['status'] ?? 'Menunggu Konfirmasi';
-                                                                $isLocked = ($status === 'Sampai ke Tujuan');
+                                                                $isSampaiKeTujuan = ($status === 'Sampai ke Tujuan');
+                                                                $isDikonfirmasi = ($status === 'Dikonfirmasi');
+                                                                $isDikirim = ($status === 'Dikirim');
                                                                 ?>
-                                                                <?php if ($isLocked): ?>
+                                                            <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
+                                                                <?php if ($isSampaiKeTujuan): ?>
+                                                                    <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                        Edit <small class="text-muted">(<?= $status ?>)</small>
+                                                                    </a>
+                                                                <?php else: ?>
+                                                                    <a class="dropdown-item" href="<?= BASE_URL ?>supplier/edit/<?= $r['id_request'] ?>">
+                                                                        Edit
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                            <?php else: ?>
+                                                                <?php if ($isSampaiKeTujuan): ?>
+                                                                    <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                        Edit <small class="text-muted">(<?= $status ?>)</small>
+                                                                    </a>
+                                                                <?php elseif ($isDikonfirmasi): ?>
+                                                                    <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                        Edit <small class="text-muted">(<?= $status ?>)</small>
+                                                                    </a>
+                                                                <?php elseif ($isDikirim): ?>
                                                                     <a class="dropdown-item text-muted" href="#" onclick="return false;">
                                                                         Edit <small class="text-muted">(<?= $status ?>)</small>
                                                                     </a>
@@ -156,22 +177,42 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
                                                                     </a>
                                                                 <?php endif; ?>
                                                             </li>
+                                                            <?php endif; ?>
                                                             <li><hr class="dropdown-divider"></li>
                                                             <li>
-                                                                <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
-                                                                    <?php 
+                                                                <?php if ($role === 'Admin' || $role === 'Supplier'): ?>
+                                                                    <?php
                                                                     $status = $r['status'] ?? 'Menunggu Konfirmasi';
-                                                                    if ($status === 'Dikirim'): ?>
-                                                                        <a class="dropdown-item text-muted" href="#" onclick="return false;">
-                                                                            Hapus <small class="text-muted">(Sudah Dikirim)</small>
+                                                                    $createdAt = new Datetime($r['created_at']);
+                                                                    $now = new DateTime();
+                                                                    $daysDiff = $now->diff($createdAt)->days;
+                                                                    $isSampai = ($status === 'Sampai ke Tujuan');
+                                                                    $isOldEnough = ($daysDiff > 30);
+                                                                    $canDelete = $isSampai && $isOldEnough;
+                                                                    $role = $_SESSION['role'] ?? '';
+                                                                    ?>
+                                                                    <?php if ($role === 'Admin' && $status === 'Menunggu Konfirmasi'): ?>
+                                                                        <a class="dropdown-item text-danger" href="#" 
+                                                                        onclick="hapusRequest(<?= $r['id_request'] ?>, '<?= $status ?>', <?= $daysDiff ?>); return false;">
+                                                                            <i class="bi bi-trash me-1"></i> Hapus
                                                                         </a>
-                                                                    <?php elseif ($status === 'Sampai ke Tujuan'): ?>
+                                                                    <?php elseif ($role === 'Supplier' && $status === 'Menunggu Konfirmasi'): ?>
                                                                         <a class="dropdown-item text-muted" href="#" onclick="return false;">
-                                                                            Hapus <small class="text-muted">(Sudah Sampai)</small>
+                                                                            Hapus <small class="text-muted">(Belum dikonfirmasi)</small>
+                                                                        </a>
+                                                                    <?php elseif (!$isSampai): ?>
+                                                                        <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                            Hapus <small class="text-muted">(Belum sampai tujuan)</small>
+                                                                        </a>
+                                                                    <?php elseif (!$isOldEnough): ?>
+                                                                        <?php $remaining = 30 - $daysDiff; ?>
+                                                                        <a class="dropdown-item text-muted" href="#" onclick="return false;">
+                                                                            Hapus <small class="text-muted">(<?= $remaining > 0 ? "$remaining hari lagi" : "kurang dari 1 hari lagi" ?>)</small>
                                                                         </a>
                                                                     <?php else: ?>
-                                                                        <a class="dropdown-item text-danger" href="#" onclick="hapusRequest(<?= $r['id_request'] ?>, '<?= $status ?>'); return false;">
-                                                                            Hapus
+                                                                        <a class="dropdown-item text-danger" href="#" 
+                                                                        onclick="hapusRequest(<?= $r['id_request'] ?>, '<?= $status ?>', <?= $daysDiff ?>); return false;">
+                                                                            <i class="bi bi-trash me-1"></i> Hapus
                                                                         </a>
                                                                     <?php endif; ?>
                                                                 <?php endif; ?>

@@ -56,7 +56,7 @@ class SupplierController {
             header('Location: ' . BASE_URL . 'login');
             exit;
         }
-
+        //kalo form request method, maka data akan diisi dengan nilai yang diinput oleh user
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_supplier = $_SESSION['user_id'];
             $nama_barang = trim($_POST['nama_barang']);
@@ -133,7 +133,7 @@ class SupplierController {
         $currentStatus = $request['status'] ?? 'Menunggu Konfirmasi';
         $newStatus = $_POST['status'] ?? $currentStatus;
 
-        $canEditData = !in_array($currentStatus, ['Dikirim', 'Sampai ke Tujuan']);
+        $canEditData = $currentStatus === 'Menunggu Konfirmasi';
 
         $data = ['status' => $newStatus];
 

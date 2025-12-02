@@ -15,7 +15,7 @@ if (!$request) {
 }
 $status = $request['status'] ?? 'Menunggu Konfirmasi';
 $isAdmin = ($_SESSION['role'] ?? '') === 'Admin';
-$canEditData = !in_array($status, ['Dikirim', 'Sampai ke Tujuan']);
+$canEditData = $status === 'Menunggu Konfirmasi';
 $canChangeStatus = in_array($status, ['Menunggu Konfirmasi', 'Dikonfirmasi', 'Dikirim']);
 $isFinal = $status === 'Sampai ke Tujuan';
 ?>
@@ -74,91 +74,91 @@ $isFinal = $status === 'Sampai ke Tujuan';
                         <div class="card-body">
                             <form method="POST" action="<?= BASE_URL ?>supplier/update/<?= $request['id_request'] ?>" class="tambah-form" enctype="multipart/form-data">
                                 <div class="mb-4">
-                                    <label for="nama_barang" class="form-label">Nama Barang (Bisa diisi Nama Barang)  <span class="text-danger">*</span></label>
-                                    <input type="text" name="nama_barang" id="nama_barang" class="form-control form-control-supplier" 
+                                    <label>Nama Barang <span class="text-danger">*</span></label>
+                                    <input type="text" name="nama_barang" class="form-control form-control-supplier" 
                                            value="<?= htmlspecialchars($request['nama_barang']) ?>" 
                                            <?= $canEditData ? 'required' : 'disabled' ?>>
                                 </div>
-
+                                        
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
-                                        <label for="jumlah_barang" class="form-label">Jumlah Barang <span class="text-danger">*</span></label>
-                                        <input type="number" name="jumlah_barang" id="jumlah_barang" class="form-control form-control-supplier" 
+                                        <label>Jumlah Barang <span class="text-danger">*</span></label>
+                                        <input type="number" name="jumlah_barang" class="form-control form-control-supplier" 
                                                value="<?= $request['jumlah_barang'] ?>" min="1"
                                                <?= $canEditData ? 'required' : 'disabled' ?>>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="berat" class="form-label">Berat Total (kg) <span class="text-danger">*</span></label>
-                                        <input type="number" name="berat" id="berat" class="form-control form-control-supplier" step="0.01"
+                                        <label>Berat Total (kg) <span class="text-danger">*</span></label>
+                                        <input type="number" name="berat" class="form-control form-control-supplier" step="0.01"
                                                value="<?= $request['berat'] ?>"
                                                <?= $canEditData ? 'required' : 'disabled' ?>>
                                     </div>
                                 </div>
-
+                                        
                                 <div class="mb-4">
-                                    <label class="form-label">Alamat Asal (Gudang/Pengambilan) <span class="text-danger">*</span></label>
-                                    <textarea name="alamat_asal" class="form-control form-control-supplier" rows="2" 
+                                    <label>Alamat Asal (Gudang/Pengambilan) <span class="text-danger">*</span></label>
+                                    <textarea name="alamat_asal" class="form-control form-control-supplier" rows="2"
                                               <?= $canEditData ? 'required' : 'disabled' ?>><?= htmlspecialchars($request['alamat_asal'] ?? '') ?></textarea>
-                                    <small class="text-muted">Alamat lokasi pengambilan barang</small>
                                 </div>
-
+                                        
                                 <div class="mb-4">
-                                    <label class="form-label">Alamat Tujuan (Penerima) <span class="text-danger">*</span></label>
-                                    <textarea name="alamat_tujuan" class="form-control form-control-supplier" rows="3" 
+                                    <label>Alamat Tujuan (Penerima) <span class="text-danger">*</span></label>
+                                    <textarea name="alamat_tujuan" class="form-control form-control-supplier" rows="3"
                                               <?= $canEditData ? 'required' : 'disabled' ?>><?= htmlspecialchars($request['alamat_tujuan'] ?? '') ?></textarea>
-                                    <small class="text-muted">Alamat lengkap penerima barang</small>
                                 </div>
-
+                                        
                                 <div class="mb-4">
-                                    <label for="deskripsi" class="form-label">Deskripsi</label>
-                                    <textarea name="deskripsi" id="deskripsi" class="form-control form-control-supplier" rows="4"
+                                    <label>Deskripsi</label>
+                                    <textarea name="deskripsi" class="form-control form-control-supplier" rows="4"
                                               <?= $canEditData ? '' : 'disabled' ?>><?= htmlspecialchars($request['deskripsi'] ?? '') ?></textarea>
                                 </div>
-
-                                <?php if ($isAdmin): ?>
-                                <div class="mb-4">
-                                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                    <select name="status" id="status" class="form-select form-control-supplier" 
-                                            <?= $isFinal ? 'disabled' : '' ?> required>
-                                        <option value="">Pilih Status</option>
-
-                                        <?php if ($canEditData): ?>
-                                            <option value="Menunggu Konfirmasi" <?= $status == 'Menunggu Konfirmasi' ? 'selected' : '' ?>>Menunggu Konfirmasi</option>
-                                            <option value="Dikonfirmasi" <?= $status == 'Dikonfirmasi' ? 'selected' : '' ?>>Dikonfirmasi</option>
-                                            <option value="Ditolak" <?= $status == 'Ditolak' ? 'selected' : '' ?>>Ditolak</option>
-                                        <?php endif; ?>
-
-                                        <option value="Dikirim" <?= $status == 'Dikirim' ? 'selected' : '' ?>>Dikirim</option>
-                                        <?php if (!$isFinal): ?>
-                                            <option value="Sampai ke Tujuan" <?= $status == 'Sampai ke Tujuan' ? 'selected' : '' ?>>Sampai ke Tujuan</option>
-                                        <?php endif; ?>
-                                    </select>
                                         
-                                    <?php if ($isFinal): ?>
-                                        <div class="mt-2">
-                                            <small class="text-danger"><i class="bi bi-lock-fill"></i> Status sudah final. Data tidak dapat diubah lagi.</small>
-                                        </div>
-                                    <?php elseif ($status === 'Dikirim'): ?>
-                                        <div class="mt-2">
-                                            <small class="text-warning"><i class="bi bi-exclamation-triangle"></i> Data barang tidak dapat diubah lagi. Hanya status yang bisa diganti.</small>
+                                <?php if ($canEditData): ?>
+                                <div class="mb-4">
+                                    <label>Foto Paket (Opsional)</label>
+                                    <input type="file" name="foto_paket" class="form-control" accept="image/*">
+                                    <small class="text-muted">Max 2MB</small>
+                                    <?php if (!empty($request['foto_paket'])): ?>
+                                        <div class="mt-3">
+                                            <img src="<?= BASE_URL ?>uploads/paket/<?= htmlspecialchars($request['foto_paket']) ?>" 
+                                                 class="img-thumbnail" style="max-height: 200px;" alt="Foto Paket">
                                         </div>
                                     <?php endif; ?>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ($canEditData): ?>
-                                    <div class="mb-4">
-                                        <label class="form-label">Foto Paket (Opsional)</label>
-                                        <input type="file" name="foto_paket" class="form-control" accept="image/*">
-                                        <small class="text-muted">Max 2MB. Biarkan kosong jika tidak ingin ganti.</small>
+                                    
+                                <?php if ($isAdmin): ?>
+                                <div class="mb-4">
+                                    <label>Status <span class="text-danger">*</span></label>
+                                    <select name="status" id="status" class="form-select form-control-supplier" 
+                                            <?= $isFinal ? 'disabled' : '' ?> required>
+                                        <option value="">Pilih Status</option>
                                         
-                                        <?php if (!empty($request['foto_paket'])): ?>
-                                            <div class="mt-3">
-                                                <p><strong>Foto Saat Ini:</strong></p>
-                                                <img src="<?= BASE_URL ?>uploads/paket/<?= htmlspecialchars($request['foto_paket']) ?>" 
-                                                     class="img-thumbnail" style="max-height: 200px;" alt="Foto Paket">
-                                            </div>
+                                        <?php if ($status === 'Menunggu Konfirmasi'): ?>
+                                            <option value="Menunggu Konfirmasi" selected>Menunggu Konfirmasi</option>
+                                            <option value="Dikonfirmasi">Dikonfirmasi</option>
+                                            <option value="Ditolak">Ditolak</option>
+                                        <?php elseif ($status === 'Dikonfirmasi'): ?>
+                                            <option value="Dikonfirmasi" selected>Dikonfirmasi</option>
+                                            <option value="Dikirim">Dikirim</option>
+                                        <?php elseif ($status === 'Dikirim'): ?>
+                                            <option value="Dikirim" selected>Dikirim</option>
+                                            <option value="Sampai ke Tujuan">Sampai ke Tujuan</option>
+                                        <?php elseif ($status === 'Sampai ke Tujuan'): ?>
+                                            <option value="Sampai ke Tujuan" selected disabled>Sampai ke Tujuan</option>
                                         <?php endif; ?>
-                                    </div>
+                                    </select>
+                                        
+                                    <?php if ($isFinal): ?>
+                                        <div class="mt-2 text-danger">
+                                            Status sudah final — data tidak dapat diubah lagi!
+                                        </div>
+                                    <?php elseif ($status === 'Dikonfirmasi' || $status === 'Dikirim'): ?>
+                                        <div class="mt-2 text-warning">
+                                            Data barang sudah terkunci — hanya status yang bisa diubah!
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                                 <?php endif; ?>
                                     
                                 <div class="d-flex gap-2">
